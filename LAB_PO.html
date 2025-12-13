@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>XPath Lab — EDI Purchase Order</title>
+<style>
+  :root{--brand:#0366d6;--bg:#fff;--muted:#666}
+  body{font-family:Segoe UI,Arial,Helvetica,sans-serif;margin:0;background:#f7f9fb;color:#111}
+  .wrap{max-width:1100px;margin:20px auto;padding:18px;background:var(--bg);border-radius:8px;box-shadow:0 2px 8px rgba(20,30,40,0.05)}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  h1{margin:0;color:var(--brand);font-size:20px}
+  p.lead{margin:6px 0 0;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:16px}
+  .panel{background:#fff;padding:12px;border-radius:6px;border:1px solid #eef3fb}
+  pre.xml{background:#0b1220;color:#cfe8ff;padding:12px;overflow:auto;border-radius:6px;font-family:Consolas,Menlo,monospace;font-size:13px;line-height:1.4}
+  label{display:block;margin:8px 0 6px;font-weight:600;color:#333}
+  input.xpath{width:100%;padding:8px;border-radius:6px;border:1px solid #dfeaf8;font-size:14px}
+  .btn{display:inline-block;padding:8px 12px;border-radius:6px;background:var(--brand);color:#fff;text-decoration:none;border:none;cursor:pointer}
+  .btn.ghost{background:#f3f8ff;color:var(--brand);border:1px solid #dbeefe}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .small{font-size:13px;color:var(--muted)}
+  .results{margin-top:10px;background:#fbfcff;border:1px dashed #e3eefc;padding:10px;border-radius:6px;min-height:80px;overflow:auto}
+  .task{margin-bottom:12px;padding:10px;border-radius:6px;border:1px solid #f0f4fb;background:#fbfeff}
+  .task h4{margin:0 0 6px;font-size:15px}
+  .solutions{margin-top:10px;background:#fff7f0;border-left:4px solid #ffb86b;padding:10px;border-radius:4px}
+  .hint{font-size:13px;color:#666}
+  .example-btn{font-size:13px;padding:6px 8px}
+  .footer{margin-top:18px;color:var(--muted);font-size:13px}
+  details{margin-top:8px}
+  .code-inline{font-family:Consolas,monospace;background:#f5f7fb;padding:2px 6px;border-radius:4px;color:#0a2540}
+</style>
+</head>
+<body>
+<div class="wrap" role="main">
+  <header>
+    <div>
+      <h1>Lab — EDI Purchase Order (XPath practice)</h1>
+      <p class="lead">Practice XPath queries against a realistic Purchase Order XML. Use the interactive tester on the right to run expressions and verify results.</p>
+    </div>
+    <div style="text-align:right">
+      <div class="small">Difficulty: <strong>Intermediate</strong></div>
+      <div class="small">Estimated time: <strong>5–10 min</strong></div>
+    </div>
+  </header>
+
+  <div class="grid" role="region" aria-label="lab grid">
+    <!-- Left column: instructions + tasks + XML sample link -->
+    <div>
+      <div class="panel">
+        <h3 style="margin:0 0 8px">How to use this lab</h3>
+        <ol style="margin:6px 0 0 18px">
+          <li>Read the tasks below.</li>
+          <li>Type an XPath in the tester on the right, then click <strong>Run</strong>.</li>
+          <li>Check the results — the tester shows node text and node XML.</li>
+          <li>When stuck, click a sample XPath from the <em>Examples</em> area or reveal solutions.</li>
+        </ol>
+        <div style="margin-top:10px" class="hint">Note: This lab uses plain XPath 1.0 expressions (supported by many tools). Advanced namespaces and XPath 2.0 features are covered in later labs.</div>
+      </div>
+
+      <div style="margin-top:12px" class="panel">
+        <h3 style="margin:0 0 8px">Purchase Order — Sample XML</h3>
+        <pre class="xml" id="xmlSample" aria-label="Purchase order sample XML">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;PurchaseOrder&gt;
+  &lt;Header&gt;
+    &lt;PONumber&gt;PO-2025-00123&lt;/PONumber&gt;
+    &lt;OrderDate&gt;2025-12-01&lt;/OrderDate&gt;
+    &lt;Buyer&gt;
+      &lt;Party&gt;
+        &lt;Name&gt;Acme Corp&lt;/Name&gt;
+        &lt;Address&gt;
+          &lt;Street&gt;100 Main St&lt;/Street&gt;
+          &lt;City&gt;Metropolis&lt;/City&gt;
+          &lt;Country&gt;US&lt;/Country&gt;
+        &lt;/Address&gt;
+      &lt;/Party&gt;
+    &lt;/Buyer&gt;
+    &lt;Seller&gt;
+      &lt;Party id="SELL-77"&gt;
+        &lt;Name&gt;SupplyCo&lt;/Name&gt;
+        &lt;Address&gt;
+          &lt;Street&gt;5 Industrial Way&lt;/Street&gt;
+          &lt;City&gt;Gotham&lt;/City&gt;
+          &lt;Country&gt;US&lt;/Country&gt;
+        &lt;/Address&gt;
+      &lt;/Party&gt;
+    &lt;/Seller&gt;
+  &lt;/Header&gt;
+
+  &lt;LineItems&gt;
+    &lt;Item lineNumber="1"&gt;
+      &lt;Description&gt;14-inch Laptop&lt;/Description&gt;
+      &lt;Quantity&gt;2&lt;/Quantity&gt;
+      &lt;UnitPrice currency="USD"&gt;1200.00&lt;/UnitPrice&gt;
+      &lt;Tax&gt;0.10&lt;/Tax&gt;
+    &lt;/Item&gt;
+
+    &lt;Item lineNumber="2"&gt;
+      &lt;Description&gt;Wireless Mouse&lt;/Description&gt;
+      &lt;Quantity&gt;5&lt;/Quantity&gt;
+      &lt;UnitPrice currency="USD"&gt;25.00&lt;/UnitPrice&gt;
+      &lt;Tax&gt;0.08&lt;/Tax&gt;
+    &lt;/Item&gt;
+
+    &lt;Item lineNumber="3"&gt;
+      &lt;Description&gt;USB-C Dock&lt;/Description&gt;
+      &lt;Quantity&gt;3&lt;/Quantity&gt;
+      &lt;UnitPrice currency="USD"&gt;150.00&lt;/UnitPrice&gt;
+      &lt;Tax&gt;0.10&lt;/Tax&gt;
+    &lt;/Item&gt;
+
+    &lt;Item lineNumber="4"&gt;
+      &lt;Description&gt;Mechanical Keyboard&lt;/Description&gt;
+      &lt;Quantity&gt;1&lt;/Quantity&gt;
+      &lt;UnitPrice currency="USD"&gt;120.00&lt;/UnitPrice&gt;
+      &lt;Tax&gt;0.08&lt;/Tax&gt;
+    &lt;/Item&gt;
+
+    &lt;Item lineNumber="5"&gt;
+      &lt;Description&gt;27-inch Monitor&lt;/Description&gt;
+      &lt;Quantity&gt;2&lt;/Quantity&gt;
+      &lt;UnitPrice currency="USD"&gt;350.00&lt;/UnitPrice&gt;
+      &lt;Tax&gt;0.10&lt;/Tax&gt;
+    &lt;/Item&gt;
+  &lt;/LineItems&gt;
+
+  &lt;Summary&gt;
+    &lt;Subtotal currency="USD"&gt;4150.00&lt;/Subtotal&gt;
+    &lt;TotalTax currency="USD"&gt;376.50&lt;/TotalTax&gt;
+    &lt;Total currency="USD"&gt;4526.50&lt;/Total&gt;
+  &lt;/Summary&gt;
+
+&lt;/PurchaseOrder&gt;</pre>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="panel">
+          <h3 style="margin:0 0 8px">Lab Tasks — Purchase Order</h3>
+
+          <div class="task">
+            <h4>Task 1 — Basic extraction</h4>
+            <ol style="margin:6px 0 0 18px">
+              <li>Get the PO number.</li>
+              <li>Get the Order Date.</li>
+              <li>Get the Buyer Name and Seller Name.</li>
+            </ol>
+            <div class="hint">Hint: PO number is under <code>&lt;Header&gt;</code>.</div>
+          </div>
+
+          <div class="task">
+            <h4>Task 2 — Line item queries</h4>
+            <ol style="margin:6px 0 0 18px">
+              <li>Get the description of the item where <code>lineNumber="2"</code>.</li>
+              <li>Get the quantity of the item with <code>lineNumber="5"</code>.</li>
+              <li>Count how many <code>&lt;Item&gt;</code> entries exist.</li>
+            </ol>
+          </div>
+
+          <div class="task">
+            <h4>Task 3 — Filtering & aggregation</h4>
+            <ol style="margin:6px 0 0 18px">
+              <li>List descriptions for items with <code>Quantity &gt; 2</code>.</li>
+              <li>Sum all item quantities using XPath function (if supported in your tool): <code>sum(//Quantity)</code>.</li>
+              <li>Get the currency used for unit prices.</li>
+            </ol>
+          </div>
+
+          <div class="task">
+            <h4>Task 4 — Validation checks</h4>
+            <ol style="margin:6px 0 0 18px">
+              <li>Verify that the <code>&lt;Total&gt;</code> in Summary matches the sum of Subtotal + TotalTax (manual check).</li>
+              <li>Find items with Tax &gt; 0.09</li>
+            </ol>
+          </div>
+
+          <details>
+            <summary style="cursor:pointer;font-weight:600">Show solutions (click to reveal)</summary>
+            <div class="solutions">
+              <div><strong>Answers (XPath expressions)</strong></div>
+              <ol style="margin:6px 0 0 18px">
+                <li><code>//Header/PONumber/text()</code></li>
+                <li><code>//Header/OrderDate/text()</code></li>
+                <li><code>//Header/Buyer/Party/Name/text()</code> and <code>//Header/Seller/Party/Name/text()</code></li>
+
+                <li><code>//LineItems/Item[@lineNumber='2']/Description/text()</code></li>
+                <li><code>//LineItems/Item[@lineNumber='5']/Quantity/text()</code></li>
+                <li><code>count(//LineItems/Item)</code></li>
+
+                <li><code>//LineItems/Item[Quantity &gt; 2]/Description/text()</code></li>
+                <li><code>sum(//LineItems/Item/Quantity)</code></li>
+                <li><code>//LineItems/Item/UnitPrice/@currency</code></li>
+
+                <li><code>//Summary/Total/text()</code> (compare to Subtotal + TotalTax)</li>
+                <li><code>//LineItems/Item[Tax &gt; 0.09]/Description/text()</code></li>
+              </ol>
+              <div class="hint" style="margin-top:8px">Note: <code>sum()</code> and numeric comparison behavior depends on your XPath engine. The built-in browser evaluator may support <code>sum()</code> on node-sets if numeric conversion is allowed.</div>
+            </div>
+          </details>
+
+        </div>
+      </div>
+
+      <div class="footer small">LVT Magus: XPath Workshop</div>
+    </div>
+
+    <!-- Right column: interactive tester -->
+    <aside>
+      <div class="panel" aria-label="XPath tester">
+        <label for="xpathInput">Type XPath expression</label>
+        <input id="xpathInput" class="xpath" value="//Header/PONumber/text()" aria-label="XPath expression"/>
+        <div class="controls" style="margin-top:8px">
+          <button id="runBtn" class="btn">Run</button>
+          <button id="clearBtn" class="btn ghost" style="color:var(--brand)">Clear</button>
+          <button id="examplesBtn" class="btn ghost" title="Insert example XPaths">Examples</button>
+        </div>
+
+        <div style="margin-top:10px" class="small">Results (<span id="resultCount">0</span>)</div>
+        <div id="results" class="results" role="region" aria-live="polite"></div>
+
+        <details style="margin-top:10px">
+          <summary style="cursor:pointer">Examples</summary>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+            <button class="example-btn btn ghost" data-xpath="//Header/PONumber/text()">PO Number</button>
+            <button class="example-btn btn ghost" data-xpath="//Header/Buyer/Party/Name/text()">Buyer Name</button>
+            <button class="example-btn btn ghost" data-xpath="//LineItems/Item[@lineNumber='3']/Description/text()">Item 3 Description</button>
+            <button class="example-btn btn ghost" data-xpath="count(//LineItems/Item)">Count Items</button>
+            <button class="example-btn btn ghost" data-xpath="//LineItems/Item[Quantity &gt; 2]/Description/text()">Qty > 2</button>
+            <button class="example-btn btn ghost" data-xpath="sum(//LineItems/Item/Quantity)">Sum Quantities</button>
+          </div>
+        </details>
+
+      </div>
+
+      <div style="margin-top:12px" class="panel">
+        <h4 style="margin:0 0 8px">Notes on using this tester</h4>
+        <ul style="margin:6px 0 0 18px" class="small">
+          <li>Expressions run against the sample XML shown on the left.</li>
+          <li>String/text results are shown directly. Element nodes show their serialized XML.</li>
+          <li>Browser XPath engine supports many XPath 1.0 operations; behavior for <code>sum()</code> or complex numeric casts may vary.</li>
+        </ul>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Grab sample XML from the pre block
+  const xmlText = document.getElementById('xmlSample').textContent.trim();
+  let xmlDoc = null;
+  function parseXML() {
+    try {
+      const parser = new DOMParser();
+      xmlDoc = parser.parseFromString(xmlText, "application/xml");
+      const parsererror = xmlDoc.getElementsByTagName('parsererror');
+      if (parsererror.length) {
+        throw new Error('XML parse error');
+      }
+    } catch (e) {
+      xmlDoc = null;
+      console.error('XML parse failed', e);
+    }
+  }
+  parseXML();
+
+  // Utility: evaluate XPath and return array of results
+  function evaluate(xpath) {
+    if (!xmlDoc) return { error: 'XML not parsed' };
+    try {
+      // Some XPath functions return numbers/strings: try evaluating as string/number first
+      // We'll attempt to evaluate as a string/number and fallback to nodes
+      const nsResolver = xmlDoc.createNSResolver(xmlDoc.documentElement);
+      // Try number (for sum/count)
+      const numberResult = xmlDoc.evaluate(xpath, xmlDoc, nsResolver, XPathResult.NUMBER_TYPE, null);
+      if (!isNaN(numberResult.numberValue) && String(numberResult.numberValue) !== 'NaN') {
+        // For number expressions like sum() or count()
+        return { type: 'number', value: numberResult.numberValue };
+      }
+      // Try string
+      const stringResult = xmlDoc.evaluate(xpath, xmlDoc, nsResolver, XPathResult.STRING_TYPE, null);
+      if (stringResult.stringValue && stringResult.stringValue !== '') {
+        return { type: 'string', value: stringResult.stringValue };
+      }
+      // Node set
+      const nodes = xmlDoc.evaluate(xpath, xmlDoc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+      const out = [];
+      for (let i=0;i<nodes.snapshotLength;i++){
+        out.push(nodes.snapshotItem(i));
+      }
+      return { type: 'nodes', nodes: out };
+    } catch (err) {
+      return { error: err.toString() };
+    }
+  }
+
+  // UI elements
+  const xpathInput = document.getElementById('xpathInput');
+  const runBtn = document.getElementById('runBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const resultsEl = document.getElementById('results');
+  const resultCount = document.getElementById('resultCount');
+  const exampleButtons = document.querySelectorAll('.example-btn');
+
+  function renderResult(res) {
+    resultsEl.innerHTML = '';
+    if (res.error) {
+      resultsEl.innerHTML = '<div style="color:#b00020"><strong>Error:</strong> ' + escapeHtml(res.error) + '</div>';
+      resultCount.textContent = '0';
+      return;
+    }
+    if (res.type === 'number') {
+      resultsEl.innerHTML = '<div><strong>Number:</strong> ' + res.value + '</div>';
+      resultCount.textContent = '1';
+      return;
+    }
+    if (res.type === 'string') {
+      resultsEl.innerHTML = '<div><strong>String:</strong> <pre style="white-space:pre-wrap;background:#f7fbff;padding:8px;border-radius:6px">' + escapeHtml(res.value) + '</pre></div>';
+      resultCount.textContent = '1';
+      return;
+    }
+    if (res.type === 'nodes') {
+      if (res.nodes.length === 0) {
+        resultsEl.innerHTML = '<div class="small" style="color:#666">No nodes matched</div>';
+        resultCount.textContent = '0';
+        return;
+      }
+      resultCount.textContent = res.nodes.length;
+      res.nodes.forEach(function(node, idx){
+        let out = '';
+        if (node.nodeType === Node.TEXT_NODE) {
+          out = escapeHtml(node.nodeValue);
+          resultsEl.innerHTML += '<div><strong>['+ (idx+1) +'] Text:</strong><pre style="white-space:pre-wrap;background:#fff;padding:8px;border-radius:6px;margin-top:6px">' + out + '</pre></div>';
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // Serialize element XML
+          const serializer = new XMLSerializer();
+          out = serializer.serializeToString(node);
+          resultsEl.innerHTML += '<div><strong>['+ (idx+1) +'] Element:</strong><pre style="white-space:pre-wrap;background:#fff;padding:8px;border-radius:6px;margin-top:6px">' + escapeHtml(out) + '</pre></div>';
+        } else {
+          resultsEl.innerHTML += '<div>Node type: ' + node.nodeType + '</div>';
+        }
+      });
+    }
+  }
+
+  function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  runBtn.addEventListener('click', function(){
+    const expr = xpathInput.value.trim();
+    if (!expr) return;
+    const r = evaluate(expr);
+    renderResult(r);
+  });
+
+  clearBtn.addEventListener('click', function(){
+    xpathInput.value = '';
+    resultsEl.innerHTML = '';
+    resultCount.textContent = '0';
+  });
+
+  exampleButtons.forEach(function(b){
+    b.addEventListener('click', function(){
+      const x = this.getAttribute('data-xpath');
+      xpathInput.value = x;
+    });
+  });
+
+  // Allow Enter key to run
+  xpathInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { runBtn.click(); e.preventDefault(); }
+  });
+
+})();
+</script>
+</body>
+</html>
