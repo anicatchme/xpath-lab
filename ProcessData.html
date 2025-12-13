@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ProcessData — XPath Q&A Presentation</title>
+<style>
+  :root{
+    --accent:#0b67c2;
+    --muted:#6b7280;
+    --bg:#f5f7fa;
+    --ok:#138000;
+    --warn:#d97706;
+    --err:#d0302f;
+  }
+  body{font-family:Inter,Segoe UI,Roboto,Arial; margin:0; background:var(--bg); color:#111}
+  .container{max-width:1200px;margin:18px auto;padding:16px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  h1{font-size:20px;color:var(--accent);margin:0}
+  .sub{color:var(--muted);font-size:13px}
+  .layout{display:grid;grid-template-columns:1fr 520px;gap:16px}
+  .pane{background:#fff;border:1px solid #e3e6ea;padding:12px;border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,0.03)}
+  .xmlPane{height:720px; overflow:auto; font-family:Consolas,monospace; font-size:13px; white-space:pre; padding:12px; background:#0b1220; color:#dbe7ff; border-radius:6px; line-height:1.45}
+  .right {display:flex;flex-direction:column; gap:10px}
+  .questionBox{background:linear-gradient(180deg,#fff,#fbfdff);padding:12px;border-radius:6px;border:1px solid #e6eefc}
+  .questionTitle{font-weight:700; font-size:16px; color:#0b2140}
+  .xpathBox{margin-top:8px;padding:10px;background:#081026;border-radius:6px;color:#dbe7ff;font-family:monospace; font-size:14px; overflow:auto}
+  .resultBox{margin-top:8px;padding:10px;background:#f7fffa;border-radius:6px;border:1px solid #dff3e6;color:var(--ok);font-weight:700}
+  .explain{margin-top:8px;padding:10px;background:#fffaf0;border-radius:6px;border:1px solid #fdeec2;color:#3d2e00}
+  .controls{display:flex;gap:8px;align-items:center}
+  button{cursor:pointer;border-radius:6px;border:0;padding:8px 12px;font-weight:600}
+  .btnPrimary{background:var(--accent);color:#fff}
+  .btnSecondary{background:#f2f4f7;color:#111;border:1px solid #e1e6ee}
+  .playState{color:var(--muted);font-size:13px}
+  .meta{font-size:13px;color:var(--muted)}
+  .footerNote{margin-top:12px;font-size:13px;color:var(--muted)}
+  .highlight{background:rgba(255,230,100,0.18);border-radius:3px;padding:0 2px}
+  @media (max-width:1000px){ .layout{grid-template-columns:1fr} .xmlPane{height:280px} .right{order:2} }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>ProcessData — XPath Q&amp;A Presentation</h1>
+        <div class="sub">Question → XPath → Result → Explanation — left side shows ProcessData XML with highlights</div>
+      </div>
+      <div class="meta">Ready for trainer-led recordings or embedding in SharePoint</div>
+    </header>
+
+    <div class="layout">
+      <!-- Left: XML -->
+      <div class="pane">
+        <div style="font-weight:700;margin-bottom:8px">ProcessData (XML)</div>
+        <div id="xmlPane" class="xmlPane" aria-live="polite"></div>
+      </div>
+
+      <!-- Right: Scene display -->
+      <div class="pane right">
+        <div class="questionBox">
+          <div class="questionTitle" id="qTitle">Question text</div>
+          <div class="xpathBox" id="qXPath" role="code" aria-label="XPath expression">/ProcessData</div>
+          <div class="resultBox" id="qResult">Result: <span id="qResultValue">...</span></div>
+          <div class="explain" id="qExplain">Explanation text</div>
+        </div>
+
+        <div class="controls">
+          <button id="prevBtn" class="btnSecondary">◀ Previous</button>
+          <button id="nextBtn" class="btnPrimary">Next ▶</button>
+          <button id="autoBtn" class="btnSecondary">▶ Play</button>
+          <div style="flex:1"></div>
+          <div class="playState" id="playState">Slide 1 / 12</div>
+        </div>
+
+        <div class="footerNote">
+          Tip: use this as a script for your recording. The XPath stays visible while the trainer explains.
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ========== Embedded ProcessData XML ========== */
+const xmlText = `<?xml version="1.0" encoding="UTF-8"?>
+<ProcessData>
+   <!-- Inbound document being processed -->
+   <PrimaryDocument>
+       <Content>
+           <Order>
+               <OrderNumber>PO12345</OrderNumber>
+               <OrderDate>2025-01-10</OrderDate>
+               <Header>
+                   <Buyer>ABC Company</Buyer>
+                   <Seller>XYZ Inc</Seller>
+               </Header>
+               <Items>
+                   <Item line="1">
+                      <SKU>SKU001</SKU>
+                      <Description>Laptop</Description>
+                      <Quantity>2</Quantity>
+                      <Price>499.99</Price>
+                   </Item>
+                   <Item line="2">
+                      <SKU>SKU002</SKU>
+                      <Description>Mouse</Description>
+                      <Quantity>5</Quantity>
+                      <Price>19.99</Price>
+                   </Item>
+                   <Item line="3">
+                      <SKU>SKU003</SKU>
+                      <Description>Keyboard</Description>
+                      <Quantity>3</Quantity>
+                      <Price>29.99</Price>
+                   </Item>
+               </Items>
+           </Order>
+       </Content>
+   </PrimaryDocument>
+
+   <!-- Example: Extracted fields using DocExtract service -->
+   <DocExtractResults>
+       <Sender>ABC_COMPANY</Sender>
+       <Receiver>XYZ_SUPPLIER</Receiver>
+       <DocumentType>850</DocumentType>
+   </DocExtractResults>
+
+   <!-- Output from a map (translation result) -->
+   <MapOutput>
+       <MappedOrder>
+           <Header>
+               <OrderNumber>PO12345</OrderNumber>
+               <OrderDate>2025-01-10</OrderDate>
+               <TotalAmount>1299.99</TotalAmount>
+           </Header>
+           <Lines>
+               <LineItem line="1">
+                   <SKU>LAPTOP123</SKU>
+                   <Qty>2</Qty>
+                   <Price>499.99</Price>
+               </LineItem>
+               <LineItem line="2">
+                   <SKU>MOUSE456</SKU>
+                   <Qty>5</Qty>
+                   <Price>19.99</Price>
+               </LineItem>
+           </Lines>
+       </MappedOrder>
+   </MapOutput>
+
+   <!-- Example service output (File System, SOAP, REST, DB, etc.) -->
+   <ServiceOutput>
+       <Status>SUCCESS</Status>
+       <Message>Mapping Completed</Message>
+       <ProcessingTimeSec>4.25</ProcessingTimeSec>
+   </ServiceOutput>
+
+   <!-- Error block used by BP to check conditions -->
+   <Errors>
+       <Error code="4001">Invalid Quantity</Error>
+       <Error code="3002">Missing Address</Error>
+   </Errors>
+</ProcessData>`;
+
+/* ========== Scenes from your trainer notes ========== */
+const scenes = [
+  {
+    q: "What is the base node for ProcessData navigation?",
+    xpath: "/ProcessData",
+    explanation: "Selects the root <ProcessData> element. In Sterling, many BP XPath expressions start here to access workspace data."
+  },
+  {
+    q: "How do we select the Errors section?",
+    xpath: "/ProcessData/Errors",
+    explanation: "Selects the <Errors> block and everything under it. Use this to check whether the BP recorded any errors."
+  },
+  {
+    q: "How to get all Error nodes?",
+    xpath: "/ProcessData/Errors/Error",
+    explanation: "Returns every <Error> element so you can iterate, log, or route based on details."
+  },
+  {
+    q: "How do we fetch the error codes only?",
+    xpath: "/ProcessData/Errors/Error/@code",
+    explanation: "Attributes use the @ syntax. This returns the code attribute values (e.g. 4001, 3002) used for routing decisions."
+  },
+  {
+    q: "How to select the second error entry?",
+    xpath: "/ProcessData/Errors/Error[2]",
+    explanation: "Predicates are 1-based. [2] selects the second <Error> node in the ordered node-set."
+  },
+  {
+    q: "How to read the inbound order number from PrimaryDocument?",
+    xpath: "/ProcessData/PrimaryDocument/Content/Order/OrderNumber/text()",
+    explanation: "Navigate into the PrimaryDocument and read the OrderNumber text (PO12345). Maps and services often read this value."
+  },
+  {
+    q: "How to get the mapped order's total amount?",
+    xpath: "/ProcessData/MapOutput/MappedOrder/Header/TotalAmount/text()",
+    explanation: "Maps output stored under MapOutput — this XPath retrieves TotalAmount (1299.99) from the mapped result."
+  },
+  {
+    q: "How to select every LineItem in the mapped order?",
+    xpath: "/ProcessData/MapOutput/MappedOrder/Lines/LineItem",
+    explanation: "Selects all LineItem nodes — useful for looping through lines in BPML."
+  },
+  {
+    q: "How to get the SKU of the second line item (positional)?",
+    xpath: "/ProcessData/MapOutput/MappedOrder/Lines/LineItem[2]/SKU/text()",
+    explanation: "Use positional predicate [2] to select the second LineItem, then read its SKU (MOUSE456)."
+  },
+  {
+    q: "How to read the service execution status?",
+    xpath: "/ProcessData/ServiceOutput/Status/text()",
+    explanation: "Retrieve Status (e.g. SUCCESS) to determine whether to continue the BP or trigger error handling."
+  },
+  {
+    q: "How to get service processing time (for monitoring)?",
+    xpath: "/ProcessData/ServiceOutput/ProcessingTimeSec/text()",
+    explanation: "Retrieve the execution time (4.25 seconds) — useful for performance monitoring or SLA checks."
+  },
+  {
+    q: "How to get line numbers (attributes) for Items?",
+    xpath: "/ProcessData/PrimaryDocument/Content/Order/Items/Item/@line",
+    explanation: "Extracts the line attribute values (1,2,3) from each Item; used for indexing and audits."
+  }
+];
+
+/* ========== DOM references ========== */
+const xmlPane = document.getElementById('xmlPane');
+const qTitle = document.getElementById('qTitle');
+const qXPath = document.getElementById('qXPath');
+const qResult = document.getElementById('qResultValue');
+const qExplain = document.getElementById('qExplain');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const autoBtn = document.getElementById('autoBtn');
+const playState = document.getElementById('playState');
+
+let index = 0;
+let autoPlay = false;
+let autoTimer = null;
+
+/* Render raw XML (escaped) initially */
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+xmlPane.innerHTML = escapeHtml(xmlText);
+
+/* Helper: Highlight matches in XML pane by simple serialized-string matching */
+function highlightSerializedMatches(matches){
+  // rebuild escaped raw
+  let raw = escapeHtml(xmlText);
+  // unique & sort longest first
+  const uniq = Array.from(new Set(matches)).filter(Boolean).sort((a,b)=>b.length-a.length);
+  for(const m of uniq){
+    // escape m
+    const esc = escapeHtml(m);
+    if(!esc) continue;
+    // replace all occurrences
+    raw = raw.split(esc).join(`<span class="highlight">${esc}</span>`);
+  }
+  xmlPane.innerHTML = raw;
+}
+
+/* Evaluate XPath and return array of serialized results or error */
+function evaluateXPath(expr){
+  try{
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, "application/xml");
+    if(doc.querySelector('parsererror')) return { error: 'XML parse error' };
+
+    // Try attribute/node/text results; use ORDERED_NODE_ITERATOR_TYPE
+    const res = doc.evaluate(expr, doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    const out = [];
+    let node;
+    while((node = res.iterateNext())){
+      if(node.nodeType === Node.TEXT_NODE) out.push(node.nodeValue.trim());
+      else if(node.nodeType === Node.ATTRIBUTE_NODE) out.push(node.value);
+      else out.push(new XMLSerializer().serializeToString(node));
+    }
+    return { result: out };
+  } catch (e) {
+    return { error: e.message || String(e) };
+  }
+}
+
+/* Render a scene by index */
+function renderScene(i){
+  if(i < 0) i = 0;
+  if(i >= scenes.length) i = scenes.length - 1;
+  index = i;
+  const s = scenes[index];
+  qTitle.textContent = s.q;
+  qXPath.textContent = s.xpath;
+  qExplain.textContent = s.explanation;
+  playState.textContent = `Slide ${index+1} / ${scenes.length}`;
+
+  // evaluate
+  const evalRes = evaluateXPath(s.xpath);
+  if(evalRes.error){
+    qResult.textContent = `(evaluation error) ${evalRes.error}`;
+    // clear highlights
+    xmlPane.innerHTML = escapeHtml(xmlText);
+  } else {
+    const vals = evalRes.result;
+    qResult.textContent = vals.length ? vals.join(' ⟩ ') : '(no results)';
+    // highlight matches (attempt)
+    highlightSerializedMatches(vals);
+  }
+
+  // update buttons
+  prevBtn.disabled = (index === 0);
+  nextBtn.disabled = (index === scenes.length - 1);
+}
+
+/* Controls */
+prevBtn.addEventListener('click', ()=> { stopAuto(); renderScene(index-1); });
+nextBtn.addEventListener('click', ()=> { stopAuto(); renderScene(index+1); });
+
+autoBtn.addEventListener('click', ()=>{
+  autoPlay = !autoPlay;
+  if(autoPlay){
+    autoBtn.textContent = '⏸ Pause';
+    startAuto();
+  } else {
+    autoBtn.textContent = '▶ Play';
+    stopAuto();
+  }
+});
+
+function startAuto(){
+  stopAuto();
+  autoTimer = setInterval(()=>{
+    if(index < scenes.length - 1) renderScene(index+1);
+    else { stopAuto(); autoBtn.textContent = '▶ Play'; }
+  }, 6500); // 6.5s per slide (adjustable)
+}
+
+function stopAuto(){
+  if(autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  autoPlay = false;
+  autoBtn.textContent = '▶ Play';
+}
+
+/* Keyboard navigation */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'ArrowRight') { renderScene(index+1); stopAuto(); }
+  if(e.key === 'ArrowLeft') { renderScene(index-1); stopAuto(); }
+  if(e.key === ' ') { // space toggles play/pause
+    e.preventDefault();
+    autoBtn.click();
+  }
+});
+
+/* Init */
+renderScene(0);
+</script>
+</body>
+</html>

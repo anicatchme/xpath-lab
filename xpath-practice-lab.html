@@ -1,0 +1,425 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>XPath Practice Lab — Interactive</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  :root{--accent:#0b67c2;--muted:#666;--ok:#138000;--bad:#d0302f}
+  body{font-family:Segoe UI, Roboto, Arial; margin:0; padding:18px; color:#222; background:#f4f6f8}
+  h1{margin:0 0 12px; color:var(--accent)}
+  .layout{display:grid; grid-template-columns: 1fr 520px; gap:18px; align-items:start}
+  .box{background:#fff;border:1px solid #e3e6e9;padding:14px;border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,0.03)}
+  .xmlPane{height:720px; overflow:auto; font-family:monospace; font-size:13px; white-space:pre; padding:12px; background:#0b1220; color:#dbe7ff; border-radius:6px}
+  .highlight{background:rgba(255,230,100,0.15); box-shadow:inset 0 -3px 0 rgba(255,230,100,0.08)}
+  .question{margin-bottom:12px}
+  .choices{list-style:none;padding:0;margin:8px 0}
+  .choices li{margin:8px 0}
+  .choiceBtn{display:block;width:100%;text-align:left;padding:10px;border-radius:6px;border:1px solid #e2e6ea;background:#fff;cursor:pointer}
+  .choiceBtn:hover{box-shadow:0 1px 0 rgba(0,0,0,0.04)}
+  .choiceBtn.correct{border-color:var(--ok);background:linear-gradient(#f3fff5,#eefff0)}
+  .choiceBtn.wrong{border-color:var(--bad);background:linear-gradient(#fff2f2,#fff0f0)}
+  .meta{font-size:13px;color:var(--muted);margin-top:8px}
+  .resultBox{background:#f8fbff;border:1px solid #dfeeff;padding:10px;border-radius:6px;margin-top:8px}
+  pre.result{background:#fff;border:1px dashed #e6e6e6;padding:10px;height:120px;overflow:auto}
+  .xpath{font-family:monospace;background:#0b1220;color:#dbe7ff;padding:8px;border-radius:6px;display:inline-block}
+  .explain{margin-top:8px;background:#fffef6;border:1px solid #faeab7;padding:10px;border-radius:6px}
+  .controls{margin-top:10px}
+  button.primary{background:var(--accent);color:#fff;border:0;padding:8px 12px;border-radius:6px;cursor:pointer}
+  button.secondary{background:#f2f2f2;border:0;padding:8px 12px;border-radius:6px;cursor:pointer;margin-left:8px}
+  .score{font-weight:700;color:var(--accent)}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  @media (max-width:1000px){ .layout{grid-template-columns:1fr; } .xmlPane{height:300px} }
+</style>
+</head>
+<body>
+  <h1>XPath Practice Lab — Interactive (10 questions)</h1>
+  <div class="topbar">
+    <div class="meta">Instructions: Read the question on the right, click the answer. The page will reveal the XPath, explanation, and show the evaluated result against the XML (left pane highlights matches).</div>
+    <div><span class="score" id="score">Score: 0 / 0</span></div>
+  </div>
+
+  <div class="layout">
+    <!-- Left: XML display -->
+    <div class="box">
+      <div style="font-weight:700;margin-bottom:8px">XML Document (scrollable)</div>
+      <div id="xmlPane" class="xmlPane" aria-live="polite"></div>
+    </div>
+
+    <!-- Right: Quiz -->
+    <div class="box" id="quizBox">
+      <div id="questionArea"></div>
+      <div id="controls" class="controls" style="display:flex;gap:8px;margin-top:12px">
+        <button class="primary" id="nextBtn" style="display:none">Next Question</button>
+        <button class="secondary" id="resetBtn">Reset Lab</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ========== XML source (your document) ========== */
+const xmlText = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Orders>
+   <Order>
+     <!-- subdocument # 1 -->
+     <Sender>DOCEXTRACTXML</Sender>
+     <Receiver>TXERCVR1</Receiver>
+     <AccepterLookupAlias>810</AccepterLookupAlias><![CDATA[Some text with lots of<"!@#$%'^&*()> special characters]]><!-- Returns only the first MATCHING Sender/Receiver/AccepterLookupAlias value -->
+        <Manifest>
+          <Item type="book" color="blue">
+          <Sender>INVALID-SENDER</Sender>
+          <Receiver>INVALID_RECEIVER</Receiver>
+          <AccepterLookupAlias>INVALID-ACCEPTER</AccepterLookupAlias>
+          <ID>101</ID>
+          <NAME>All about DOM.</NAME>
+          <PRICE>$19.99</PRICE>
+      </Item>
+    <Item>
+      <ID>102</ID>
+      <NAME>The story about ...</NAME>
+      <PRICE>$9.99</PRICE>
+        </Item>
+    <Item>
+      <ID>103</ID>
+      <NAME>When to use a DOM.</NAME>
+      <PRICE>$49.99</PRICE>
+        </Item>
+    <Item>
+      <ID>104</ID>
+      <NAME>Java 2.</NAME>
+      <PRICE>$59.99</PRICE>
+         </Item>
+            <Item>
+      <ID>105</ID>
+      <NAME>Java 3.</NAME>
+      <PRICE>$69.99</PRICE>
+         </Item>
+   <Item>
+      <ID>106</ID>
+      <NAME>Java 4.</NAME>
+      <PRICE>$79.99</PRICE>
+                        </Item>
+
+</Manifest>
+  </Order>
+    <Order>
+      <!-- subdocument # 2 -->
+      <Sender>DOCEXTRACTXML</Sender>
+      <Receiver>TXERCVR2</Receiver>
+      <AccepterLookupAlias>810</AccepterLookupAlias>
+   <Manifest>
+     <Item>
+       <ID>101</ID>
+       <NAME>All about DOM.</NAME>
+                   <PRICE>$29.99</PRICE>
+       </Item>
+    <Item>
+                  <ID>102</ID>
+      <NAME>The story about ...</NAME>
+      <PRICE>$19.99</PRICE>
+    </Item>
+    <Item>
+      <ID>103</ID>
+      <NAME>Wnen to use a DOM.</NAME>
+      <PRICE>$59.99</PRICE>
+     </Item>
+     <Item>
+        <ID>104</ID>
+                    <NAME>Java 2.</NAME>
+        <PRICE>$69.99</PRICE>
+     </Item>
+     <Item>
+        <ID>105</ID>
+        <NAME>Java 3.</NAME>
+        <PRICE>$79.99</PRICE>
+     </Item>
+  </Manifest>
+ </Order>
+   <Order>
+     <!-- subdocument # 3 -->
+     <Sender>DOCEXTRACTXML</Sender>
+     <Receiver>TXERCVR1</Receiver>
+     <AccepterLookupAlias>810</AccepterLookupAlias>
+
+   <Manifest>
+    <Item>
+      <ID>101</ID>
+      <NAME>All about DOM.</NAME>
+      <PRICE>$29.99</PRICE>
+    </Item>
+    <Item>
+       <ID>102</ID>
+       <NAME>The story about ...</NAME>
+       <PRICE>$19.99</PRICE>
+    </Item>
+    <Item>
+       <ID>103</ID>
+       <NAME>Wnen to use a DOM.</NAME>
+       <PRICE>$59.99</PRICE>
+    </Item>
+    <Item>
+       <ID>104</ID>
+       <NAME>Java 2.</NAME>
+       <PRICE>$69.99</PRICE>
+    </Item>
+    <Item>
+        <ID>105</ID>
+        <NAME>Java 3.</NAME>
+        <PRICE>$79.99</PRICE>
+    </Item>
+</Manifest>
+   </Order>
+     <Order>
+      <!-- subdocument # 4 -->
+      <Sender>DOCEXTRACTXML</Sender>
+      <Receiver>TXERCVR2</Receiver>
+      <AccepterLookupAlias>810</AccepterLookupAlias>
+
+ <Manifest>
+    <Item>
+      <ID>101</ID>
+      <NAME>All about DOM.</NAME>
+      <PRICE>$29.99</PRICE>
+    </Item>
+    <Item>
+       <ID>102</ID>
+       <NAME>The story about ...</NAME>
+       <PRICE>$19.99</PRICE>
+    </Item>
+    <Item>
+        <ID>103</ID>
+        <NAME>Wnen to use a DOM.</NAME>
+        <PRICE>$59.99</PRICE>
+             </Item>
+    <Item>
+       <ID>104</ID>
+                   <NAME>Java 2.</NAME>
+       <PRICE>$69.99</PRICE>
+    </Item>
+    <Item>
+                   <ID>105</ID>
+       <NAME>Java 3.</NAME>
+       <PRICE>$79.99</PRICE>a
+    </Item>
+  </Manifest>
+  </Order>
+ </Orders>`;
+
+/* ========== Questions (10) ==========
+Each object: question, choices[], correctIndex, xpath (canonical), explanation
+*/
+const questions = [
+  {
+    question: "How many <Order> elements are in the document?",
+    choices: ["2", "3", "4", "5"],
+    correct: 2,
+    xpath: "count(/Orders/Order)",
+    explanation: "count(/Orders/Order) counts the Order nodes that are direct children of the root Orders element. The document contains four Order elements."
+  },
+  {
+    question: "Select the Sender value of the first Order (top-level Sender).",
+    choices: [ "DOCEXTRACTXML", "INVALID-SENDER", "TXERCVR1", "810" ],
+    correct: 0,
+    xpath: "/Orders/Order[1]/Sender/text()",
+    explanation: "/Orders/Order[1] selects the first Order; /Sender/text() returns the text node of Sender (the top-level Sender under Order)."
+  },
+  {
+    question: "Select the Receiver of the 2nd Order.",
+    choices: ["TXERCVR1", "TXERCVR2", "DOCEXTRACTXML", "810"],
+    correct: 1,
+    xpath: "/Orders/Order[2]/Receiver/text()",
+    explanation: "Order[2] selects the second Order. /Receiver/text() yields the Receiver text value 'TXERCVR2'."
+  },
+  {
+    question: "Select all <Item> nodes in the first Order.",
+    choices: ["Node-set of 3 Items", "Node-set of 6 Items", "Node-set of 2 Items", "No items"],
+    correct: 1,
+    xpath: "/Orders/Order[1]/Manifest/Item",
+    explanation: "/Orders/Order[1]/Manifest/Item selects all Item elements under the first Order's Manifest. In this XML that first Order contains 6 Item elements (IDs 101..106)."
+  },
+  {
+    question: "Select the ID values of all Items in the first Order.",
+    choices: ["101,102,103", "101..106", "101,102,103,104,105,106", "IDs unknown"],
+    correct: 2,
+    xpath: "/Orders/Order[1]/Manifest/Item/ID/text()",
+    explanation: "Selecting Item/ID/text() returns the textual ID values for each Item under Order[1]. They are 101,102,103,104,105,106."
+  },
+  {
+    question: "Get the NAME of the Item with ID=103 in the first Order.",
+    choices: ["When to use a DOM.", "Wnen to use a DOM.", "Java 2.", "All about DOM."],
+    correct: 0,
+    xpath: "/Orders/Order[1]/Manifest/Item[ID='103']/NAME/text()",
+    explanation: "The predicate [ID='103'] filters Items to those whose ID child equals '103'. Then NAME/text() returns the text of the matching NAME node. Note: small spelling differences in other Orders may exist."
+  },
+  {
+    question: "Find the Item node that has attribute type=\"book\".",
+    choices: ["Item in Order #1 with ID=101", "Item in Order #2 with ID=101", "No such Item", "Multiple Items"],
+    correct: 0,
+    xpath: "//Item[@type='book']",
+    explanation: "//Item searches all Item nodes and @type='book' filters those with attribute type equal to book. The first Order's Item with ID 101 has that attribute."
+  },
+  {
+    question: "Count how many Items exist in Order #1.",
+    choices: ["4", "5", "6", "7"],
+    correct: 2,
+    xpath: "count(/Orders/Order[1]/Manifest/Item)",
+    explanation: "count(...) returns the number of Item nodes under Order[1] Manifest — that's 6."
+  },
+  {
+    question: "Get the last Item (node) in Order #1.",
+    choices: ["Item ID 105", "Item ID 106", "Item ID 101", "Item ID 104"],
+    correct: 1,
+    xpath: "/Orders/Order[1]/Manifest/Item[last()]",
+    explanation: "last() returns the last node in the selected node-set. For Order[1] the last Item has ID 106."
+  },
+  {
+    question: "Select Items where PRICE (numeric) is greater than $60.",
+    choices: ["Matches $59.99 only", "Matches $69.99 and $79.99", "No matches", "Matches all prices"],
+    correct: 1,
+    xpath: "//Item[number(translate(PRICE,'$','')) > 60]",
+    explanation: "translate(PRICE,'$','') removes the $; number(...) converts the string to a numeric value. The predicate >60 filters items priced above $60: $69.99 and $79.99."
+  }
+];
+
+/* ========== Render XML on the left with simple highlight support ========== */
+const xmlPane = document.getElementById('xmlPane');
+xmlPane.textContent = xmlText;
+
+/* Helper: escape HTML for safe display */
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* Function to highlight matched text occurrences (naive: string match of serialized nodes) */
+function highlightMatches(matches){
+  // rebuild highlighted HTML from original raw text
+  let raw = escapeHtml(xmlText);
+  // sort unique and longest-first to avoid nested replacement issue
+  const set = Array.from(new Set(matches)).sort((a,b)=>b.length-a.length);
+  for(const m of set){
+    if(!m) continue;
+    const escaped = escapeHtml(m);
+    // wrap all occurrences
+    raw = raw.split(escaped).join(`<span class="highlight">${escaped}</span>`);
+  }
+  xmlPane.innerHTML = raw;
+}
+
+/* Evaluate XPath against parsed document and return array of serialized results */
+function evaluateXPath(xpathExpr){
+  try{
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, "application/xml");
+    if(doc.querySelector('parsererror')) return { error: 'XML parse error.' };
+    // evaluate
+    const res = doc.evaluate(xpathExpr, doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    const out = []; let node;
+    while((node = res.iterateNext())){
+      if(node.nodeType === Node.TEXT_NODE) out.push(node.nodeValue.trim());
+      else if(node.nodeType === Node.ATTRIBUTE_NODE) out.push(node.value);
+      else out.push(new XMLSerializer().serializeToString(node));
+    }
+    return { result: out };
+  }catch(e){
+    return { error: e.message };
+  }
+}
+
+/* ========== Quiz UI logic ========== */
+let qIndex = 0;
+let correctCount = 0;
+
+const scoreEl = document.getElementById('score');
+const questionArea = document.getElementById('questionArea');
+const nextBtn = document.getElementById('nextBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+function renderQuestion(){
+  // reset left pane highlights
+  xmlPane.innerHTML = escapeHtml(xmlText);
+
+  const q = questions[qIndex];
+  questionArea.innerHTML = `
+    <div class="question"><strong>Question ${qIndex+1} of ${questions.length}:</strong> ${q.question}</div>
+    <ul class="choices" id="choicesList">
+      ${q.choices.map((c,i)=>`<li><button class="choiceBtn" data-index="${i}">${String.fromCharCode(65+i)}. ${c}</button></li>`).join('')}
+    </ul>
+    <div class="meta">Click an answer to reveal the XPath, explanation, and live result.</div>
+    <div id="revealArea"></div>
+  `;
+  // wire choice buttons
+  document.querySelectorAll('.choiceBtn').forEach(b=>{
+    b.addEventListener('click', onChoiceClick);
+  });
+  nextBtn.style.display = 'none';
+  updateScore();
+}
+
+function onChoiceClick(e){
+  const choiceBtn = e.currentTarget;
+  const chosen = Number(choiceBtn.getAttribute('data-index'));
+  const q = questions[qIndex];
+  const correct = q.correct;
+
+  // disable all buttons
+  document.querySelectorAll('.choiceBtn').forEach(btn=>btn.disabled=true);
+
+  // mark buttons
+  if(chosen === correct){
+    choiceBtn.classList.add('correct');
+    correctCount++;
+  } else {
+    choiceBtn.classList.add('wrong');
+    // also highlight correct answer
+    const correctBtn = document.querySelector(`.choiceBtn[data-index="${correct}"]`);
+    if(correctBtn) correctBtn.classList.add('correct');
+  }
+  updateScore();
+
+  // reveal XPath, explanation, and evaluation
+  const reveal = document.getElementById('revealArea');
+  const evalResult = evaluateXPath(q.xpath);
+  let evalHtml = '';
+  if(evalResult.error){
+    evalHtml = `<div class="resultBox"><strong>Evaluation error:</strong> ${escapeHtml(evalResult.error)}</div>`;
+  } else {
+    const vals = evalResult.result;
+    evalHtml = `<div class="resultBox"><strong>Evaluation result (${vals.length}):</strong><pre class="result">${escapeHtml(vals.join("\\n")) || '(no results)'}</pre></div>`;
+    // attempt to highlight the matched serialized nodes/values in the XML pane
+    highlightMatches(vals);
+  }
+
+  reveal.innerHTML = `
+    <div style="margin-top:10px"><strong>XPath:</strong> <code class="xpath">${escapeHtml(q.xpath)}</code></div>
+    <div class="explain"><strong>Why this XPath works:</strong><div style="margin-top:6px">${escapeHtml(q.explanation)}</div></div>
+    ${evalHtml}
+  `;
+  nextBtn.style.display = 'inline-block';
+}
+
+function updateScore(){
+  scoreEl.textContent = `Score: ${correctCount} / ${questions.length}`;
+}
+
+nextBtn.addEventListener('click', ()=>{
+  qIndex++;
+  if(qIndex >= questions.length){
+    // finished
+    questionArea.innerHTML = `<div style="font-size:18px;font-weight:700">Lab complete — well done!</div>
+      <div class="meta" style="margin-top:8px">Final score: <span class="score">${correctCount} / ${questions.length}</span></div>
+      <div style="margin-top:10px"><button class="primary" id="restartBtn">Restart Lab</button></div>`;
+    document.getElementById('restartBtn').addEventListener('click', ()=>{ qIndex=0; correctCount=0; renderQuestion(); });
+    nextBtn.style.display = 'none';
+  } else {
+    renderQuestion();
+  }
+});
+
+resetBtn.addEventListener('click', ()=>{
+  qIndex = 0; correctCount = 0; renderQuestion();
+});
+
+/* Init */
+renderQuestion();
+
+</script>
+</body>
+</html>
