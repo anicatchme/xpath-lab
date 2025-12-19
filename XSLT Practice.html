@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>XSLT Live Demo — XML → XSLT → Output</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  body { font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial; margin: 16px; background:#f7f7f7; }
+  h1 { font-size:18px; margin:0 0 12px 0 }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .panel { background:#fff; border:1px solid #ddd; padding:12px; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
+  .code { font-family: "Courier New", monospace; font-size:13px; white-space:pre; overflow:auto; max-height:360px; background:#f3f6fb; padding:10px; border-radius:4px; border:1px solid #e6eef8; }
+  .controls { display:flex; gap:8px; margin-bottom:12px; }
+  button { padding:8px 12px; border-radius:6px; border:1px solid #cfcfcf; background:#fff; cursor:pointer; }
+  button.primary { background:#0b5cff; color:#fff; border-color:#084ecc; }
+  .small { font-size:13px; color:#333; }
+  footer { margin-top:14px; font-size:13px; color:#666; }
+</style>
+</head>
+<body>
+<h1>XSLT Live Demo — XML → XSLT → Output (step-by-step)</h1>
+
+<div class="controls">
+  <button id="stepRaw">Show raw XML only</button>
+  <button id="stepXsl">Show XSLT (transform)</button>
+  <button id="apply" class="primary">Apply XSLT</button>
+  <button id="reset">Reset</button>
+  <select id="xslSelect" aria-label="Choose XSLT">
+    <option value="invoice">Invoice: full output (invoice-transform.xsl)</option>
+    <option value="items">Items only (loop-items)</option>
+    <option value="minimal">Minimal (value-of InvoiceNumber)</option>
+  </select>
+</div>
+
+<div class="grid">
+  <div class="panel">
+    <div class="small"><strong>XML (input)</strong></div>
+    <div id="xmlPanel" class="code"></div>
+  </div>
+  <div class="panel">
+    <div class="small"><strong>XSLT (selected)</strong></div>
+    <div id="xslPanel" class="code"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="small"><strong>Output (result of transformation)</strong></div>
+  <div id="outPanel" class="code"></div>
+</div>
+
+<footer>
+  LVTMagus LAB
+</footer>
+
+<script>
+// sample XML (banking EDI invoice)
+const xmlText = `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice>
+  <InvoiceNumber>INV-5001</InvoiceNumber>
+  <InvoiceDate>2025-01-15</InvoiceDate>
+  <Buyer>
+    <Name>ABC Corporation</Name>
+    <AccountNumber>123456789</AccountNumber>
+  </Buyer>
+  <Items>
+    <Item><Description>Router</Description><Price>1200</Price></Item>
+    <Item><Description>Switch</Description><Price>900</Price></Item>
+  </Items>
+  <Total currency="USD">2100</Total>
+</Invoice>`;
+
+// three XSLT variants (small and pedagogical)
+const xsls = {
+  invoice: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:output method="text" encoding="UTF-8"/>
+  <xsl:template match="/">
+    <xsl:text>Invoice: </xsl:text><xsl:value-of select="Invoice/InvoiceNumber"/><xsl:text>&#10;</xsl:text>
+    <xsl:text>Date: </xsl:text><xsl:value-of select="Invoice/InvoiceDate"/><xsl:text>&#10;</xsl:text>
+    <xsl:text>Buyer: </xsl:text><xsl:value-of select="Invoice/Buyer/Name"/><xsl:text> (Acct: </xsl:text>
+    <xsl:value-of select="Invoice/Buyer/AccountNumber"/><xsl:text>)&#10;</xsl:text>
+    <xsl:text>Items:&#10;</xsl:text>
+    <xsl:for-each select="Invoice/Items/Item">
+      <xsl:value-of select="Description"/><xsl:text> - </xsl:text>
+      <xsl:value-of select="Price"/><xsl:text>&#10;</xsl:text>
+    </xsl:for-each>
+    <xsl:text>Total (USD): </xsl:text><xsl:value-of select="Invoice/Total"/><xsl:text>&#10;</xsl:text>
+  </xsl:template>
+</xsl:stylesheet>`,
+
+  items: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+    <xsl:text>Items list:&#10;</xsl:text>
+    <xsl:for-each select="Invoice/Items/Item">
+      <xsl:value-of select="Description"/><xsl:text>, $</xsl:text><xsl:value-of select="Price"/><xsl:text>&#10;</xsl:text>
+    </xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`,
+
+  minimal: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+    <xsl:value-of select="Invoice/InvoiceNumber"/>
+  </xsl:template>
+</xsl:stylesheet>`
+};
+
+// UI elements
+const xmlPanel = document.getElementById('xmlPanel');
+const xslPanel = document.getElementById('xslPanel');
+const outPanel = document.getElementById('outPanel');
+const xslSelect = document.getElementById('xslSelect');
+
+xmlPanel.textContent = xmlText;
+xslPanel.textContent = xsls[xslSelect.value];
+outPanel.textContent = '— press "Apply XSLT" to run the transform —';
+
+// helpers: parse XML/XSLT, apply XSLTProcessor (browser)
+function parseXml(text) {
+  return new DOMParser().parseFromString(text, 'application/xml');
+}
+function applyXslt(xmlStr, xslStr) {
+  try {
+    const xmlDoc = parseXml(xmlStr);
+    const xslDoc = parseXml(xslStr);
+    // detect parser errors
+    if (xmlDoc.getElementsByTagName('parsererror').length) {
+      return '[XML parse error]';
+    }
+    if (xslDoc.getElementsByTagName('parsererror').length) {
+      return '[XSL parse error]';
+    }
+    // XSLTProcessor (works in modern browsers for XSLT 1.0)
+    const processor = new XSLTProcessor();
+    processor.importStylesheet(xslDoc);
+    const result = processor.transformToDocument(xmlDoc);
+    // try text content first
+    const text = new XMLSerializer().serializeToString(result);
+    // If output method="text", browser wraps text in text nodes — extract textContent
+    const bodyText = result.documentElement ? result.documentElement.textContent : result.documentElement;
+    // fallback: if text found, use it; else use serialized xml
+    return (bodyText && bodyText.trim()) ? bodyText.trim() : text;
+  } catch (e) {
+    return '[Transformation error] ' + e.message;
+  }
+}
+
+// event handlers
+document.getElementById('apply').addEventListener('click', () => {
+  const xslt = xsls[xslSelect.value];
+  xslPanel.textContent = xslt;
+  outPanel.textContent = 'Running transformation...';
+  setTimeout(() => {
+    const res = applyXslt(xmlText, xslt);
+    outPanel.textContent = res;
+  }, 150); // tiny delay for visual effect
+});
+document.getElementById('stepRaw').addEventListener('click', () => {
+  xslPanel.textContent = '— select an XSLT and press Apply —';
+  outPanel.textContent = 'Raw XML shown. Press Apply to transform.';
+});
+document.getElementById('stepXsl').addEventListener('click', () => {
+  const xslt = xsls[xslSelect.value];
+  xslPanel.textContent = xslt;
+  outPanel.textContent = 'XSLT loaded. Press Apply to see output.';
+});
+document.getElementById('reset').addEventListener('click', () => {
+  xslSelect.value = 'invoice';
+  xslPanel.textContent = xsls.invoice;
+  outPanel.textContent = '— press "Apply XSLT" to run the transform —';
+});
+xslSelect.addEventListener('change', () => {
+  xslPanel.textContent = xsls[xslSelect.value];
+  outPanel.textContent = 'XSLT changed. Press Apply.';
+});
+</script>
+</body>
+</html>
+
