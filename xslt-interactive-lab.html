@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>XSLT Invoice Lab — 16 Samples</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  :root{--bg:#f7f8fb;--panel:#fff;--muted:#556;--accent:#0b63ff}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:14px;background:var(--bg);color:#111}
+  h1{font-size:18px;margin:0 0 8px}
+  .layout{display:flex;gap:12px;align-items:flex-start}
+  .panel{background:var(--panel);border:1px solid #e3e9f3;border-radius:8px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+  .left{width:48%;min-width:320px}
+  .right{width:52%;min-width:480px;display:flex;flex-direction:column}
+  textarea.xml{width:100%;height:560px;font-family:monospace;font-size:13px;padding:8px;border-radius:6px;border:1px solid #e8f0ff;background:#fff;resize:vertical}
+  textarea.xsl{width:100%;height:320px;font-family:monospace;font-size:13px;padding:8px;border-radius:6px;border:1px solid #e8f0ff;background:#fff;resize:vertical}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  button,select{padding:8px 10px;border-radius:6px;border:1px solid #cfcfcf;background:#fff;cursor:pointer}
+  button.primary{background:var(--accent);color:#fff;border-color:#084ecc}
+  .outputs{display:flex;gap:8px;margin-top:12px}
+  .outputs .panel{flex:1;min-height:200px;padding:8px}
+  .small{font-size:13px;color:var(--muted)}
+  .explain{margin-top:12px;padding:10px;background:#fff8e6;border-left:4px solid #ffd28a;border-radius:6px;color:#5a4300}
+  .kbd{font-family:monospace;background:#f1f5ff;border:1px solid #e6efff;padding:2px 6px;border-radius:6px}
+  footer{margin-top:12px;font-size:13px;color:var(--muted)}
+  pre.code{font-family:monospace;background:#fbfdff;padding:8px;border-radius:6px;border:1px solid #eef5ff;overflow:auto;max-height:260px}
+</style>
+</head>
+<body>
+  <h1>XSLT Invoice Lab — 16 Examples</h1>
+  <p class="small">Left: XML input. Right: pick an XSLT sample, Load → Apply. Use <span class="kbd">xsltproc sample.xsl invoice-namespace.xml</span> to run from CLI.</p>
+
+  <div class="layout">
+    <!-- LEFT -->
+    <div class="panel left">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>XML (input) — editable</strong>
+        <div class="small">Tip: zoom before recording</div>
+      </div>
+      <textarea id="xmlArea" class="xml" spellcheck="false" aria-label="XML input"></textarea>
+      <div style="margin-top:8px" class="small">To test on CLI: save as <span class="kbd">invoice-namespace.xml</span>.</div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="panel right">
+      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="small" for="xslSelect" style="margin:0">Choose XSLT:</label>
+          <select id="xslSelect" title="Choose an XSLT sample"></select>
+          <button id="loadBtn">Load</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="applyBtn" class="primary">Apply XSLT</button>
+          <button id="downloadBtn">Download XSLT</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label class="small" style="display:block;margin-bottom:6px"><strong>XSLT (editable)</strong></label>
+        <textarea id="xslEditor" class="xsl" spellcheck="false" aria-label="XSLT editor"></textarea>
+      </div>
+
+      <div class="controls">
+        <button id="copyBtn">Copy XSLT</button>
+        <button id="resetBtn">Reset XSLT</button>
+        <div style="margin-left:auto" class="small">Output: text & HTML preview below</div>
+      </div>
+
+      <div class="outputs">
+        <div class="panel">
+          <strong class="small">Output (text)</strong>
+          <div id="outText" style="font-family:monospace;white-space:pre;overflow:auto;height:200px;background:#fbfdff;padding:8px;border-radius:6px;border:1px solid #eef5ff">— press Apply XSLT —</div>
+        </div>
+        <div class="panel">
+          <strong class="small">HTML preview</strong>
+          <div id="htmlPreview" style="overflow:auto;height:200px;background:#fff;padding:8px;border-radius:6px;border:1px solid #eef5ff">— preview (if HTML) —</div>
+        </div>
+      </div>
+
+      <div class="explain" id="explainBox">
+        <strong>Explanation</strong>
+        <div id="explainText" class="small" style="margin-top:8px">Load a sample to see details and teaching notes.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>If you'd like these as separate files + invoice XML zipped, say "zip it".</footer>
+
+<script>
+/* ---------- The corrected Invoice XML (exact provided content) ---------- */
+const xmlText = `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice
+  xmlns="http://example.com/invoice/v1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://example.com/invoice/v1 http://example.com/invoice/v1/invoice.xsd"
+  version="1.1"
+  currency="USD"
+  invoiceType="Standard"
+  xmlGeneratedAt="2025-01-15T10:05:00-05:00">
+
+  <Header>
+    <InvoiceNumber>INV-5001</InvoiceNumber>
+    <InvoiceDate>2025-01-15</InvoiceDate>
+    <DueDate>2025-02-14</DueDate>
+    <DocumentStatus>Issued</DocumentStatus>
+    <OriginalPO>PO-88421</OriginalPO>
+    <SalesOrder>SO-2025-1179</SalesOrder>
+    <Reference>NET-INFRA-Q1</Reference>
+  </Header>
+
+  <Seller>
+    <Name>NetGear Solutions LLC</Name>
+    <TaxRegistration type="EIN">12-3456789</TaxRegistration>
+    <Contact>
+      <Email>billing@netgearsolutions.example</Email>
+      <Phone>+1-412-555-0199</Phone>
+    </Contact>
+    <Address>
+      <Line1>2400 Tech Park Drive</Line1>
+      <City>Pittsburgh</City>
+      <State>PA</State>
+      <PostalCode>15222</PostalCode>
+      <Country>US</Country>
+    </Address>
+    <RemitTo>
+      <BankName>Example Bank N.A.</BankName>
+      <RoutingNumber>052000113</RoutingNumber>
+      <AccountNumber masked="true">***1234</AccountNumber>
+      <Swift>BACXUS33</Swift>
+    </RemitTo>
+  </Seller>
+
+  <Buyer>
+    <Name>ABC Corporation</Name>
+    <AccountNumber>123456789</AccountNumber>
+    <TaxRegistration type="TIN">98-7654321</TaxRegistration>
+    <Department>Network Operations</Department>
+    <Contact>
+      <Email>ap@abccorp.example</Email>
+      <Phone>+1-617-555-0123</Phone>
+    </Contact>
+    <BillTo>
+      <Line1>100 Market Street</Line1>
+      <City>Boston</City>
+      <State>MA</State>
+      <PostalCode>02108</PostalCode>
+      <Country>US</Country>
+      <Attention>Accounts Payable</Attention>
+    </BillTo>
+    <ShipTo>
+      <Line1>1550 Data Center Ave</Line1>
+      <City>Cambridge</City>
+      <State>MA</State>
+      <PostalCode>02139</PostalCode>
+      <Country>US</Country>
+      <Attention>DC Receiving</Attention>
+    </ShipTo>
+  </Buyer>
+
+  <PaymentTerms>
+    <TermCode>NET30</TermCode>
+    <Description>Payment due within 30 days of invoice date</Description>
+    <LateFee percent="1.5" period="monthly">applies after due date</LateFee>
+    <Discount>
+      <EarlyPayment percent="2" ifPaidBy="2025-01-25">2025-01-25</EarlyPayment>
+    </Discount>
+    <PaymentMethod>Wire Transfer</PaymentMethod>
+  </PaymentTerms>
+
+  <Shipping>
+    <Carrier>FedEx</Carrier>
+    <ServiceLevel>Ground</ServiceLevel>
+    <ShipDate>2025-01-16</ShipDate>
+    <TrackingNumber>784512963000</TrackingNumber>
+    <FOB>Origin</FOB>
+    <Incoterms>FOB</Incoterms>
+  </Shipping>
+
+  <Items>
+    <Item lineNumber="1">
+      <SKU>RTR-AX9000</SKU>
+      <Description>Enterprise Wi-Fi 6 Router</Description>
+      <Quantity unit="each">1</Quantity>
+      <UnitPrice>1200.00</UnitPrice>
+      <Discount><Type>Contract</Type><Percent>5.0</Percent><Amount>60.00</Amount></Discount>
+      <Tax><Type>SalesTax</Type><Rate percent="6.25"/><Jurisdiction>MA</Jurisdiction></Tax>
+      <LineTotals><SubTotal>1140.00</SubTotal><TaxAmount>71.25</TaxAmount><LineTotal>1211.25</LineTotal></LineTotals>
+    </Item>
+
+    <Item lineNumber="2">
+      <SKU>SWT-48P-10G</SKU>
+      <Description>48-Port Managed Switch with 10G Uplinks</Description>
+      <Quantity unit="each">1</Quantity>
+      <UnitPrice>900.00</UnitPrice>
+      <Discount><Type>Promo</Type><Percent>0.0</Percent><Amount>0.00</Amount></Discount>
+      <Tax><Type>SalesTax</Type><Rate percent="6.25"/><Jurisdiction>MA</Jurisdiction></Tax>
+      <LineTotals><SubTotal>900.00</SubTotal><TaxAmount>56.25</TaxAmount><LineTotal>956.25</LineTotal></LineTotals>
+    </Item>
+
+    <Item lineNumber="3">
+      <SKU>CAB-CAT6A-3M</SKU>
+      <Description>CAT6A Shielded Ethernet Cable, 3m</Description>
+      <Quantity unit="each">2</Quantity>
+      <UnitPrice>25.00</UnitPrice>
+      <Discount><Type>None</Type><Percent>0.0</Percent><Amount>0.00</Amount></Discount>
+      <Tax><Type>SalesTax</Type><Rate percent="6.25"/><Jurisdiction>MA</Jurisdiction></Tax>
+      <LineTotals><SubTotal>50.00</SubTotal><TaxAmount>3.13</TaxAmount><LineTotal>53.13</LineTotal></LineTotals>
+    </Item>
+  </Items>
+
+  <Charges>
+    <ShippingCharge>29.00</ShippingCharge>
+    <HandlingCharge>0.00</HandlingCharge>
+  </Charges>
+
+  <Adjustments>
+    <HeaderDiscount>
+      <Type>Loyalty</Type>
+      <Percent>2.00</Percent>
+      <Amount>102.38</Amount>
+      <AppliedTo>MerchandiseSubtotal</AppliedTo>
+    </HeaderDiscount>
+  </Adjustments>
+
+  <Totals>
+    <MerchandiseSubtotal>2090.00</MerchandiseSubtotal>
+    <TaxTotal>130.63</TaxTotal>
+    <ShippingTotal>29.00</ShippingTotal>
+    <DiscountTotal>102.38</DiscountTotal>
+    <GrandTotal>2147.25</GrandTotal>
+    <AmountsInWords locale="en-US">Two thousand one hundred forty-seven dollars and twenty-five cents</AmountsInWords>
+    <BalanceDue>2147.25</BalanceDue>
+  </Totals>
+</Invoice>`;
+
+/* ---------- 16 XSLT samples (namespace-aware) ---------- */
+const samples = {
+  "01-minimal": {
+    title: "01 - Minimal (InvoiceNumber)",
+    explain: "Extracts InvoiceNumber — demonstrates namespace prefix usage (inv:).",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                exclude-result-prefixes="inv"
+                version="1.0">
+  <xsl:output method="text" encoding="UTF-8"/>
+  <xsl:template match="/">
+Invoice Number: <xsl:value-of select="/inv:Invoice/inv:Header/inv:InvoiceNumber"/>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "02-items-list": {
+    title: "02 - Items list (detailed)",
+    explain: "Loop items, show attributes and nested elements.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Items:
+<xsl:for-each select="/inv:Invoice/inv:Items/inv:Item">
+- Line <xsl:value-of select="@lineNumber"/> | SKU=<xsl:value-of select="inv:SKU"/> | <xsl:value-of select="inv:Description"/>
+  Qty=<xsl:value-of select="inv:Quantity"/> @ $<xsl:value-of select="inv:UnitPrice"/> | LineTotal=$<xsl:value-of select="inv:LineTotals/inv:LineTotal"/>
+</xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "03-templates": {
+    title: "03 - Templates + apply-templates",
+    explain: "Use apply-templates and per-node templates for modularity.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Invoice: <xsl:value-of select="/inv:Invoice/inv:Header/inv:InvoiceNumber"/>
+<xsl:apply-templates select="/inv:Invoice/inv:Items/inv:Item"/>
+  </xsl:template>
+
+  <xsl:template match="inv:Item">
+- [Line <xsl:value-of select="@lineNumber"/>] <xsl:value-of select="inv:SKU"/> — <xsl:value-of select="inv:LineTotals/inv:LineTotal"/>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "04-filter-high": {
+    title: "04 - Filter (LineTotal >= 1000)",
+    explain: "Filter nodes by numeric predicate using number().",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+High-value items (>=1000):
+<xsl:for-each select="/inv:Invoice/inv:Items/inv:Item[number(inv:LineTotals/inv:LineTotal) &gt;= 1000]">
+* <xsl:value-of select="inv:SKU"/> — $<xsl:value-of select="inv:LineTotals/inv:LineTotal"/>
+</xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "05-sort-desc": {
+    title: "05 - Sort (LineTotal desc)",
+    explain: "Sort by numeric LineTotal descending.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Sorted by LineTotal (desc):
+<xsl:for-each select="/inv:Invoice/inv:Items/inv:Item">
+  <xsl:sort select="number(inv:LineTotals/inv:LineTotal)" data-type="number" order="descending"/>
+  - <xsl:value-of select="inv:SKU"/> : $<xsl:value-of select="inv:LineTotals/inv:LineTotal"/>
+</xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "06-csv-export": {
+    title: "06 - CSV export (items)",
+    explain: "Produce simple CSV rows (quotes but no escaping).",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text" encoding="UTF-8"/>
+  <xsl:template match="/">
+"Line","SKU","Description","Qty","UnitPrice","LineTotal"
+<xsl:for-each select="/inv:Invoice/inv:Items/inv:Item">
+"<xsl:value-of select="@lineNumber"/>","<xsl:value-of select="inv:SKU"/>","<xsl:value-of select="inv:Description"/>","<xsl:value-of select="inv:Quantity"/>","<xsl:value-of select="inv:UnitPrice"/>","<xsl:value-of select="inv:LineTotals/inv:LineTotal"/>"
+</xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "07-html-report": {
+    title: "07 - HTML report (renderable)",
+    explain: "Produce a browser-friendly invoice (method=html).",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="html" indent="yes" encoding="UTF-8"/>
+  <xsl:template match="/">
+<html><head><meta charset="utf-8"/><title>Invoice <xsl:value-of select="/inv:Invoice/inv:Header/inv:InvoiceNumber"/></title></head>
+<body>
+  <h1>Invoice: <xsl:value-of select="/inv:Invoice/inv:Header/inv:InvoiceNumber"/></h1>
+  <p>Date: <xsl:value-of select="/inv:Invoice/inv:Header/inv:InvoiceDate"/></p>
+  <h2>Items</h2>
+  <table border="1" cellpadding="6">
+    <tr><th>Line</th><th>SKU</th><th>Description</th><th>Qty</th><th>UnitPrice</th><th>LineTotal</th></tr>
+    <xsl:for-each select="/inv:Invoice/inv:Items/inv:Item">
+      <tr>
+        <td><xsl:value-of select="@lineNumber"/></td>
+        <td><xsl:value-of select="inv:SKU"/></td>
+        <td><xsl:value-of select="inv:Description"/></td>
+        <td><xsl:value-of select="inv:Quantity"/></td>
+        <td><xsl:value-of select="inv:UnitPrice"/></td>
+        <td><xsl:value-of select="inv:LineTotals/inv:LineTotal"/></td>
+      </tr>
+    </xsl:for-each>
+  </table>
+  <h3>Totals</h3>
+  <p>GrandTotal: $<xsl:value-of select="/inv:Invoice/inv:Totals/inv:GrandTotal"/></p>
+</body></html>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "08-sum-linetotals": {
+    title: "08 - Sum LineTotals",
+    explain: "Use sum() to aggregate line totals and compare to GrandTotal.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Sum of LineTotals: <xsl:value-of select="format-number(sum(/inv:Invoice/inv:Items/inv:Item/inv:LineTotals/inv:LineTotal), '#,##0.00')"/>
+Declared GrandTotal: <xsl:value-of select="/inv:Invoice/inv:Totals/inv:GrandTotal"/>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "09-sum-qty-unit-recursive": {
+    title: "09 - Sum (qty * unitPrice) — recursive",
+    explain: "Recursion to compute expression-based sum (XSLT 1.0 pattern).",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Total merchandise (qty*unitPrice):
+  <xsl:call-template name="sum-items">
+    <xsl:with-param name="nodes" select="/inv:Invoice/inv:Items/inv:Item"/>
+  </xsl:call-template>
+</xsl:template>
+
+  <xsl:template name="sum-items">
+    <xsl:param name="nodes"/>
+    <xsl:choose>
+      <xsl:when test="count($nodes) = 0">
+        <xsl:text>0.00</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="first" select="$nodes[1]"/>
+        <xsl:variable name="rest" select="$nodes[position() &gt; 1]"/>
+        <xsl:variable name="value" select="number($first/inv:Quantity) * number($first/inv:UnitPrice)"/>
+        <xsl:variable name="restsum">
+          <xsl:call-template name="sum-items">
+            <xsl:with-param name="nodes" select="$rest"/>
+          </xsl:call-template>
+        </xsl:variable>
+        <xsl:value-of select="format-number(number($value) + number($restsum), '#,##0.00')"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "10-muenchian-glcodes": {
+    title: "10 - Unique GL Codes (Muenchian grouping)",
+    explain: "Group items by GLCode using a key and generate unique list.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:key name="kGL" match="inv:Item" use="inv:Accounting/inv:GLCode"/>
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Unique GL Codes:
+<xsl:for-each select="/inv:Invoice/inv:Items/inv:Item[generate-id() = generate-id(key('kGL', inv:Accounting/inv:GLCode)[1])]">
+- <xsl:value-of select="inv:Accounting/inv:GLCode"/>
+</xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "11-tax-by-jurisdiction": {
+    title: "11 - Tax totals by jurisdiction",
+    explain: "Group by Tax Jurisdiction and sum tax amounts per group.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:key name="kJur" match="inv:Item" use="inv:Tax/inv:Jurisdiction"/>
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Tax totals by jurisdiction:
+<xsl:for-each select="/inv:Invoice/inv:Items/inv:Item[generate-id() = generate-id(key('kJur', inv:Tax/inv:Jurisdiction)[1])]">
+  <xsl:variable name="jur" select="inv:Tax/inv:Jurisdiction"/>
+  <xsl:text>- </xsl:text><xsl:value-of select="$jur"/><xsl:text>: </xsl:text>
+  <xsl:value-of select="format-number(sum(key('kJur', $jur)/inv:LineTotals/inv:TaxAmount), '#,##0.00')"/>
+</xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "12-attachments-extract": {
+    title: "12 - Attachments extract (if present)",
+    explain: "List attachment URLs and metadata (your XML doesn't include attachments by default).",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Attachments:
+<xsl:for-each select="/inv:Invoice/inv:Attachments/inv:Attachment">
+- Type=<xsl:value-of select="@type"/> | Desc=<xsl:value-of select="@description"/> | URL=<xsl:value-of select="."/>
+</xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "13-accounting-journal": {
+    title: "13 - Accounting journal lines (CSV)",
+    explain: "Map each item to debit/credit journal pseudo-rows for import.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text" encoding="UTF-8"/>
+  <xsl:template match="/">
+"Account","Debit","Credit","Description"
+<xsl:for-each select="/inv:Invoice/inv:Items/inv:Item">
+  "<xsl:value-of select="inv:Accounting/inv:GLCode"/>","<xsl:value-of select="inv:LineTotals/inv:LineTotal"/>","","<xsl:value-of select="inv:Description"/>"
+  "Accounts Payable","","<xsl:value-of select="inv:LineTotals/inv:LineTotal"/>","<xsl:value-of select="inv:Description"/>"
+</xsl:for-each>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "14-discounts-summary": {
+    title: "14 - Discounts summary (per item & header)",
+    explain: "Show per-item discounts and header-level adjustments.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+Item discounts:
+<xsl:for-each select="/inv:Invoice/inv:Items/inv:Item">
+ - <xsl:value-of select="inv:SKU"/> : <xsl:value-of select="inv:Discount/inv:Amount"/> (<xsl:value-of select="inv:Discount/inv:Type"/>)
+</xsl:for-each>
+
+Header discount:
+ - <xsl:value-of select="/inv:Invoice/inv:Adjustments/inv:HeaderDiscount/inv:Type"/> : $<xsl:value-of select="/inv:Invoice/inv:Adjustments/inv:HeaderDiscount/inv:Amount"/>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "15-validate-grandtotal": {
+    title: "15 - Validate GrandTotal (pass/fail)",
+    explain: "Compute sum(LineTotal) and compare to GrandTotal; show PASS/FAIL.",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text"/>
+  <xsl:template match="/">
+<xsl:variable name="sumLines" select="sum(/inv:Invoice/inv:Items/inv:Item/inv:LineTotals/inv:LineTotal)"/>
+Sum of LineTotals: <xsl:value-of select="format-number($sumLines,'#0.00')"/>
+Declared GrandTotal: <xsl:value-of select="/inv:Invoice/inv:Totals/inv:GrandTotal"/>
+Status: <xsl:choose><xsl:when test="number(/inv:Invoice/inv:Totals/inv:GrandTotal) = $sumLines">PASS</xsl:when><xsl:otherwise>FAIL</xsl:otherwise></xsl:choose>
+  </xsl:template>
+</xsl:stylesheet>`
+  },
+
+  "16-to-json": {
+    title: "16 - Transform to JSON (text output)",
+    explain: "Produce a JSON-ish text output for basic fields (XSLT 1.0 text assembly).",
+    xsl: `<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:inv="http://example.com/invoice/v1"
+                version="1.0">
+  <xsl:output method="text" encoding="UTF-8"/>
+  <xsl:template match="/">
+{
+  "invoiceNumber": "<xsl:value-of select="/inv:Invoice/inv:Header/inv:InvoiceNumber"/>",
+  "date": "<xsl:value-of select="/inv:Invoice/inv:Header/inv:InvoiceDate"/>",
+  "buyer": "<xsl:value-of select="/inv:Invoice/inv:Buyer/inv:Name"/>",
+  "grandTotal": "<xsl:value-of select="/inv:Invoice/inv:Totals/inv:GrandTotal"/>",
+  "items": [
+    <xsl:for-each select="/inv:Invoice/inv:Items/inv:Item">
+      {
+        "line": "<xsl:value-of select="@lineNumber"/>",
+        "sku": "<xsl:value-of select="inv:SKU"/>",
+        "desc": "<xsl:value-of select="inv:Description"/>",
+        "lineTotal": "<xsl:value-of select="inv:LineTotals/inv:LineTotal"/>"
+      }<xsl:if test="position() != last()">,</xsl:if>
+    </xsl:for-each>
+  ]
+}
+  </xsl:template>
+</xsl:stylesheet>`
+  }
+};
+
+/* ---------- UI wiring ---------- */
+const xmlArea = document.getElementById('xmlArea');
+const xslSelect = document.getElementById('xslSelect');
+const loadBtn = document.getElementById('loadBtn');
+const xslEditor = document.getElementById('xslEditor');
+const applyBtn = document.getElementById('applyBtn');
+const outText = document.getElementById('outText');
+const htmlPreview = document.getElementById('htmlPreview');
+const explainText = document.getElementById('explainText');
+const copyBtn = document.getElementById('copyBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+xmlArea.value = xmlText;
+
+// populate select
+Object.keys(samples).forEach(key=>{
+  const opt = document.createElement('option');
+  opt.value = key;
+  opt.textContent = samples[key].title;
+  xslSelect.appendChild(opt);
+});
+
+// helper parse
+function parseXml(text){
+  return new DOMParser().parseFromString(text, 'application/xml');
+}
+function hasParseError(doc){
+  return doc.getElementsByTagName('parsererror').length > 0;
+}
+
+// apply XSLT using browser XSLTProcessor
+function applyXslt(xmlStr, xslStr){
+  try{
+    const xmlDoc = parseXml(xmlStr);
+    if(hasParseError(xmlDoc)) return { error: '[XML parse error]' };
+    const xslDoc = parseXml(xslStr);
+    if(hasParseError(xslDoc)) return { error: '[XSL parse error]' };
+    const proc = new XSLTProcessor();
+    proc.importStylesheet(xslDoc);
+    const frag = proc.transformToFragment(xmlDoc, document);
+    const container = document.createElement('div');
+    container.appendChild(frag.cloneNode(true));
+    return { text: container.textContent.trim(), html: container.innerHTML };
+  } catch(e){
+    return { error: '[Transformation error] ' + e.message };
+  }
+}
+
+// load sample
+function loadSample(key){
+  xslEditor.value = samples[key].xsl;
+  explainText.textContent = samples[key].explain;
+  outText.textContent = '— press Apply XSLT —';
+  htmlPreview.innerHTML = '— preview (if HTML) —';
+}
+loadSample(xslSelect.value);
+
+// events
+loadBtn.addEventListener('click', ()=> loadSample(xslSelect.value));
+applyBtn.addEventListener('click', ()=>{
+  outText.textContent = 'Running transformation...';
+  htmlPreview.innerHTML = 'Running...';
+  setTimeout(()=>{
+    const res = applyXslt(xmlArea.value, xslEditor.value);
+    if(res.error){
+      outText.textContent = res.error;
+      htmlPreview.textContent = res.error;
+      return;
+    }
+    outText.textContent = res.text || '(no text output)';
+    // if res.html has tags, render; else show text
+    if(res.html && /<\/?[a-z][\s\S]*>/i.test(res.html)){
+      htmlPreview.innerHTML = res.html;
+    } else {
+      htmlPreview.innerHTML = '<pre style="white-space:pre-wrap;font-family:monospace">'+escapeHtml(res.text||'')+'</pre>';
+    }
+  }, 120);
+});
+
+copyBtn.addEventListener('click', ()=>{
+  navigator.clipboard.writeText(xslEditor.value).then(()=> alert('XSLT copied to clipboard'));
+});
+
+downloadBtn.addEventListener('click', ()=>{
+  const blob = new Blob([xslEditor.value], {type:'application/xml'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (xslSelect.value || 'transform') + '.xsl';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+});
+
+resetBtn.addEventListener('click', ()=> loadSample(xslSelect.value));
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+</script>
+</body>
+</html>
