@@ -1,0 +1,1536 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XML & XPath — Interactive Q&A (Basic → Advanced)</title>
+  <style>
+    :root{
+      --bg: #0b0c10;
+      --panel: #11131a;
+      --panel2:#0f1117;
+      --text:#e8e8ea;
+      --muted:#b7bac7;
+      --border:#2a2e3a;
+      --accent:#7aa2ff;
+      --good:#63d19c;
+      --warn:#ffd479;
+      --bad:#ff6b6b;
+      --code:#0a0b0f;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 500px at 15% 0%, rgba(122,162,255,.18), transparent 50%),
+                  radial-gradient(900px 450px at 85% 10%, rgba(99,209,156,.12), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    a{color:var(--accent)}
+    .wrap{
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 18px 70px;
+    }
+    header{
+      background: linear-gradient(180deg, rgba(17,19,26,.88), rgba(17,19,26,.65));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      box-shadow: var(--shadow);
+    }
+    h1{
+      margin: 0 0 8px;
+      font-size: clamp(1.25rem, 2vw + 1rem, 2.1rem);
+      letter-spacing: .2px;
+    }
+    .sub{
+      margin: 0;
+      color: var(--muted);
+      max-width: 75ch;
+    }
+    .note{
+      margin-top: 12px;
+      padding: 12px 12px;
+      background: rgba(122,162,255,.10);
+      border: 1px solid rgba(122,162,255,.25);
+      border-radius: 12px;
+      color: var(--text);
+    }
+    .controls{
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 780px){
+      .controls{grid-template-columns: 1.5fr 1fr}
+    }
+    .controlPanel{
+      background: rgba(15,17,23,.75);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    label{display:block; font-size:.92rem; color: var(--muted); margin-bottom: 6px;}
+    input[type="search"]{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0c0e13;
+      color: var(--text);
+      outline: none;
+    }
+    input[type="search"]:focus{border-color: rgba(122,162,255,.65); box-shadow: 0 0 0 3px rgba(122,162,255,.18)}
+    .row{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .levels{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .levels .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 10px;
+      background: #0c0e13;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      user-select: none;
+      cursor: pointer;
+      font-size: .92rem;
+      color: var(--muted);
+    }
+    .levels input{accent-color: var(--accent)}
+    .btns{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    button{
+      cursor:pointer;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0c0e13;
+      color: var(--text);
+      padding: 10px 12px;
+      font-weight: 600;
+      letter-spacing: .15px;
+    }
+    button:hover{border-color: rgba(122,162,255,.55)}
+    button:focus{outline: none; box-shadow: 0 0 0 3px rgba(122,162,255,.18)}
+    .tiny{
+      font-size: .88rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    main{
+      margin-top: 16px;
+      display: grid;
+      gap: 14px;
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(17,19,26,.80), rgba(15,17,23,.75));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 14px;
+      box-shadow: var(--shadow);
+    }
+    .meta{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(10,11,15,.55);
+      font-size: .86rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .badge.level-basic{border-color: rgba(122,162,255,.35)}
+    .badge.level-intermediate{border-color: rgba(255,212,121,.35)}
+    .badge.level-advanced{border-color: rgba(99,209,156,.35)}
+    .badge.ver1{border-color: rgba(122,162,255,.35)}
+    .badge.ver2{border-color: rgba(255,212,121,.35)}
+    .badge.ver3{border-color: rgba(99,209,156,.35)}
+    h2{
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+    }
+    .prompt{color: var(--text); margin: 0 0 12px;}
+    .prompt p{margin:.45rem 0}
+    .prompt ul{margin:.4rem 0 .4rem 1.25rem}
+    .toggle{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(122,162,255,.35);
+      background: rgba(122,162,255,.10);
+    }
+    .toggle:hover{border-color: rgba(122,162,255,.70)}
+    .answer{
+      margin-top: 12px;
+      border-top: 1px solid rgba(42,46,58,.85);
+      padding-top: 12px;
+    }
+    .answer h3{
+      margin: 0 0 8px;
+      font-size: 1.02rem;
+    }
+    .answer p{margin:.55rem 0; color: var(--muted)}
+    .answer ul{margin:.35rem 0 .4rem 1.25rem; color: var(--muted)}
+    .codeblock{
+      position: relative;
+      background: var(--code);
+      border: 1px solid rgba(42,46,58,.95);
+      border-radius: 12px;
+      padding: 12px 12px 10px;
+      margin: 10px 0;
+      overflow:auto;
+    }
+    pre{margin:0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .92rem;}
+    code{color: #f1f1f4}
+    .copy{
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      font-size: .86rem;
+      padding: 7px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+    }
+    .copy:hover{border-color: rgba(255,255,255,.22)}
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: .90em;
+      border: 1px solid rgba(255,255,255,.18);
+      border-bottom-color: rgba(255,255,255,.10);
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+    }
+    .footer{
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: .92rem;
+      text-align: center;
+    }
+    .dividerTitle{
+      margin-top: 24px;
+      padding: 10px 12px;
+      border: 1px dashed rgba(42,46,58,.95);
+      border-radius: 12px;
+      color: var(--muted);
+      background: rgba(10,11,15,.35);
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>XML & XPath — Interactive Q&A (Basic → Advanced)</h1>
+      <p class="sub">
+        Click <span class="kbd">Show answer</span> to reveal the answer
+        plus a detailed explanation. Includes practical XPath exercises and XML fundamentals.
+      </p>
+      <div class="controls">
+     </div>
+    </header>
+
+    <div class="dividerTitle">A. XML Fundamentals (Q1–Q10)</div>
+    <main id="cards">
+
+      <!-- Q1 -->
+      <section class="card" data-level="basic" data-q="1">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XML</span>
+        </div>
+        <h2>Q1) What makes an XML document <em>well‑formed</em>?</h2>
+        <div class="prompt">
+          <p>List the core rules XML parsers enforce for a document to be well‑formed.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>An XML document is <strong>well‑formed</strong> when it follows the XML syntax rules. The most important ones:</p>
+          <ul>
+            <li><strong>Exactly one root element</strong> (a single top-level element wraps everything).</li>
+            <li><strong>Proper nesting</strong>: tags must be closed in the reverse order they were opened.</li>
+            <li><strong>Every start tag has an end tag</strong> (or is self-closing like <code>&lt;tag/&gt;</code>).</li>
+            <li><strong>Case sensitive</strong>: <code>&lt;Book&gt;</code> and <code>&lt;book&gt;</code> are different names.</li>
+            <li><strong>Attribute values must be quoted</strong>: <code>id="123"</code> (not <code>id=123</code>).</li>
+            <li><strong>Reserved characters must be escaped</strong> in text/attributes: <code>&lt;</code>, <code>&amp;</code>, etc.</li>
+          </ul>
+          <div class="codeblock">
+            <pre><code>&lt;root&gt;
+  &lt;a&gt;
+    &lt;b/&gt;
+  &lt;/a&gt;
+&lt;/root&gt;</code></pre>
+          </div>
+          <p>If any of these are violated, an XML parser will fail before you can even run XPath on it.</p>
+        </div>
+      </section>
+
+      <!-- Q2 -->
+      <section class="card" data-level="basic" data-q="2">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XML modeling</span>
+        </div>
+        <h2>Q2) Elements vs Attributes: when should you use each?</h2>
+        <div class="prompt">
+          <p>Give practical rules of thumb for modeling data as an element vs an attribute.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>Both store information, but they behave differently in XML tooling and XPath.</p>
+          <ul>
+            <li><strong>Use elements</strong> for structured data, repeated values, large text, or data that may need nested parts.</li>
+            <li><strong>Use attributes</strong> for short metadata or identifiers that describe an element (IDs, flags, simple codes).</li>
+          </ul>
+          <p>Examples:</p>
+          <div class="codeblock">
+            <pre><code>&lt;book id="b2" category="WEB"&gt;
+  &lt;title lang="en"&gt;Learning XML&lt;/title&gt;
+  &lt;price currency="USD"&gt;39.95&lt;/price&gt;
+&lt;/book&gt;</code></pre>
+          </div>
+          <p>
+            Here, <code>@id</code> and <code>@category</code> are metadata (good as attributes), while <code>&lt;title&gt;</code> and
+            <code>&lt;price&gt;</code> are content (good as elements).
+          </p>
+        </div>
+      </section>
+
+      <!-- Q3 -->
+      <section class="card" data-level="basic" data-q="3">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">Escaping</span>
+        </div>
+        <h2>Q3) How do you represent <code>&lt;</code>, <code>&amp;</code>, and quotes inside XML?</h2>
+        <div class="prompt">
+          <p>Show the correct escaping (entities) for reserved characters in XML text and attributes.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>XML reserves some characters for markup, so you must escape them when they appear as data:</p>
+          <ul>
+            <li><code>&amp;lt;</code> for <code>&lt;</code></li>
+            <li><code>&amp;gt;</code> for <code>&gt;</code></li>
+            <li><code>&amp;amp;</code> for <code>&amp;</code></li>
+            <li><code>&amp;quot;</code> for <code>"</code> (inside double-quoted attributes)</li>
+            <li><code>&amp;apos;</code> for <code>'</code> (inside single-quoted attributes)</li>
+          </ul>
+          <div class="codeblock">
+            <pre><code>&lt;msg&gt;Use &amp;lt; and &amp;amp; in XML.&lt;/msg&gt;
+&lt;item note="He said &amp;quot;hello&amp;quot;"/&gt;</code></pre>
+          </div>
+          <p>Common bug: forgetting to escape <code>&amp;</code> inside URLs in attributes.</p>
+        </div>
+      </section>
+
+      <!-- Q4 -->
+      <section class="card" data-level="basic" data-q="4">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">CDATA</span>
+        </div>
+        <h2>Q4) What is a CDATA section, and when is it useful?</h2>
+        <div class="prompt">
+          <p>Explain CDATA and give an example where it helps (e.g., embedding HTML/JS snippets).</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>
+            CDATA tells the parser: “treat everything inside as text, not markup.”
+            It’s handy when you want to include characters like <code>&lt;</code> and <code>&amp;</code> without escaping them.
+          </p>
+          <div class="codeblock">
+            <pre><code>&lt;script&gt;&lt;![CDATA[
+  if (a &lt; b &amp;&amp; c &gt; d) { console.log("ok"); }
+]]&gt;&lt;/script&gt;</code></pre>
+          </div>
+          <ul>
+            <li>Inside CDATA, <code>&lt;</code> and <code>&amp;</code> do not need escaping.</li>
+            <li>You <strong>cannot</strong> include the sequence <code>]]&gt;</code> inside CDATA (it ends the section).</li>
+            <li>XPath still sees this content as a <strong>text node</strong> of the element.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Q5 -->
+      <section class="card" data-level="basic" data-q="5">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">Namespaces</span>
+        </div>
+        <h2>Q5) What are XML namespaces, and why do we need them?</h2>
+        <div class="prompt">
+          <p>Explain how namespaces prevent name collisions, and show prefix + default namespace examples.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>
+            Namespaces let you distinguish elements/attributes that share the same local name but belong to different vocabularies.
+            They do this by associating a name with a URI (a unique identifier).
+          </p>
+          <div class="codeblock">
+            <pre><code>&lt;root xmlns:h="http://example.com/html"
+      xmlns:f="http://example.com/finance"&gt;
+  &lt;h:table&gt;...&lt;/h:table&gt;
+  &lt;f:table&gt;...&lt;/f:table&gt;
+&lt;/root&gt;</code></pre>
+          </div>
+          <p>Default namespace example (no prefix):</p>
+          <div class="codeblock">
+            <pre><code>&lt;catalog xmlns="http://example.com/catalog"&gt;
+  &lt;product id="p1"/&gt;
+&lt;/catalog&gt;</code></pre>
+          </div>
+          <p>
+            <strong>Important for XPath:</strong> XPath expressions must use prefixes that are bound by the host environment.
+            Even if your XML uses a default namespace, your XPath usually needs a prefix (see later questions).
+          </p>
+        </div>
+      </section>
+
+      <!-- Q6 -->
+      <section class="card" data-level="basic" data-q="6">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">Syntax</span>
+        </div>
+        <h2>Q6) XML comments: what are the rules and common pitfalls?</h2>
+        <div class="prompt">
+          <p>Give the syntax and at least two constraints that often break parsers.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>Comment syntax:</p>
+          <div class="codeblock">
+            <pre><code>&lt;!-- This is a comment --&gt;</code></pre>
+          </div>
+          <p>Key rules/pitfalls:</p>
+          <ul>
+            <li>Comments <strong>cannot contain</strong> <code>--</code> inside them.</li>
+            <li>Comments cannot end with a single hyphen (must end exactly with <code>--&gt;</code>).</li>
+            <li>Don’t use comments to “disable” partial markup unless you’re sure nested <code>--&gt;</code> won’t occur.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Q7 -->
+      <section class="card" data-level="basic" data-q="7">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">Processing Instructions</span>
+        </div>
+        <h2>Q7) What is an XML processing instruction (PI)?</h2>
+        <div class="prompt">
+          <p>Explain what a PI is used for, and show a real example you might see in the wild.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>
+            A processing instruction is a way to pass instructions to an application that processes the XML (not part of the data itself).
+            Syntax: <code>&lt;?target data?&gt;</code>.
+          </p>
+          <div class="codeblock">
+            <pre><code>&lt;?xml-stylesheet type="text/xsl" href="transform.xsl"?&gt;
+&lt;root&gt;...&lt;/root&gt;</code></pre>
+          </div>
+          <p>
+            XPath can select PIs using <code>processing-instruction()</code>, e.g. <code>//processing-instruction('xml-stylesheet')</code>.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q8 -->
+      <section class="card" data-level="basic" data-q="8">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">Validation</span>
+        </div>
+        <h2>Q8) DTD vs XSD: what’s the difference (practically)?</h2>
+        <div class="prompt">
+          <p>Compare DTD and XML Schema (XSD) in terms of type support and expressiveness.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <ul>
+            <li><strong>DTD</strong> is older, not written in XML, and has limited data types (mostly text and simple constraints).</li>
+            <li><strong>XSD</strong> is XML-based, supports rich types (integers, decimals, dates), namespaces, and more complex constraints.</li>
+          </ul>
+          <p>
+            In real projects, XSD is common when you need strict type validation and interoperability.
+            DTDs still appear in legacy docs and some publishing workflows.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q9 -->
+      <section class="card" data-level="basic" data-q="9">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q9) What are the main XPath node types, and why do <code>text()</code> vs <code>node()</code> matter?</h2>
+        <div class="prompt">
+          <p>Explain node types and the difference between selecting element nodes vs text nodes.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>Common XPath node types:</p>
+          <ul>
+            <li><strong>root node</strong> (the document node)</li>
+            <li><strong>element nodes</strong> (e.g., <code>&lt;book&gt;</code>)</li>
+            <li><strong>attribute nodes</strong> (e.g., <code>@id</code>)</li>
+            <li><strong>text nodes</strong> (the actual text inside elements)</li>
+            <li><strong>comment nodes</strong> and <strong>processing instructions</strong></li>
+          </ul>
+          <p>
+            <code>text()</code> selects only text nodes.
+            <code>node()</code> selects any node type (elements, text, comments, PIs).
+            This matters because in XPath, an element’s text content is not “the element” — it’s a child text node.
+          </p>
+          <div class="codeblock">
+            <pre><code>//title          (: element nodes :)
+ //title/text()   (: text nodes within title elements :)</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Q10 -->
+      <section class="card" data-level="basic" data-q="10">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q10) Absolute vs relative XPath, and <code>/</code> vs <code>//</code></h2>
+        <div class="prompt">
+          <p>Explain how <code>/</code> differs from <code>//</code>, and when each should be used.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <ul>
+            <li><strong>Absolute path</strong> starts from the root node (e.g., <code>/bookstore/book</code>).</li>
+            <li><strong>Relative path</strong> starts from the current context node (e.g., <code>book/title</code>).</li>
+          </ul>
+          <p><strong><code>/</code> (child step)</strong> means “direct child”.</p>
+          <p><strong><code>//</code> (descendant-or-self shortcut)</strong> means “any descendant at any depth”.</p>
+          <div class="codeblock">
+            <pre><code>/bookstore/book/title   (: exact structure :)
+ //title                 (: any title anywhere :)</code></pre>
+          </div>
+          <p>
+            Practical rule: prefer <code>/</code> when you know the structure (more precise, faster, fewer surprises).
+            Use <code>//</code> when the structure is unknown or intentionally flexible — but treat it as a “power tool.”
+          </p>
+        </div>
+      </section>
+
+      <div class="dividerTitle">B. XPath Fundamentals (Q11–Q20)</div>
+
+      <!-- Q11 -->
+      <section class="card" data-level="basic" data-q="11">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q11) Select all <code>&lt;book&gt;</code> elements under <code>&lt;bookstore&gt;</code></h2>
+        <div class="prompt">
+          <p>Given this XML:</p>
+          <div class="codeblock">
+            <pre><code>&lt;bookstore&gt;
+  &lt;book id="b1" category="COOKING"&gt;...&lt;/book&gt;
+  &lt;book id="b2" category="CHILDREN"&gt;...&lt;/book&gt;
+  &lt;book id="b3" category="WEB"&gt;...&lt;/book&gt;
+&lt;/bookstore&gt;</code></pre>
+          </div>
+          <p>Write an XPath that selects all <code>&lt;book&gt;</code> children of <code>&lt;bookstore&gt;</code>.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book">Copy</button>
+            <pre><code>/bookstore/book</code></pre>
+          </div>
+          <p>
+            This is an absolute path from the root to the <code>bookstore</code> element and then its direct children <code>book</code>.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q12 -->
+      <section class="card" data-level="basic" data-q="12">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q12) Select all <code>&lt;title&gt;</code> elements for every book</h2>
+        <div class="prompt">
+          <p>Using the same bookstore XML, write an XPath to select all <code>&lt;title&gt;</code> elements.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book/title">Copy</button>
+            <pre><code>/bookstore/book/title</code></pre>
+          </div>
+          <p>
+            This selects the <code>title</code> element nodes, not their text.
+            Many XPath consumers will stringify an element automatically, but it’s best to be explicit when needed.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q13 -->
+      <section class="card" data-level="basic" data-q="13">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q13) Select the text content of all titles</h2>
+        <div class="prompt">
+          <p>Write an XPath that returns the text nodes inside <code>&lt;title&gt;</code>.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book/title/text()">Copy</button>
+            <pre><code>/bookstore/book/title/text()</code></pre>
+          </div>
+          <p>
+            <code>text()</code> selects text nodes. If there can be mixed content (text + child elements), you may need
+            <code>string(title)</code> (XPath 1.0) or <code>string-join(title/text(), '')</code> (XPath 2.0+) to control concatenation.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q14 -->
+      <section class="card" data-level="basic" data-q="14">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q14) Select an attribute value (e.g., book ID)</h2>
+        <div class="prompt">
+          <p>Write an XPath that returns all <code>@id</code> attributes from book elements.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book/@id">Copy</button>
+            <pre><code>/bookstore/book/@id</code></pre>
+          </div>
+          <p>
+            In XPath, attributes are selected with <code>@</code>.
+            This returns attribute nodes (often displayed as their string values by tools).
+          </p>
+        </div>
+      </section>
+
+      <!-- Q15 -->
+      <section class="card" data-level="basic" data-q="15">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath predicates</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q15) Select books in a specific category (e.g., WEB)</h2>
+        <div class="prompt">
+          <p>Write an XPath that selects only books where <code>@category</code> equals <code>WEB</code>.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book[@category='WEB']">Copy</button>
+            <pre><code>/bookstore/book[@category='WEB']</code></pre>
+          </div>
+          <p>
+            The part in square brackets is a <strong>predicate</strong>, used to filter the node-set.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q16 -->
+      <section class="card" data-level="basic" data-q="16">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath numeric compare</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q16) Select books priced above 35</h2>
+        <div class="prompt">
+          <p>Given each book has <code>&lt;price&gt;39.95&lt;/price&gt;</code>, write an XPath to select books with price &gt; 35.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book[price &gt; 35]">Copy</button>
+            <pre><code>/bookstore/book[price &gt; 35]</code></pre>
+          </div>
+          <p>
+            XPath will convert the <code>price</code> element text to a number for comparison.
+            If your price includes currency symbols or commas, you’d need cleanup logic (XPath 2.0+ helps).
+          </p>
+        </div>
+      </section>
+
+      <!-- Q17 -->
+      <section class="card" data-level="basic" data-q="17">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath position</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q17) Select the 2nd book (indexing gotcha)</h2>
+        <div class="prompt">
+          <p>Write an XPath that selects the second <code>&lt;book&gt;</code> element. Mention whether XPath uses 0-based or 1-based indexing.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book[2]">Copy</button>
+            <pre><code>/bookstore/book[2]</code></pre>
+          </div>
+          <p>
+            XPath positions are <strong>1-based</strong> (the first node is position <code>1</code>).
+            So <code>[2]</code> means “the second book”.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q18 -->
+      <section class="card" data-level="basic" data-q="18">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath functions</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q18) Select the last book</h2>
+        <div class="prompt">
+          <p>Write an XPath to select the last <code>&lt;book&gt;</code> under <code>&lt;bookstore&gt;</code>.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book[last()]">Copy</button>
+            <pre><code>/bookstore/book[last()]</code></pre>
+          </div>
+          <p>
+            <code>last()</code> returns the position of the last node in the current node-set.
+            This is common in web scraping and config extraction.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q19 -->
+      <section class="card" data-level="basic" data-q="19">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath union</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q19) Select both titles and prices with one XPath</h2>
+        <div class="prompt">
+          <p>Write an XPath that returns all <code>&lt;title&gt;</code> and <code>&lt;price&gt;</code> elements from the bookstore.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book/title | /bookstore/book/price">Copy</button>
+            <pre><code>/bookstore/book/title | /bookstore/book/price</code></pre>
+          </div>
+          <p>
+            The union operator <code>|</code> combines two node-sets. The result is de-duplicated and returned in document order.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q20 -->
+      <section class="card" data-level="basic" data-q="20">
+        <div class="meta">
+          <span class="badge level-basic">Basic</span>
+          <span class="badge">XPath wildcards</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q20) Select all attributes on all books</h2>
+        <div class="prompt">
+          <p>Write an XPath that selects every attribute node of every <code>&lt;book&gt;</code> element.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book/@*">Copy</button>
+            <pre><code>/bookstore/book/@*</code></pre>
+          </div>
+          <p><code>@*</code> is a wildcard node test meaning “all attributes”.</p>
+        </div>
+      </section>
+
+      <div class="dividerTitle">C. Intermediate XPath (Axes, Predicates, Robust Matching) (Q21–Q30)</div>
+
+      <!-- Q21 -->
+      <section class="card" data-level="intermediate" data-q="21">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">XPath</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q21) Select orders that contain a specific item SKU</h2>
+        <div class="prompt">
+          <p>Given this XML:</p>
+          <div class="codeblock">
+            <pre><code>&lt;orders&gt;
+  &lt;order id="o100" status="shipped"&gt;
+    &lt;items&gt;
+      &lt;item sku="A1"/&gt;
+      &lt;item sku="B2"/&gt;
+    &lt;/items&gt;
+  &lt;/order&gt;
+  &lt;order id="o101" status="pending"&gt;
+    &lt;items&gt;
+      &lt;item sku="C3"/&gt;
+    &lt;/items&gt;
+  &lt;/order&gt;
+&lt;/orders&gt;</code></pre>
+          </div>
+          <p>Write an XPath to select <strong>order elements</strong> that contain an item with <code>@sku='B2'</code>.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/orders/order[.//item[@sku='B2']]">Copy</button>
+            <pre><code>/orders/order[.//item[@sku='B2']]</code></pre>
+          </div>
+          <p>
+            Inside the predicate, <code>.//item[@sku='B2']</code> means “within this order, does any descendant item have sku B2?”.
+            If the node-set is non-empty, the predicate is true and the order is kept.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q22 -->
+      <section class="card" data-level="intermediate" data-q="22">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">Numeric filtering</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q22) Select items where quantity is greater than 1</h2>
+        <div class="prompt">
+          <p>Given items like:</p>
+          <div class="codeblock">
+            <pre><code>&lt;item sku="B2"&gt;
+  &lt;name&gt;Mouse&lt;/name&gt;
+  &lt;qty&gt;2&lt;/qty&gt;
+&lt;/item&gt;</code></pre>
+          </div>
+          <p>Write an XPath that selects item elements with <code>&lt;qty&gt;</code> &gt; 1.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="//item[qty &gt; 1]">Copy</button>
+            <pre><code>//item[qty &gt; 1]</code></pre>
+          </div>
+          <p>
+            <code>qty</code> is a child element of <code>item</code>. XPath converts its string value to a number in this comparison.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q23 -->
+      <section class="card" data-level="intermediate" data-q="23">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">Axes</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q23) Use <code>following-sibling</code> to select “the next item”</h2>
+        <div class="prompt">
+          <p>In a list of sibling items, write an XPath that selects the item immediately after the one whose name is <code>Keyboard</code>.</p>
+          <div class="codeblock">
+            <pre><code>&lt;items&gt;
+  &lt;item&gt;&lt;name&gt;Keyboard&lt;/name&gt;&lt;/item&gt;
+  &lt;item&gt;&lt;name&gt;Mouse&lt;/name&gt;&lt;/item&gt;
+  &lt;item&gt;&lt;name&gt;Monitor&lt;/name&gt;&lt;/item&gt;
+&lt;/items&gt;</code></pre>
+          </div>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="//item[name='Keyboard']/following-sibling::item[1]">Copy</button>
+            <pre><code>//item[name='Keyboard']/following-sibling::item[1]</code></pre>
+          </div>
+          <p>
+            <code>following-sibling::item</code> selects item siblings after the current item.
+            The predicate <code>[1]</code> picks the first one — i.e., “the next item”.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q24 -->
+      <section class="card" data-level="intermediate" data-q="24">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">Axes</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q24) From an item node, select its ancestor order’s ID</h2>
+        <div class="prompt">
+          <p>Write an XPath that finds the <code>@id</code> of the <code>&lt;order&gt;</code> that contains an item with <code>@sku='C3'</code>.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="//item[@sku='C3']/ancestor::order/@id">Copy</button>
+            <pre><code>//item[@sku='C3']/ancestor::order/@id</code></pre>
+          </div>
+          <p>
+            <code>ancestor::order</code> climbs up the tree until it finds an ancestor element named <code>order</code>.
+            Then <code>/@id</code> selects its ID attribute.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q25 -->
+      <section class="card" data-level="intermediate" data-q="25">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">Context precision</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q25) Select items only from shipped orders</h2>
+        <div class="prompt">
+          <p>Write an XPath that selects all <code>&lt;item&gt;</code> elements where the containing order has <code>@status='shipped'</code>.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/orders/order[@status='shipped']//item">Copy</button>
+            <pre><code>/orders/order[@status='shipped']//item</code></pre>
+          </div>
+          <p>
+            This is a common “scope first, then search” pattern: first select the right parent nodes,
+            then select descendants. It avoids accidentally selecting items from other orders.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q26 -->
+      <section class="card" data-level="intermediate" data-q="26">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">Predicates</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q26) Select customers whose tier is “gold” (element value filter)</h2>
+        <div class="prompt">
+          <p>Given:</p>
+          <div class="codeblock">
+            <pre><code>&lt;customer id="c1"&gt;
+  &lt;name&gt;Anil&lt;/name&gt;
+  &lt;tier&gt;gold&lt;/tier&gt;
+&lt;/customer&gt;</code></pre>
+          </div>
+          <p>Write an XPath that returns the customer name for customers in the gold tier.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="//customer[tier='gold']/name/text()">Copy</button>
+            <pre><code>//customer[tier='gold']/name/text()</code></pre>
+          </div>
+          <p>
+            The predicate <code>[tier='gold']</code> checks for a child element <code>tier</code> whose string value is <code>gold</code>.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q27 -->
+      <section class="card" data-level="intermediate" data-q="27">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">not()</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q27) Select orders that are <em>not</em> shipped</h2>
+        <div class="prompt">
+          <p>Write an XPath to select all orders where <code>@status</code> is not <code>shipped</code>.</p>
+          <p>Also: explain why <code>@status!='shipped'</code> can behave differently if the attribute is missing.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/orders/order[not(@status='shipped')]">Copy</button>
+            <pre><code>/orders/order[not(@status='shipped')]</code></pre>
+          </div>
+          <p>
+            <code>not(@status='shipped')</code> is explicit: it is true if the status is missing <em>or</em> present but not shipped.
+          </p>
+          <p>
+            In XPath 1.0, <code>@status!='shipped'</code> can be tricky because comparisons against an empty node-set
+            don’t behave like typical SQL null comparisons. Using <code>not()</code> is usually clearer and safer.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q28 -->
+      <section class="card" data-level="intermediate" data-q="28">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">Attribute existence</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q28) Select all elements that have an <code>id</code> attribute</h2>
+        <div class="prompt">
+          <p>Write an XPath that selects every element in the document that has <code>@id</code> (anywhere, any depth).</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="//*[@id]">Copy</button>
+            <pre><code>//*[@id]</code></pre>
+          </div>
+          <p>
+            <code>*</code> matches any element name, and the predicate <code>[@id]</code> means “has an <code>id</code> attribute”.
+            This is a handy audit/debug XPath.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q29 -->
+      <section class="card" data-level="intermediate" data-q="29">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">Text normalization</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q29) Select non-empty text nodes (ignore whitespace-only nodes)</h2>
+        <div class="prompt">
+          <p>XML often includes indentation/newlines that appear as whitespace text nodes. Write an XPath that selects only text nodes that have non-whitespace content.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="//text()[normalize-space()]">Copy</button>
+            <pre><code>//text()[normalize-space()]</code></pre>
+          </div>
+          <p>
+            <code>normalize-space()</code> trims and collapses whitespace. If the result is a non-empty string, the predicate is true.
+            This is extremely practical when extracting text from pretty-printed XML.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q30 -->
+      <section class="card" data-level="intermediate" data-q="30">
+        <div class="meta">
+          <span class="badge level-intermediate">Intermediate</span>
+          <span class="badge">Counting</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q30) Select books that have at least 2 authors</h2>
+        <div class="prompt">
+          <p>Given a book may have multiple <code>&lt;author&gt;</code> elements, write an XPath to select books where the number of authors is ≥ 2.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book[count(author) &gt;= 2]">Copy</button>
+            <pre><code>/bookstore/book[count(author) &gt;= 2]</code></pre>
+          </div>
+          <p>
+            <code>count(author)</code> counts child <code>author</code> elements.
+            This is a common pattern for data quality checks (“must have at least N values”).
+          </p>
+        </div>
+      </section>
+
+      <div class="dividerTitle">D. Advanced & Practical XPath (Namespaces, Gotchas, Aggregations, XPath 2.0+) (Q31–Q40)</div>
+
+      <!-- Q31 -->
+      <section class="card" data-level="advanced" data-q="31">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">Namespaces</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q31) Namespaced SOAP: select the SOAP Body element</h2>
+        <div class="prompt">
+          <p>Given:</p>
+          <div class="codeblock">
+            <pre><code>&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:m="http://example.com/messages"&gt;
+  &lt;soapenv:Header/&gt;
+  &lt;soapenv:Body&gt;
+    &lt;m:GetPrice&gt;
+      &lt;m:Item sku="A1"/&gt;
+    &lt;/m:GetPrice&gt;
+  &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;</code></pre>
+          </div>
+          <p>Write an XPath that selects the <code>Body</code> element.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+
+          <p><strong>Preferred (when your XPath engine lets you bind namespaces):</strong></p>
+          <div class="codeblock">
+            <button class="copy" data-copy="/soapenv:Envelope/soapenv:Body">Copy</button>
+            <pre><code>/soapenv:Envelope/soapenv:Body</code></pre>
+          </div>
+
+          <p>
+            <strong>Why this works:</strong> In XPath, prefixes are resolved by the host environment (your XPath evaluator),
+            not by the XML document itself. You must bind <code>soapenv</code> → <code>http://schemas.xmlsoap.org/soap/envelope/</code>
+            in the XPath context.
+          </p>
+
+          <p><strong>Fallback (works without namespace bindings, but less ideal):</strong></p>
+          <div class="codeblock">
+            <button class="copy" data-copy="/*[local-name()='Envelope']/*[local-name()='Body']">Copy</button>
+            <pre><code>/*[local-name()='Envelope']/*[local-name()='Body']</code></pre>
+          </div>
+          <p>
+            This ignores namespaces using <code>local-name()</code>. Use it when you truly cannot bind namespaces,
+            but prefer proper prefix binding when possible (more precise).
+          </p>
+        </div>
+      </section>
+
+      <!-- Q32 -->
+      <section class="card" data-level="advanced" data-q="32">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">Default namespace gotcha</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q32) Default namespace: why does <code>//product</code> return nothing?</h2>
+        <div class="prompt">
+          <p>Given XML with a default namespace:</p>
+          <div class="codeblock">
+            <pre><code>&lt;catalog xmlns="http://example.com/catalog"&gt;
+  &lt;product id="p1"/&gt;
+  &lt;product id="p2"/&gt;
+&lt;/catalog&gt;</code></pre>
+          </div>
+          <p>1) Why does <code>//product</code> often return no matches?<br/>2) Provide the correct XPath.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>
+            1) Because <code>product</code> is in the namespace <code>http://example.com/catalog</code>.
+            In XPath, an unprefixed name matches elements in <strong>no namespace</strong> (unless your engine has special rules).
+          </p>
+          <p>2) Bind a prefix (e.g., <code>c</code>) to that namespace in your XPath engine, then:</p>
+          <div class="codeblock">
+            <button class="copy" data-copy="//c:product">Copy</button>
+            <pre><code>//c:product</code></pre>
+          </div>
+          <p>
+            If you can’t bind namespaces, the fallback is <code>//*[local-name()='product']</code>, but that can match unintended nodes.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q33 -->
+      <section class="card" data-level="advanced" data-q="33">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">Robust namespace match</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q33) Match by both local-name and namespace-uri (robust but verbose)</h2>
+        <div class="prompt">
+          <p>Write an XPath that matches <code>soapenv:Body</code> even if the prefix changes in the XML (e.g., <code>env:Body</code>).</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/*[local-name()='Envelope' and namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/']/*[local-name()='Body' and namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/']">Copy</button>
+            <pre><code>/*[local-name()='Envelope' and namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/']
+  /*[local-name()='Body' and namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/']</code></pre>
+          </div>
+          <p>
+            This is the “prefix-independent” approach: it checks the local name and the namespace URI.
+            It’s verbose but can be useful when you receive XML from multiple sources using different prefixes.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q34 -->
+      <section class="card" data-level="advanced" data-q="34">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">String matching</span>
+          <span class="badge ver1">XPath 1.0</span>
+        </div>
+        <h2>Q34) Case-insensitive match in XPath 1.0 (no regex, no lower-case())</h2>
+        <div class="prompt">
+          <p>Write an XPath 1.0 expression that selects the book whose title is “Harry Potter”, ignoring case and extra whitespace.</p>
+          <p>(Assume titles are plain text nodes.)</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book[translate(normalize-space(title),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='harry potter']">Copy</button>
+            <pre><code>/bookstore/book[
+  translate(normalize-space(title),
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            'abcdefghijklmnopqrstuvwxyz')
+  = 'harry potter'
+]</code></pre>
+          </div>
+          <p>
+            XPath 1.0 lacks <code>lower-case()</code>. The classic workaround is <code>translate()</code>:
+            map uppercase letters to lowercase, then compare.
+          </p>
+          <p>
+            <code>normalize-space(title)</code> trims and collapses whitespace so “  Harry   Potter ” still matches.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q35 -->
+      <section class="card" data-level="advanced" data-q="35">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">XPath gotcha</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q35) The classic gotcha: <code>//book[1]</code> vs <code>(//book)[1]</code></h2>
+        <div class="prompt">
+          <p>Explain the difference and what each one returns.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p>
+            These look similar but behave differently because predicates apply to different node-sets:
+          </p>
+          <div class="codeblock">
+            <pre><code>//book[1]     (: first book child under EACH parent, at every level :)
+(//book)[1]   (: the first book in the entire document order :)</code></pre>
+          </div>
+          <ul>
+            <li><code>//book[1]</code> means: find all <code>book</code> elements that are the first <code>book</code> child of their parent.</li>
+            <li><code>(//book)[1]</code> means: find all <code>book</code> elements anywhere, then pick the first in document order.</li>
+          </ul>
+          <p>
+            Practical takeaway: if you mean “the first match overall,” use parentheses.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q36 -->
+      <section class="card" data-level="advanced" data-q="36">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">Aggregation</span>
+          <span class="badge ver1">XPath 1.0+</span>
+        </div>
+        <h2>Q36) Select books priced above the average price</h2>
+        <div class="prompt">
+          <p>Write an XPath that selects <code>&lt;book&gt;</code> elements with <code>price</code> greater than the average of all book prices.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <p><strong>XPath 1.0-compatible approach:</strong></p>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book[price &gt; (sum(/bookstore/book/price) div count(/bookstore/book/price))]">Copy</button>
+            <pre><code>/bookstore/book[
+  price &gt; (sum(/bookstore/book/price) div count(/bookstore/book/price))
+]</code></pre>
+          </div>
+          <p>
+            <code>sum(...)</code> adds all <code>&lt;price&gt;</code> values; <code>count(...)</code> counts them.
+            Divide to get the average, then compare each book’s price to that average.
+          </p>
+          <p>
+            This is a nice “advanced practical” example because it uses global aggregation inside a predicate.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q37 -->
+      <section class="card" data-level="advanced" data-q="37">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">Regex</span>
+          <span class="badge ver2">XPath 2.0+</span>
+        </div>
+        <h2>Q37) Regex matching with <code>matches()</code> (XPath 2.0+)</h2>
+        <div class="prompt">
+          <p>Write an XPath that selects books whose title contains “xml” (case-insensitive).</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/bookstore/book[matches(title, 'xml', 'i')]">Copy</button>
+            <pre><code>/bookstore/book[matches(title, 'xml', 'i')]</code></pre>
+          </div>
+          <p>
+            XPath 2.0 adds <code>matches()</code> for regex matching.
+            The third argument <code>'i'</code> means case-insensitive.
+          </p>
+          <p>
+            In XPath 1.0 you’d typically use <code>contains(translate(...), 'xml')</code>.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q38 -->
+      <section class="card" data-level="advanced" data-q="38">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">Distinct values</span>
+          <span class="badge ver2">XPath 2.0+</span>
+        </div>
+        <h2>Q38) Return a list of unique categories (XPath 2.0+)</h2>
+        <div class="prompt">
+          <p>Write an XPath that returns distinct category values from <code>@category</code> attributes on books.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="distinct-values(/bookstore/book/@category)">Copy</button>
+            <pre><code>distinct-values(/bookstore/book/@category)</code></pre>
+          </div>
+          <p>
+            <code>distinct-values()</code> is XPath 2.0+. It’s practical for reporting, validation, and building UI filters.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q39 -->
+      <section class="card" data-level="advanced" data-q="39">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">String-join</span>
+          <span class="badge ver2">XPath 2.0+</span>
+        </div>
+        <h2>Q39) Build a comma-separated SKU list (XPath 2.0+)</h2>
+        <div class="prompt">
+          <p>Write an XPath that returns a single string like <code>A1, B2, C3</code> from all item SKUs in the document.</p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="string-join(distinct-values(//item/@sku), ', ')">Copy</button>
+            <pre><code>string-join(distinct-values(//item/@sku), ', ')</code></pre>
+          </div>
+          <p>
+            This uses two XPath 2.0+ functions:
+            <code>distinct-values()</code> (unique SKUs) and <code>string-join()</code> (join into one string).
+          </p>
+          <p>
+            Practical use: quickly generate a summary string for logging, reports, or UI.
+          </p>
+        </div>
+      </section>
+
+      <!-- Q40 -->
+      <section class="card" data-level="advanced" data-q="40">
+        <div class="meta">
+          <span class="badge level-advanced">Advanced</span>
+          <span class="badge">Quantifiers</span>
+          <span class="badge ver2">XPath 2.0+</span>
+        </div>
+        <h2>Q40) Find orders containing duplicate SKUs (XPath 2.0+)</h2>
+        <div class="prompt">
+          <p>
+            In an order, the same SKU might appear multiple times (data issue or split lines).
+            Write an XPath that selects orders where any SKU appears more than once in <code>items/item/@sku</code>.
+          </p>
+        </div>
+        <button class="toggle" type="button" aria-expanded="false">Show answer</button>
+        <div class="answer" hidden>
+          <h3>Answer + Explanation</h3>
+          <div class="codeblock">
+            <button class="copy" data-copy="/orders/order[some $s in distinct-values(items/item/@sku) satisfies count(items/item[@sku=$s]) &gt; 1]">Copy</button>
+            <pre><code>/orders/order[
+  some $s in distinct-values(items/item/@sku)
+  satisfies count(items/item[@sku=$s]) &gt; 1
+]</code></pre>
+          </div>
+          <p>
+            This is a very practical “advanced validation” XPath:
+          </p>
+          <ul>
+            <li><code>distinct-values(items/item/@sku)</code> gives unique SKUs in the order.</li>
+            <li><code>some $s ... satisfies</code> means “there exists an SKU <code>$s</code> such that …”.</li>
+            <li><code>count(items/item[@sku=$s]) &gt; 1</code> checks duplicates.</li>
+          </ul>
+          <p>Note: quantifiers (<code>some</code>/<code>every</code>) are XPath 2.0+ features.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <p class="footer">
+      LVTMagus questions & answers
+    </p>
+  </div>
+
+  <script>
+    const search = document.getElementById('search');
+    const cards = Array.from(document.querySelectorAll('.card'));
+    const checks = Array.from(document.querySelectorAll('.levelCheck'));
+    const count = document.getElementById('count');
+    const revealAllBtn = document.getElementById('revealAll');
+    const hideAllBtn = document.getElementById('hideAll');
+
+    function setCardAnswer(card, show){
+      const btn = card.querySelector('.toggle');
+      const ans = card.querySelector('.answer');
+      if(!btn || !ans) return;
+      if(show){
+        ans.removeAttribute('hidden');
+        btn.textContent = 'Hide answer';
+        btn.setAttribute('aria-expanded', 'true');
+      }else{
+        ans.setAttribute('hidden','');
+        btn.textContent = 'Show answer';
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    // Toggle per-card
+    cards.forEach(card => {
+      const btn = card.querySelector('.toggle');
+      const ans = card.querySelector('.answer');
+      if(!btn || !ans) return;
+
+      btn.addEventListener('click', () => {
+        const isHidden = ans.hasAttribute('hidden');
+        setCardAnswer(card, isHidden);
+      });
+    });
+
+    // Copy buttons
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.copy');
+      if(!btn) return;
+      const text = btn.getAttribute('data-copy') || '';
+      try{
+        await navigator.clipboard.writeText(text);
+        const old = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = old, 900);
+      }catch(err){
+        alert('Copy failed (browser permissions). Select the text and copy manually.');
+      }
+    });
+
+    // Filtering
+    function filter(){
+      const q = (search.value || '').trim().toLowerCase();
+      const levels = checks.filter(c => c.checked).map(c => c.value);
+      let shown = 0;
+
+      cards.forEach(card => {
+        const levelOk = levels.includes(card.dataset.level);
+        const textOk = !q || (card.innerText || '').toLowerCase().includes(q);
+        const visible = levelOk && textOk;
+
+        card.style.display = visible ? '' : 'none';
+        if(visible) shown++;
+      });
+
+      count.textContent = `Showing ${shown} of ${cards.length} questions`;
+    }
+
+    search.addEventListener('input', filter);
+    checks.forEach(c => c.addEventListener('change', filter));
+
+    revealAllBtn.addEventListener('click', () => {
+      cards.forEach(c => { if(c.style.display !== 'none') setCardAnswer(c, true); });
+    });
+
+    hideAllBtn.addEventListener('click', () => {
+      cards.forEach(c => setCardAnswer(c, false));
+    });
+
+    // Initial
+    filter();
+  </script>
+</body>
+</html>
