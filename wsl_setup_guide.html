@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WSL2 Setup Guide (Ubuntu) — Linux Command Practice for EDI/MFT</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#111827;
+      --muted:#4b5563;
+      --card:#f9fafb;
+      --border:#e5e7eb;
+      --codebg:#0b1020;
+      --code:#e5e7eb;
+      --accent:#2563eb;
+      --warnbg:#fff7ed;
+      --warnborder:#fdba74;
+      --notebg:#eff6ff;
+      --noteborder:#93c5fd;
+      --tipbg:#ecfdf5;
+      --tipborder:#6ee7b7;
+      --dangerbg:#fef2f2;
+      --dangerborder:#fecaca;
+    }
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      line-height:1.55;
+    }
+    header{
+      padding: 28px 18px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+    header .wrap, main .wrap, footer .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    h1{ margin:0 0 8px 0; font-size: 28px; line-height:1.15;}
+    .subtitle{ color:var(--muted); margin:0; }
+    .meta{ margin-top:12px; color:var(--muted); font-size: 14px;}
+    nav.toc{
+      margin-top: 18px;
+      padding: 14px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    nav.toc a{ color: var(--accent); text-decoration: none; }
+    nav.toc a:hover{ text-decoration: underline; }
+    nav.toc ul{ margin: 10px 0 0 18px; }
+    main{
+      padding: 22px 18px 40px 18px;
+    }
+    h2{ margin-top: 34px; font-size: 22px; }
+    h3{ margin-top: 22px; font-size: 18px; }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .callout{
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin: 14px 0;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+    .callout.note{ background: var(--notebg); border-color: var(--noteborder); }
+    .callout.tip{ background: var(--tipbg); border-color: var(--tipborder); }
+    .callout.warn{ background: var(--warnbg); border-color: var(--warnborder); }
+    .callout.danger{ background: var(--dangerbg); border-color: var(--dangerborder); }
+    .callout strong{ display:inline-block; margin-bottom: 4px; }
+    code.inline{
+      background:#f3f4f6;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0 6px;
+      font-size: 0.95em;
+    }
+    pre{
+      background: var(--codebg);
+      color: var(--code);
+      border-radius: 12px;
+      padding: 12px 12px;
+      overflow:auto;
+      position: relative;
+      border: 1px solid #111827;
+    }
+    pre code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      display: block;
+      white-space: pre;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.95em;
+      background:#f3f4f6;
+      border:1px solid var(--border);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 1px 6px;
+    }
+    .btn{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:#ffffff;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    .btn:hover{ border-color:#cbd5e1; }
+    .copybtn{
+      position:absolute;
+      right:10px;
+      top:10px;
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 9px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(229,231,235,0.25);
+      color: #e5e7eb;
+    }
+    .copybtn:hover{ background: rgba(255,255,255,0.14); }
+    ol.steps{
+      padding-left: 22px;
+    }
+    ol.steps > li{
+      margin: 10px 0 16px 0;
+    }
+    .checklist{
+      list-style: none;
+      padding-left: 0;
+      margin: 12px 0;
+    }
+    .checklist li{
+      display:flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin: 8px 0;
+    }
+    .checklist input{ margin-top: 3px; }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+    th, td{
+      border:1px solid var(--border);
+      padding: 10px 10px;
+      text-align:left;
+      vertical-align: top;
+    }
+    th{
+      background:#f3f4f6;
+    }
+    details{
+      border:1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background:#ffffff;
+      margin: 10px 0;
+    }
+    details summary{
+      cursor:pointer;
+      font-weight: 600;
+    }
+    footer{
+      border-top: 1px solid var(--border);
+      padding: 18px 18px 30px 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .muted{ color: var(--muted); }
+    .tag{
+      display:inline-block;
+      background:#eef2ff;
+      color:#3730a3;
+      border: 1px solid #c7d2fe;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <h1>Step-by-step WSL2 Setup (Ubuntu) — Linux Command Practice for EDI/MFT</h1>
+    <p class="subtitle">A beginner-friendly guide to install <strong>WSL2 + Ubuntu</strong> on Windows and create a safe lab workspace to practice Linux commands for EDI / Managed File Transfer operations.</p>
+    <p class="meta">
+      Estimated time: <strong>25–45 minutes</strong> (depends on download speed).<br/>
+      Recommended for: <strong>Windows 11</strong> or <strong>Windows 10</strong> with a recent build.
+    </p>
+
+    <nav class="toc" aria-label="Table of contents">
+      <strong>Contents</strong>
+      <ul>
+        <li><a href="#prereq">Prerequisites & pre-checks</a></li>
+        <li><a href="#install">Install WSL2 + Ubuntu</a></li>
+        <li><a href="#firstlaunch">First launch setup</a></li>
+        <li><a href="#updates">Update Ubuntu packages</a></li>
+        <li><a href="#terminal">Optional: Improve your terminal (Windows Terminal)</a></li>
+        <li><a href="#lab">Create your Linux practice workspace (mft-lab)</a></li>
+        <li><a href="#files">Windows ↔ Linux file access ( /mnt/c and \\\\wsl$ )</a></li>
+        <li><a href="#tools">Optional tools for command practice</a></li>
+        <li><a href="#validate">Validation checklist (make sure everything works)</a></li>
+        <li><a href="#troubleshoot">Common issues & fixes</a></li>
+        <li><a href="#next">Next steps: practice essential Linux commands</a></li>
+        <li><a href="#refs">References</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <section id="prereq">
+      <h2>Prerequisites & pre-checks</h2>
+
+      <div class="card">
+        <h3>What you need</h3>
+        <ul>
+          <li>A Windows laptop/desktop (Windows 11 recommended).</li>
+          <li>Internet access to download Ubuntu + updates.</li>
+          <li><strong>Administrator access</strong> (or help from IT) to install WSL features.</li>
+        </ul>
+      </div>
+
+      <div class="callout note">
+        <strong>Why WSL2?</strong><br/>
+        WSL2 uses a lightweight virtualization backend, offering better Linux compatibility and a realistic environment for EDI/MFT tasks (SSH/SFTP tools, scripts, logs, permissions).
+      </div>
+
+      <h3>Pre-check 1: Confirm your Windows version</h3>
+      <p>
+        WSL install commands are supported on <strong>Windows 10 version 2004+</strong> (Build 19041+) or <strong>Windows 11</strong>.
+      </p>
+      <ol class="steps">
+        <li>Press <span class="kbd">Win</span> + <span class="kbd">R</span>, type <span class="kbd">winver</span>, press <span class="kbd">Enter</span>.</li>
+        <li>Confirm you are on Windows 11 or Windows 10 Build 19041 or later.</li>
+      </ol>
+
+      <h3>Pre-check 2: Confirm virtualization is enabled</h3>
+      <ol class="steps">
+        <li>Open <strong>Task Manager</strong> → <strong>Performance</strong> tab → <strong>CPU</strong>.</li>
+        <li>Look for <strong>Virtualization: Enabled</strong>.</li>
+      </ol>
+
+      <div class="callout warn">
+        <strong>If Virtualization shows “Disabled”</strong><br/>
+        You may need to enable virtualization in BIOS/UEFI (often called <em>Intel VT-x</em> or <em>AMD-V</em>). On corporate devices, this may require IT support.
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>Install WSL2 + Ubuntu</h2>
+
+      <h3>Step 1: Open PowerShell as Administrator</h3>
+      <ol class="steps">
+        <li>Click Start and search <strong>PowerShell</strong>.</li>
+        <li>Right-click <strong>Windows PowerShell</strong> → <strong>Run as administrator</strong>.</li>
+      </ol>
+
+      <h3>Step 2: Install WSL (and Ubuntu)</h3>
+      <p>In the Administrator PowerShell window, run:</p>
+
+      <pre><button class="copybtn" data-copy>Copy</button><code>wsl --install</code></pre>
+
+      <div class="callout tip">
+        <strong>What this does</strong><br/>
+        Enables required Windows features for WSL and installs a default Linux distribution (typically Ubuntu).
+      </div>
+
+      <div class="callout warn">
+        <strong>Restart required</strong><br/>
+        After installation, you will usually be prompted to restart Windows. Save your work and restart when prompted.
+      </div>
+
+      <h3>Step 3: Set WSL 2 as default (recommended)</h3>
+      <p>After restart, open PowerShell (Admin) again and run:</p>
+      <pre><button class="copybtn" data-copy>Copy</button><code>wsl --set-default-version 2</code></pre>
+
+      <h3>Step 4: Verify your installed distributions and WSL version</h3>
+      <pre><button class="copybtn" data-copy>Copy</button><code>wsl -l -v</code></pre>
+
+      <p class="muted">Example output (your distro name may differ):</p>
+      <pre><code>  NAME      STATE           VERSION
+* Ubuntu    Stopped         2</code></pre>
+
+      <div class="callout note">
+        <strong>If you see “VERSION 1”</strong><br/>
+        You can convert an existing distro to WSL2:
+        <pre><code>wsl --set-version Ubuntu 2</code></pre>
+      </div>
+
+      <details>
+        <summary>Optional: Install a specific distro (if Ubuntu didn’t install)</summary>
+        <p>List available distributions:</p>
+        <pre><button class="copybtn" data-copy>Copy</button><code>wsl --list --online</code></pre>
+        <p>Install Ubuntu explicitly:</p>
+        <pre><button class="copybtn" data-copy>Copy</button><code>wsl --install -d Ubuntu</code></pre>
+        <p class="muted">
+          If install hangs at 0.0%, try the web download option:
+        </p>
+        <pre><button class="copybtn" data-copy>Copy</button><code>wsl --install --web-download -d Ubuntu</code></pre>
+      </details>
+
+      <details>
+        <summary>Optional: Update WSL to the latest version</summary>
+        <p>Run in PowerShell (Admin):</p>
+        <pre><button class="copybtn" data-copy>Copy</button><code>wsl --update</code></pre>
+        <p class="muted">If instructed, restart Windows after updating.</p>
+      </details>
+    </section>
+
+    <section id="firstlaunch">
+      <h2>First launch setup</h2>
+      <h3>Step 5: Launch Ubuntu</h3>
+      <ol class="steps">
+        <li>Open the Windows Start Menu.</li>
+        <li>Search for <strong>Ubuntu</strong> and open it.</li>
+      </ol>
+
+      <p>On first launch, Ubuntu will finalize installation and then ask you to create:</p>
+      <ul>
+        <li>A Linux <strong>username</strong> (lowercase recommended, e.g., <code class="inline">anil</code>)</li>
+        <li>A Linux <strong>password</strong> (you won’t see characters while typing — that’s normal)</li>
+      </ul>
+
+      <div class="callout note">
+        <strong>Important</strong><br/>
+        Your Linux username/password is separate from your Windows login. You’ll use it when running <code class="inline">sudo</code> commands (admin tasks inside Ubuntu).
+      </div>
+
+      <h3>Step 6: Confirm Ubuntu is working</h3>
+      <p>In the Ubuntu terminal, run these commands:</p>
+
+      <pre><button class="copybtn" data-copy>Copy</button><code>uname -a
+cat /etc/os-release</code></pre>
+
+      <p class="muted">
+        Success looks like: you see Linux kernel info and Ubuntu version details without errors.
+      </p>
+    </section>
+
+    <section id="updates">
+      <h2>Update Ubuntu packages</h2>
+      <p>Keeping packages updated is standard industry practice (security + stability).</p>
+
+      <pre><button class="copybtn" data-copy>Copy</button><code>sudo apt update && sudo apt upgrade -y</code></pre>
+
+      <div class="callout tip">
+        <strong>If prompted</strong><br/>
+        Enter your Linux password. It will not display while typing — press Enter when done.
+      </div>
+    </section>
+
+    <section id="terminal">
+      <h2>Optional: Improve your terminal (Windows Terminal)</h2>
+      <p>
+        Windows Terminal makes it easier to work with multiple tabs (PowerShell + Ubuntu + logs) — very useful for MFT operations.
+      </p>
+
+      <ol class="steps">
+        <li>Install <strong>Windows Terminal</strong> from Microsoft Store (if not already installed).</li>
+        <li>Open Windows Terminal → choose the <strong>Ubuntu</strong> profile from the dropdown.</li>
+        <li>Increase font size for screen-sharing/training (recommended: 14–16+).</li>
+      </ol>
+
+      <div class="callout note">
+        <strong>MFT tip</strong><br/>
+        In real operations, you often monitor logs in one tab while running transfers/scripts in another.
+      </div>
+    </section>
+
+    <section id="lab">
+      <h2>Create your Linux practice workspace (mft-lab)</h2>
+      <p>
+        This creates a safe folder structure that mirrors real Managed File Transfer operations:
+        <code class="inline">inbound</code>, <code class="inline">outbound</code>, <code class="inline">archive</code>, <code class="inline">error</code>, <code class="inline">logs</code>, <code class="inline">scripts</code>.
+      </p>
+
+      <h3>Step 7: Create the folder structure</h3>
+      <pre><button class="copybtn" data-copy>Copy</button><code>mkdir -p ~/mft-lab/{inbound,outbound,archive,error,logs,scripts,sample-data}</code></pre>
+
+      <h3>Step 8: Create a training log entry and verify</h3>
+      <pre><button class="copybtn" data-copy>Copy</button><code>echo "$(date) - WSL lab initialized" >> ~/mft-lab/logs/training.log
+tail -n 5 ~/mft-lab/logs/training.log</code></pre>
+
+      <div class="callout tip">
+        <strong>Why this matters for MFT</strong><br/>
+        In production you’ll constantly check logs to confirm that a transfer ran, a file arrived, or a script completed.
+      </div>
+    </section>
+
+    <section id="files">
+      <h2>Windows ↔ Linux file access ( /mnt/c and \\\\wsl$ )</h2>
+
+      <h3>Two places your files can live</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Where you are</th>
+            <th>Path example</th>
+            <th>Best for</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Linux (WSL) filesystem</strong></td>
+            <td><code class="inline">/home/&lt;user&gt;/mft-lab</code></td>
+            <td>Linux command practice, scripting, fast I/O</td>
+            <td>Recommended for best performance when working in Linux tools.</td>
+          </tr>
+          <tr>
+            <td><strong>Windows filesystem mounted into WSL</strong></td>
+            <td><code class="inline">/mnt/c/Users/&lt;you&gt;/Documents</code></td>
+            <td>Easy sharing with Windows apps</td>
+            <td>Works fine, but can be slower for Linux-heavy operations.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout note">
+        <strong>Performance best practice</strong><br/>
+        For the fastest performance, store files inside the WSL Linux filesystem (for example under <code class="inline">/home/&lt;user&gt;</code>) when working in Linux. Windows drives are available under <code class="inline">/mnt/</code>. You can also access WSL files from Windows Explorer via <code class="inline">\\\\wsl$</code>.
+      </div>
+
+      <h3>Open your current Linux folder in Windows Explorer</h3>
+      <p>From Ubuntu, run:</p>
+      <pre><button class="copybtn" data-copy>Copy</button><code>explorer.exe .</code></pre>
+
+      <p class="muted">
+        This opens the current directory in Windows File Explorer (super handy for sharing screenshots or uploading lab outputs).
+      </p>
+
+      <h3>Find your WSL files from Windows Explorer</h3>
+      <p>In Windows File Explorer address bar, enter:</p>
+      <pre><code>\\wsl$</code></pre>
+
+      <div class="callout warn">
+        <strong>Safety tip</strong><br/>
+        Practice Linux commands inside <code class="inline">~/mft-lab</code>. Avoid experimenting in system folders like <code class="inline">/etc</code> or <code class="inline">/var</code> until instructed.
+      </div>
+    </section>
+
+    <section id="tools">
+      <h2>Optional tools for command practice</h2>
+      <p>Install a few common utilities used in ops and MFT troubleshooting:</p>
+
+      <pre><button class="copybtn" data-copy>Copy</button><code>sudo apt install -y tree nano curl netcat-openbsd openssh-client</code></pre>
+
+      <ul>
+        <li><code class="inline">tree</code> — show folder trees</li>
+        <li><code class="inline">nano</code> — beginner-friendly editor</li>
+        <li><code class="inline">curl</code> — test HTTP endpoints (useful for APIs)</li>
+        <li><code class="inline">nc</code> (netcat) — test ports like 22 (SFTP)</li>
+        <li><code class="inline">ssh</code> — SSH client for connectivity tests</li>
+      </ul>
+    </section>
+
+    <section id="validate">
+      <h2>Validation checklist (make sure everything works)</h2>
+      <p>Use this checklist to confirm your environment is ready for Linux command practice.</p>
+
+      <h3>WSL checks (PowerShell)</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" /> <span>PowerShell shows Ubuntu installed and using WSL2:</span></li>
+      </ul>
+      <pre><button class="copybtn" data-copy>Copy</button><code>wsl -l -v</code></pre>
+
+      <h3>Ubuntu checks (inside Ubuntu terminal)</h3>
+      <ul class="checklist">
+        <li><input type="checkbox" /> <span>Ubuntu opens without errors and shows OS details:</span></li>
+      </ul>
+      <pre><button class="copybtn" data-copy>Copy</button><code>cat /etc/os-release</code></pre>
+
+      <ul class="checklist">
+        <li><input type="checkbox" /> <span>Your lab folders exist:</span></li>
+      </ul>
+      <pre><button class="copybtn" data-copy>Copy</button><code>ls -la ~/mft-lab</code></pre>
+
+      <ul class="checklist">
+        <li><input type="checkbox" /> <span>Log file exists and can be read:</span></li>
+      </ul>
+      <pre><button class="copybtn" data-copy>Copy</button><code>tail -n 5 ~/mft-lab/logs/training.log</code></pre>
+
+      <ul class="checklist">
+        <li><input type="checkbox" /> <span>Optional: Confirm netcat works (useful for MFT port checks):</span></li>
+      </ul>
+      <pre><button class="copybtn" data-copy>Copy</button><code>nc -vz localhost 22 || echo "Port 22 not open on localhost (this is OK if ssh server isn't installed)"</code></pre>
+
+      <div class="callout tip">
+        <strong>Good to go!</strong><br/>
+        If all items above pass, you’re ready to start “Essential Linux Commands” labs.
+      </div>
+    </section>
+
+    <section id="troubleshoot">
+      <h2>Common issues & fixes</h2>
+
+      <details>
+        <summary>Problem: <em>wsl --install</em> shows help text instead of installing</summary>
+        <p>This often means WSL is already installed. Install Ubuntu explicitly:</p>
+        <pre><button class="copybtn" data-copy>Copy</button><code>wsl --list --online
+wsl --install -d Ubuntu</code></pre>
+      </details>
+
+      <details>
+        <summary>Problem: Install hangs at 0.0%</summary>
+        <p>Try the web-download option:</p>
+        <pre><button class="copybtn" data-copy>Copy</button><code>wsl --install --web-download -d Ubuntu</code></pre>
+      </details>
+
+      <details>
+        <summary>Problem: WSL2 error 0x80370102 (virtualization / VM platform)</summary>
+        <p>Typical causes:</p>
+        <ul>
+          <li>Virtualization disabled in BIOS/UEFI</li>
+          <li>Windows optional feature “Virtual Machine Platform” is not enabled</li>
+        </ul>
+        <p class="muted">Fix path:</p>
+        <ol class="steps">
+          <li>Confirm Task Manager → CPU shows Virtualization: Enabled.</li>
+          <li>Enable Windows features (PowerShell as Admin), then restart:</li>
+        </ol>
+        <pre><button class="copybtn" data-copy>Copy</button><code>dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart</code></pre>
+      </details>
+
+      <details>
+        <summary>Problem: <em>sudo apt update</em> fails (proxy, DNS, or network restrictions)</summary>
+        <p>On corporate networks, proxies may be required. Try switching networks (home/hotspot) or contact IT.</p>
+        <p>Quick checks inside Ubuntu:</p>
+        <pre><button class="copybtn" data-copy>Copy</button><code>ping -c 2 8.8.8.8 || echo "No ping (ICMP may be blocked)"
+ping -c 2 google.com || echo "DNS may be blocked"</code></pre>
+      </details>
+
+      <details>
+        <summary>Problem: “The requested operation requires elevation”</summary>
+        <p>You need an Administrator PowerShell window. Re-open PowerShell using “Run as administrator”.</p>
+      </details>
+
+      <details>
+        <summary>Problem: Ubuntu won’t open or closes immediately</summary>
+        <p>Try updating WSL and restarting:</p>
+        <pre><button class="copybtn" data-copy>Copy</button><code>wsl --update
+wsl --shutdown</code></pre>
+        <p>Then launch Ubuntu again from Start Menu.</p>
+      </details>
+
+      <div class="callout danger">
+        <strong>Do not do this in training unless instructed:</strong><br/>
+        Avoid commands like <code class="inline">rm -rf /</code> or deleting unknown system folders. Practice in <code class="inline">~/mft-lab</code>.
+      </div>
+    </section>
+
+    <section id="next">
+      <h2>Next steps: practice essential Linux commands</h2>
+
+      <div class="card">
+        <h3>Suggested practice order (beginner-friendly)</h3>
+        <ol>
+          <li><strong>Navigation:</strong> <code class="inline">pwd</code>, <code class="inline">ls</code>, <code class="inline">cd</code>, <code class="inline">man</code></li>
+          <li><strong>File management:</strong> <code class="inline">cp</code>, <code class="inline">mv</code>, <code class="inline">mkdir</code>, <code class="inline">rm</code> (safe usage)</li>
+          <li><strong>Log monitoring:</strong> <code class="inline">tail -f</code>, <code class="inline">grep</code>, <code class="inline">wc</code></li>
+          <li><strong>MFT networking basics:</strong> <code class="inline">ssh</code>, <code class="inline">sftp</code>, <code class="inline">nc</code>, <code class="inline">ss</code></li>
+        </ol>
+      </div>
+
+      <div class="callout tip">
+        <strong>Training habit that pays off in real MFT operations</strong><br/>
+        Always verify: <em>path</em> → <em>permissions</em> → <em>service status</em> → <em>logs</em>.
+      </div>
+    </section>
+
+    <section id="refs">
+      <h2>References</h2>
+      <p class="muted">
+        These official docs were used to align this guide with current WSL installation and filesystem best practices.
+      </p>
+      <ul>
+        <li>Microsoft Learn — Install WSL: <a href="https://learn.microsoft.com/en-us/windows/wsl/install">https://learn.microsoft.com/en-us/windows/wsl/install</a></li>
+        <li>Microsoft Learn — Basic commands for WSL: <a href="https://learn.microsoft.com/en-us/windows/wsl/basic-commands">https://learn.microsoft.com/en-us/windows/wsl/basic-commands</a></li>
+        <li>Microsoft Learn — Working across file systems: <a href="https://learn.microsoft.com/en-us/windows/wsl/filesystems">https://learn.microsoft.com/en-us/windows/wsl/filesystems</a></li>
+      </ul>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      <strong>Tip for instructors:</strong> Use this guide as a pre-lab before “Essential Linux Commands”. Have learners
+      open two terminal tabs: one for commands, one for <code class="inline">tail -f</code> log monitoring.
+    </p>
+    <p class="muted">© Training content template — customize freely for your organization.</p>
+  </div>
+
+  <script>
+    // Copy-to-clipboard for code blocks
+    function copyText(text){
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        return navigator.clipboard.writeText(text);
+      }
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return Promise.resolve();
+    }
+
+    document.querySelectorAll('button[data-copy]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const pre = btn.parentElement;
+        const code = pre.querySelector('code');
+        const text = code ? code.innerText : '';
+        try{
+          await copyText(text);
+          const old = btn.innerText;
+          btn.innerText = 'Copied';
+          setTimeout(() => btn.innerText = old, 1000);
+        }catch(e){
+          alert('Copy failed. Please select and copy manually.');
+        }
+      });
+    });
+  </script>
+</footer>
+</body>
+</html>
