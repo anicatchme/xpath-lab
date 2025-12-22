@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linux Basics Lab — Interactive Practice</title>
+  <style>
+    :root{
+      --brand1:#0B6E99; /* LVT Labs vibe: deep teal */
+      --brand2:#7AD7F0; /* accent */
+      --brand3:#0E2A47; /* dark text */
+      --bg:#0f172a;     /* slate background */
+      --card:#111827;   /* card */
+      --muted:#94a3b8;  /* muted */
+      --ok:#16a34a;     /* success */
+      --warn:#ca8a04;   /* warn */
+      --err:#dc2626;    /* error */
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; background:var(--bg); color:#e5e7eb}
+    header{position:sticky;top:0;background:linear-gradient(90deg,var(--brand1),var(--brand2)); padding:16px 20px; z-index:50; box-shadow:0 4px 20px rgba(0,0,0,.25)}
+    header h1{margin:0;font-size:22px;letter-spacing:.3px}
+    header .sub{font-size:13px;opacity:.9}
+
+    .container{max-width:1080px;margin:24px auto;padding:0 16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .card{background:var(--card); border:1px solid #1f2937; border-radius:16px; padding:16px; box-shadow:0 6px 18px rgba(0,0,0,.25)}
+    .card h2{margin:0 0 8px 0;font-size:18px;color:#f8fafc}
+    .card p{margin:6px 0;color:#cbd5e1}
+    code, .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    pre{background:#0b1220;border:1px solid #1f2937;padding:12px;border-radius:12px;overflow:auto}
+
+    .flex{display:flex;gap:8px;align-items:center}
+    .input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #334155;background:#0b1220;color:#e5e7eb}
+    .btn{padding:10px 14px;border:none;border-radius:12px;background:var(--brand1);color:#fff;cursor:pointer}
+    .btn.secondary{background:#1f2937}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid #334155;color:#cbd5e1}
+    .good{color:var(--ok)}.bad{color:var(--err)}.warn{color:var(--warn)}
+    details{border:1px solid #1f2937;border-radius:12px;padding:8px 12px;background:#0b1220}
+
+    .section-title{font-size:20px;margin:24px 0 8px}
+    .kbd{background:#0b1220;border:1px solid #334155;border-bottom-width:3px;padding:2px 6px;border-radius:6px}
+    .footer{margin:40px 0 20px;color:#94a3b8}
+    a{color:#7ad7f0}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Linux Basics Lab <span class="sub">— Interactive, hands-on practice for beginners</span></h1>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2>How this lab works</h2>
+      <p>Each section introduces a concept and gives you a task. Type the command in the input box and click <b>Check</b>. We match your answer using simple patterns (regular expressions). There can be multiple correct ways; we accept common variants.</p>
+      <p><span class="pill">Tip</span> Run these commands on a real Linux system later (Ubuntu, Debian, Fedora, etc.) for muscle memory.</p>
+    </div>
+
+    <!-- Section: navigation basics -->
+    <div class="card">
+      <h2>1) Navigation: <span class="mono">pwd</span>, <span class="mono">ls</span>, <span class="mono">cd</span></h2>
+      <p><b>Task A:</b> Show your current directory path.</p>
+      <div class="flex">
+        <input class="input" id="q1a" placeholder="Type the command... e.g., pwd" />
+        <button class="btn" onclick="check('q1a','^(\s*pwd\s*)$')">Check</button>
+        <span id="q1a_r"></span>
+      </div>
+      <p><b>Task B:</b> List all files, including hidden ones, in long format.</p>
+      <div class="flex">
+        <input class="input" id="q1b" placeholder="e.g., ls -la" />
+        <button class="btn" onclick="check('q1b','^\s*ls\s+-[al]+\s*$')">Check</button>
+        <span id="q1b_r"></span>
+      </div>
+      <p><b>Task C:</b> Change directory to the parent folder.</p>
+      <div class="flex">
+        <input class="input" id="q1c" placeholder="e.g., cd .." />
+        <button class="btn" onclick="check('q1c','^\s*cd\s+\.\.\s*$')">Check</button>
+        <span id="q1c_r"></span>
+      </div>
+      <details><summary>Notes</summary>
+        <ul>
+          <li><span class="mono">pwd</span> prints the working directory.</li>
+          <li><span class="mono">ls -la</span> shows permissions, owners, sizes, and hidden files.</li>
+          <li><span class="mono">cd ..</span> moves up one level; <span class="mono">cd -</span> toggles previous dir.</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- Section: files and directories -->
+    <div class="card">
+      <h2>2) Files & Directories: <span class="mono">mkdir</span>, <span class="mono">touch</span>, <span class="mono">cp</span>, <span class="mono">mv</span>, <span class="mono">rm</span></h2>
+      <p><b>Task A:</b> Create a directory named <span class="mono">lab</span> in the current folder.</p>
+      <div class="flex">
+        <input class="input" id="q2a" placeholder="e.g., mkdir lab" />
+        <button class="btn" onclick="check('q2a','^\s*mkdir\s+lab\s*$')">Check</button>
+        <span id="q2a_r"></span>
+      </div>
+      <p><b>Task B:</b> Create an empty file named <span class="mono">notes.txt</span> inside <span class="mono">lab</span>.</p>
+      <div class="flex">
+        <input class="input" id="q2b" placeholder="e.g., touch lab/notes.txt" />
+        <button class="btn" onclick="check('q2b','^\s*touch\s+lab/notes\.txt\s*$')">Check</button>
+        <span id="q2b_r"></span>
+      </div>
+      <p><b>Task C:</b> Copy <span class="mono">notes.txt</span> to <span class="mono">notes.bak</span>.</p>
+      <div class="flex">
+        <input class="input" id="q2c" placeholder="e.g., cp lab/notes.txt lab/notes.bak" />
+        <button class="btn" onclick="check('q2c','^\s*cp\s+lab/notes\.txt\s+lab/notes\.bak\s*$')">Check</button>
+        <span id="q2c_r"></span>
+      </div>
+      <p><b>Task D:</b> Move <span class="mono">notes.bak</span> to <span class="mono">backup.txt</span>.</p>
+      <div class="flex">
+        <input class="input" id="q2d" placeholder="e.g., mv lab/notes.bak lab/backup.txt" />
+        <button class="btn" onclick="check('q2d','^\s*mv\s+lab/notes\.bak\s+lab/backup\.txt\s*$')">Check</button>
+        <span id="q2d_r"></span>
+      </div>
+      <p><b>Task E (careful):</b> Delete <span class="mono">backup.txt</span>.</p>
+      <div class="flex">
+        <input class="input" id="q2e" placeholder="e.g., rm lab/backup.txt" />
+        <button class="btn" onclick="check('q2e','^\s*rm\s+lab/backup\.txt\s*$')">Check</button>
+        <span id="q2e_r"></span>
+      </div>
+      <details><summary>Notes</summary>
+        <ul>
+          <li>Use <span class="mono">rm -i</span> to confirm deletions; <span class="mono">rm -r</span> for directories.</li>
+          <li>Glob patterns like <span class="mono">*.txt</span> match many files.</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- Section: view and search -->
+    <div class="card">
+      <h2>3) View & Search: <span class="mono">cat</span>, <span class="mono">less</span>, <span class="mono">head</span>, <span class="mono">tail</span>, <span class="mono">grep</span></h2>
+      <p><b>Task A:</b> Print the first 5 lines of <span class="mono">/etc/passwd</span>.</p>
+      <div class="flex">
+        <input class="input" id="q3a" placeholder="e.g., head -n 5 /etc/passwd" />
+        <button class="btn" onclick="check('q3a','^\s*head\s+-n\s+5\s+/etc/passwd\s*$')">Check</button>
+        <span id="q3a_r"></span>
+      </div>
+      <p><b>Task B:</b> Show only lines containing <span class="mono">bash</span> from <span class="mono">/etc/passwd</span>.</p>
+      <div class="flex">
+        <input class="input" id="q3b" placeholder="e.g., grep bash /etc/passwd" />
+        <button class="btn" onclick="check('q3b','^\s*grep\s+bash\s+/etc/passwd\s*$')">Check</button>
+        <span id="q3b_r"></span>
+      </div>
+      <details><summary>Notes</summary>
+        <ul>
+          <li><span class="mono">less</span> lets you page through large files; press <span class="kbd">q</span> to quit.</li>
+          <li><span class="mono">grep -i</span> ignores case; <span class="mono">grep -r</span> searches recursively.</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- Section: permissions -->
+    <div class="card">
+      <h2>4) Permissions: <span class="mono">chmod</span>, <span class="mono">chown</span></h2>
+      <p><b>Task A:</b> Give the owner read/write and group/others read on <span class="mono">lab/notes.txt</span>.</p>
+      <div class="flex">
+        <input class="input" id="q4a" placeholder="e.g., chmod 644 lab/notes.txt" />
+        <button class="btn" onclick="check('q4a','^\s*chmod\s+\(?644\)?\s+lab/notes\.txt\s*$')">Check</button>
+        <span id="q4a_r"></span>
+      </div>
+      <p><b>Task B:</b> Change owner of <span class="mono">lab/notes.txt</span> to user <span class="mono">anil</span>.</p>
+      <div class="flex">
+        <input class="input" id="q4b" placeholder="e.g., sudo chown anil lab/notes.txt" />
+        <button class="btn" onclick="check('q4b','^\s*(sudo\s+)?chown\s+anil\s+lab/notes\.txt\s*$')">Check</button>
+        <span id="q4b_r"></span>
+      </div>
+      <details><summary>Notes</summary>
+        <ul>
+          <li>Mode <span class="mono">644</span> = owner rw-, group r--, others r--.</li>
+          <li>Use <span class="mono">chmod u+x file</span> to add execute for owner.</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- Section: processes and services -->
+    <div class="card">
+      <h2>5) Processes & Services: <span class="mono">ps</span>, <span class="mono">top</span>, <span class="mono">kill</span>, <span class="mono">systemctl</span></h2>
+      <p><b>Task A:</b> Show all processes of the current user in full format.</p>
+      <div class="flex">
+        <input class="input" id="q5a" placeholder="e.g., ps -f -u $(whoami)" />
+        <button class="btn" onclick="check('q5a','^\s*ps\s+-f\s+-u\s+\$\(whoami\)\s*$')">Check</button>
+        <span id="q5a_r"></span>
+      </div>
+      <p><b>Task B:</b> Gracefully stop process with PID <span class="mono">1234</span>.</p>
+      <div class="flex">
+        <input class="input" id="q5b" placeholder="e.g., kill -15 1234" />
+        <button class="btn" onclick="check('q5b','^\s*kill\s+-(15|TERM)\s+1234\s*$')">Check</button>
+        <span id="q5b_r"></span>
+      </div>
+      <p><b>Task C:</b> Check status of <span class="mono">ssh</span> service (systemd).</p>
+      <div class="flex">
+        <input class="input" id="q5c" placeholder="e.g., systemctl status ssh" />
+        <button class="btn" onclick="check('q5c','^\s*systemctl\s+status\s+ssh\s*$')">Check</button>
+        <span id="q5c_r"></span>
+      </div>
+    </div>
+
+    <!-- Section: packages and editors -->
+    <div class="card">
+      <h2>6) Packages & Editing: <span class="mono">apt</span>/<span class="mono">dnf</span>, <span class="mono">nano</span>, <span class="mono">vi</span></h2>
+      <p><b>Task A (Debian/Ubuntu):</b> Update package lists.</p>
+      <div class="flex">
+        <input class="input" id="q6a" placeholder="e.g., sudo apt update" />
+        <button class="btn" onclick="check('q6a','^\s*(sudo\s+)?apt\s+update\s*$')">Check</button>
+        <span id="q6a_r"></span>
+      </div>
+      <p><b>Task B (Fedora/RHEL):</b> Install <span class="mono">curl</span>.</p>
+      <div class="flex">
+        <input class="input" id="q6b" placeholder="e.g., sudo dnf install curl" />
+        <button class="btn" onclick="check('q6b','^\s*(sudo\s+)?(dnf|yum)\s+install\s+curl\s*$')">Check</button>
+        <span id="q6b_r"></span>
+      </div>
+      <details><summary>Notes</summary>
+        <ul>
+          <li>Editors: <span class="mono">nano file</span> (easy), <span class="mono">vi file</span> (powerful). In <span class="mono">vi</span>, type <span class="mono">i</span> to insert, <span class="mono">Esc</span>, <span class="mono">:wq</span> to save & quit.</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- Section: redirection and pipes -->
+    <div class="card">
+      <h2>7) Redirection & Pipes: <span class="mono">&gt;</span>, <span class="mono">&gt;&gt;</span>, <span class="mono">|</span></h2>
+      <p><b>Task A:</b> Save <span class="mono">ls -l</span> output to <span class="mono">out.txt</span> (overwrite).</p>
+      <div class="flex">
+        <input class="input" id="q7a" placeholder="e.g., ls -l > out.txt" />
+        <button class="btn" onclick="check('q7a','^\s*ls\s+-l\s*>\s*out\.txt\s*$')">Check</button>
+        <span id="q7a_r"></span>
+      </div>
+      <p><b>Task B:</b> Count number of lines in <span class="mono">/etc/passwd</span> using a pipe.</p>
+      <div class="flex">
+        <input class="input" id="q7b" placeholder="e.g., cat /etc/passwd | wc -l" />
+        <button class="btn" onclick="check('q7b','^\s*(cat\s+/etc/passwd\s*\|\s*)?wc\s+-l(\s+/etc/passwd)?\s*$')">Check</button>
+        <span id="q7b_r"></span>
+      </div>
+    </div>
+
+    <!-- Section: environment and networking -->
+    <div class="card">
+      <h2>8) Environment & Networking: <span class="mono">echo</span>, <span class="mono">export</span>, <span class="mono">ip</span>, <span class="mono">ping</span>, <span class="mono">curl</span></h2>
+      <p><b>Task A:</b> Set an environment variable <span class="mono">APP_ENV=dev</span> for the current shell.</p>
+      <div class="flex">
+        <input class="input" id="q8a" placeholder="e.g., export APP_ENV=dev" />
+        <button class="btn" onclick="check('q8a','^\s*export\s+APP_ENV=dev\s*$')">Check</button>
+        <span id="q8a_r"></span>
+      </div>
+      <p><b>Task B:</b> Show your IP addresses.</p>
+      <div class="flex">
+        <input class="input" id="q8b" placeholder="e.g., ip addr" />
+        <button class="btn" onclick="check('q8b','^\s*ip\s+(addr|a)\s*$')">Check</button>
+        <span id="q8b_r"></span>
+      </div>
+      <p><b>Task C:</b> Fetch headers from <span class="mono">https://example.com</span>.</p>
+      <div class="flex">
+        <input class="input" id="q8c" placeholder="e.g., curl -I https://example.com" />
+        <button class="btn" onclick="check('q8c','^\s*curl\s+-I\s+https?://example\.com/?\s*$')">Check</button>
+        <span id="q8c_r"></span>
+      </div>
+    </div>
+
+    <!-- Section: archive and disk -->
+    <div class="card">
+      <h2>9) Archive & Disk: <span class="mono">tar</span>, <span class="mono">gzip</span>, <span class="mono">du</span>, <span class="mono">df</span></h2>
+      <p><b>Task A:</b> Create a compressed tarball <span class="mono">lab.tar.gz</span> from <span class="mono">lab/</span>.</p>
+      <div class="flex">
+        <input class="input" id="q9a" placeholder="e.g., tar -czf lab.tar.gz lab/" />
+        <button class="btn" onclick="check('q9a','^\s*tar\s+-czf\s+lab\.tar\.gz\s+lab/?\s*$')">Check</button>
+        <span id="q9a_r"></span>
+      </div>
+      <p><b>Task B:</b> Show disk usage of the current directory (human readable).
+      </p>
+      <div class="flex">
+        <input class="input" id="q9b" placeholder="e.g., du -sh ." />
+        <button class="btn" onclick="check('q9b','^\s*du\s+-sh\s+\.\s*$')">Check</button>
+        <span id="q9b_r"></span>
+      </div>
+      <p><b>Task C:</b> Show mounted filesystems usage.
+      </p>
+      <div class="flex">
+        <input class="input" id="q9c" placeholder="e.g., df -h" />
+        <button class="btn" onclick="check('q9c','^\s*df\s+-h\s*$')">Check</button>
+        <span id="q9c_r"></span>
+      </div>
+    </div>
+
+    <!-- Quick quiz -->
+    <div class="card">
+      <h2>Quick Quiz</h2>
+      <p>Choose the correct answer:</p>
+      <ol>
+        <li>What does <span class="mono">chmod 755 file</span> set?
+          <div>
+            <label><input type="radio" name="qq1"> owner rwx, group r-x, others r-x</label><br>
+            <label><input type="radio" name="qq1"> owner rw-, group r--, others r--</label><br>
+            <button class="btn secondary" onclick="quiz('qq1',0)">Check</button>
+            <span id="qq1_r"></span>
+          </div>
+        </li>
+        <li>Which command shows <b>running processes</b> in a dynamic view?
+          <div>
+            <label><input type="radio" name="qq2"> ps -ef</label><br>
+            <label><input type="radio" name="qq2"> top</label><br>
+            <button class="btn secondary" onclick="quiz('qq2',1)">Check</button>
+            <span id="qq2_r"></span>
+          </div>
+        </li>
+        <li>What does <span class="mono">|</span> (pipe) do?
+          <div>
+            <label><input type="radio" name="qq3"> Redirects output to a file</label><br>
+            <label><input type="radio" name="qq3"> Sends output of one command as input to another</label><br>
+            <button class="btn secondary" onclick="quiz('qq3',1)">Check</button>
+            <span id="qq3_r"></span>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Resources -->
+    <div class="card">
+      <h2>Further Practice</h2>
+      <p>Practice these daily on any Linux VM or WSL. Create a checklist and repeat:</p>
+      <ul>
+        <li>Navigation & listing (<span class="mono">pwd</span>, <span class="mono">ls</span>, <span class="mono">cd</span>)</li>
+        <li>File operations (<span class="mono">touch</span>, <span class="mono">cp</span>, <span class="mono">mv</span>, <span class="mono">rm</span>)</li>
+        <li>Search & view (<span class="mono">grep</span>, <span class="mono">less</span>, <span class="mono">head</span>/<span class="mono">tail</span>)</li>
+        <li>Permissions (<span class="mono">chmod</span>, <span class="mono">chown</span>)</li>
+        <li>Processes & services (<span class="mono">ps</span>, <span class="mono">top</span>, <span class="mono">kill</span>, <span class="mono">systemctl</span>)</li>
+        <li>Pipes & redirection (<span class="mono">|</span>, <span class="mono">></span>, <span class="mono">>> </span>)</li>
+        <li>Networking (<span class="mono">ping</span>, <span class="mono">ip</span>, <span class="mono">curl</span>)</li>
+        <li>Archives & disk (<span class="mono">tar</span>, <span class="mono">gzip</span>, <span class="mono">du</span>, <span class="mono">df</span>)</li>
+      </ul>
+      <p class="footer">© 2025 LVT Labs / Kairosmagus — Linux Basics Interactive Lab</p>
+    </div>
+  </div>
+
+  <script>
+    function check(id, pattern){
+      const re = new RegExp(pattern);
+      const val = document.getElementById(id).value.trim();
+      const el = document.getElementById(id + '_r');
+      if(re.test(val)){
+        el.innerHTML = '<span class="good">✔ Correct</span>'; 
+      }else{
+        el.innerHTML = '<span class="bad">✖ Try again</span>'; 
+      }
+    }
+    function quiz(name, correctIndex){
+      const opts = document.querySelectorAll('input[name="'+name+'"]');
+      let chosen = -1; let idx = 0;
+      opts.forEach(o=>{ if(o.checked){ chosen = idx; } idx++; });
+      const el = document.getElementById(name + '_r');
+      if(chosen === correctIndex){ el.innerHTML = '<span class="good">✔ Correct</span>'; }
+      else{ el.innerHTML = '<span class="bad">✖ Not quite</span>'; }
+    }
+  </script>
+</body>
+</html>
