@@ -1,0 +1,1116 @@
+<!--
+  Linux Fundamentals Exercises (Embeddable HTML)
+  - Self-contained (scoped CSS), no external dependencies.
+  - Uses <details> for solutions (no JS required).
+  - Safe-by-default: exercises operate inside ~/linux-fundamentals-lab unless stated.
+-->
+
+<div class="linux-lab" role="document" aria-label="Linux Fundamentals Exercises">
+  <style>
+    /* Scope all styles to .linux-lab so this embeds cleanly anywhere */
+    .linux-lab {
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      line-height: 1.5;
+      color: #111827;
+      background: #ffffff;
+      padding: 1.25rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .linux-lab h1, .linux-lab h2, .linux-lab h3 { line-height: 1.2; margin: 0.75rem 0; }
+    .linux-lab h1 { font-size: 1.6rem; }
+    .linux-lab h2 { font-size: 1.25rem; margin-top: 1.5rem; }
+    .linux-lab h3 { font-size: 1.05rem; margin-top: 1rem; }
+    .linux-lab p { margin: 0.5rem 0; }
+    .linux-lab code, .linux-lab pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-size: 0.95em;
+    }
+    .linux-lab pre {
+      background: #0b1220;
+      color: #e5e7eb;
+      padding: 0.9rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      border: 1px solid #111827;
+    }
+    .linux-lab .muted { color: #6b7280; }
+    .linux-lab .callout {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-left: 6px solid #93c5fd;
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      margin: 0.9rem 0;
+    }
+    .linux-lab .danger {
+      border-left-color: #fca5a5;
+      background: #fff7f7;
+    }
+    .linux-lab .toc {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      margin: 0.75rem 0 1.25rem;
+    }
+    .linux-lab .toc ul { margin: 0.35rem 0 0; padding-left: 1.1rem; }
+    .linux-lab .toc a { color: #1d4ed8; text-decoration: none; }
+    .linux-lab .toc a:hover { text-decoration: underline; }
+
+    .linux-lab .exercise {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.95rem;
+      margin: 0.9rem 0;
+      background: #ffffff;
+    }
+    .linux-lab .exercise-header {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 0.25rem;
+    }
+    .linux-lab .exercise-title {
+      margin: 0;
+      font-weight: 700;
+    }
+    .linux-lab .badges {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .linux-lab .badge {
+      display: inline-block;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: #111827;
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+    .linux-lab .badge.beginner { border-color: #bbf7d0; background: #f0fdf4; }
+    .linux-lab .badge.intermediate { border-color: #fde68a; background: #fffbeb; }
+    .linux-lab .badge.advanced { border-color: #fecaca; background: #fff1f2; }
+    .linux-lab .badge.time { border-color: #dbeafe; background: #eff6ff; }
+    .linux-lab ul, .linux-lab ol { margin: 0.4rem 0 0.6rem; padding-left: 1.2rem; }
+    .linux-lab .checklist { list-style: none; padding-left: 0; }
+    .linux-lab .checklist li { margin: 0.25rem 0; display: flex; gap: 0.55rem; align-items: flex-start; }
+    .linux-lab input[type="checkbox"] { margin-top: 0.2rem; }
+
+    .linux-lab details.solution {
+      margin-top: 0.6rem;
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 0.6rem;
+    }
+    .linux-lab details.solution summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #1f2937;
+      user-select: none;
+    }
+    .linux-lab .kpi {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.6rem;
+      margin: 0.8rem 0;
+    }
+    .linux-lab .kpi > div {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      background: #f9fafb;
+    }
+    .linux-lab .kpi .label { font-size: 0.8rem; color: #6b7280; }
+    .linux-lab .kpi .value { font-weight: 700; font-size: 1rem; margin-top: 0.1rem; }
+    .linux-lab .hr { height: 1px; background: #e5e7eb; border: 0; margin: 1.25rem 0; }
+    .linux-lab a.anchor { color: inherit; text-decoration: none; }
+  </style>
+
+  <h1 id="top">Linux Fundamentals Exercises (Hands-on)</h1>
+  <p class="muted">
+    Designed for beginners → intermediate learners. Works on most Linux distros (Ubuntu/Debian, Fedora/RHEL, Arch).
+    Commands are safe-by-default and run inside a practice directory.
+  </p>
+
+  <div class="callout">
+    <strong>How to use this:</strong>
+    <ol>
+      <li>Open a terminal on a Linux machine (VM, cloud shell, WSL, or native).</li>
+      <li>Do exercises in order (or jump by topic).</li>
+      <li>Use <code>&lt;details&gt;</code> sections only after trying yourself.</li>
+    </ol>
+    <p class="muted">
+      Tip: If a command behaves differently on your distro, that’s normal—Linux is a family of systems.
+    </p>
+  </div>
+
+  <div class="toc" aria-label="Table of contents">
+    <strong>Contents</strong>
+    <ul>
+      <li><a href="#setup">0) Setup</a></li>
+      <li><a href="#nav">1) Navigation & Help</a></li>
+      <li><a href="#files">2) Files & Directories</a></li>
+      <li><a href="#text">3) Viewing & Editing Text</a></li>
+      <li><a href="#pipes">4) Redirection & Pipes</a></li>
+      <li><a href="#search">5) Finding Things (find/grep)</a></li>
+      <li><a href="#perms">6) Permissions</a></li>
+      <li><a href="#procs">7) Processes & Jobs</a></li>
+      <li><a href="#net">8) Networking Basics</a></li>
+      <li><a href="#pkgsvc">9) Packages & Services</a></li>
+      <li><a href="#mini">10) Mini Project</a></li>
+    </ul>
+  </div>
+
+  <div class="kpi" aria-label="Overview">
+    <div>
+      <div class="label">Estimated total time</div>
+      <div class="value">~1–2 hours</div>
+    </div>
+    <div>
+      <div class="label">Prerequisites</div>
+      <div class="value">Terminal access</div>
+    </div>
+    <div>
+      <div class="label">Focus</div>
+      <div class="value">Core CLI fundamentals</div>
+    </div>
+    <div>
+      <div class="label">Style</div>
+      <div class="value">Try → Verify → Reveal solution</div>
+    </div>
+  </div>
+
+  <hr class="hr" />
+
+  <!-- 0) Setup -->
+  <h2 id="setup">0) Setup</h2>
+
+  <article class="exercise" id="ex-0-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-0-1">Exercise 0.1 — Create a safe lab folder</a></h3>
+	
+    </div>
+
+    <p><strong>Goal:</strong> Create a dedicated practice directory so you don’t touch important system files.</p>
+
+    <ol>
+      <li>Create the directory <code>~/linux-fundamentals-lab</code>.</li>
+      <li>Inside it, create subfolders: <code>data</code>, <code>notes</code>, <code>bin</code>.</li>
+      <li>Print the absolute path to confirm where you are.</li>
+    </ol>
+
+    <ul class="checklist" aria-label="Self-check">
+      <li><input type="checkbox" />I created the folder tree.</li>
+      <li><input type="checkbox" />I can see the path with <code>pwd</code>.</li>
+    </ul>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>mkdir -p ~/linux-fundamentals-lab/{data,notes,bin}
+cd ~/linux-fundamentals-lab
+pwd
+ls -la</code></pre>
+      <p class="muted">Expected: you see <code>data</code>, <code>notes</code>, <code>bin</code> directories.</p>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-0-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-0-2">Exercise 0.2 — Identify your shell and distro</a></h3>
+
+    </div>
+
+    <p><strong>Goal:</strong> Learn what environment you’re in (useful for troubleshooting).</p>
+
+    <ol>
+      <li>Print your current shell.</li>
+      <li>Print your kernel version.</li>
+      <li>Print OS information (distro name/version).</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>echo "$SHELL"
+uname -a
+cat /etc/os-release</code></pre>
+      <p class="muted">Note: Some minimal systems may not have full OS metadata.</p>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 1) Navigation & Help -->
+  <h2 id="nav">1) Navigation & Help</h2>
+
+  <article class="exercise" id="ex-1-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-1-1">Exercise 1.1 — Navigate efficiently</a></h3>
+
+    </div>
+
+    <p><strong>Goal:</strong> Practice moving around without getting lost.</p>
+    <ol>
+      <li>From anywhere, go to your home directory.</li>
+      <li>Go to <code>~/linux-fundamentals-lab/data</code>.</li>
+      <li>Jump back to the previous directory.</li>
+      <li>Go to the lab root using a relative path.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd
+cd ~/linux-fundamentals-lab/data
+cd -
+cd ..</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-1-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-1-2">Exercise 1.2 — Use built-in help</a></h3>
+
+    </div>
+
+    <p><strong>Goal:</strong> Learn how to read command documentation.</p>
+    <ol>
+      <li>Open the manual page for <code>ls</code>.</li>
+      <li>Find what option shows “human readable” sizes.</li>
+      <li>Find what option sorts by modification time.</li>
+      <li>Exit the man page.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>man ls
+# Inside man:
+#   /human   (search)
+#   /time
+# Exit with:
+q</code></pre>
+      <p class="muted">Common answers: <code>-h</code> for human readable; <code>-t</code> for sort by time.</p>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-1-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-1-3">Exercise 1.3 — Discover what a command is</a></h3>
+     </div>
+
+    <p><strong>Goal:</strong> Determine whether a command is a binary, alias, function, or builtin.</p>
+    <ol>
+      <li>Check what <code>cd</code> is.</li>
+      <li>Check what <code>ls</code> is.</li>
+      <li>Find the full path of <code>ls</code>.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>type cd
+type ls
+which ls</code></pre>
+      <p class="muted"><code>cd</code> is usually a shell builtin; <code>ls</code> is usually an external binary.</p>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 2) Files & Directories -->
+  <h2 id="files">2) Files & Directories</h2>
+
+  <article class="exercise" id="ex-2-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-2-1">Exercise 2.1 — Create files and inspect metadata</a></h3>
+     </div>
+
+    <p><strong>Goal:</strong> Practice creating files and reading timestamps/permissions.</p>
+    <ol>
+      <li>In <code>~/linux-fundamentals-lab/data</code>, create files: <code>a.txt</code>, <code>b.txt</code>, <code>c.txt</code>.</li>
+      <li>List files with long format (permissions, owner, size, time).</li>
+      <li>Show the last modification time for <code>a.txt</code> using <code>stat</code>.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab/data
+touch a.txt b.txt c.txt
+ls -l
+stat a.txt</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-2-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-2-2">Exercise 2.2 — Copy, move, rename</a></h3>
+ 
+    </div>
+
+    <p><strong>Goal:</strong> Learn the everyday file operations.</p>
+    <ol>
+      <li>Create a folder <code>archive</code> in <code>data</code>.</li>
+      <li>Copy <code>a.txt</code> into <code>archive</code>.</li>
+      <li>Rename <code>b.txt</code> to <code>notes.txt</code>.</li>
+      <li>Move <code>c.txt</code> into <code>archive</code>.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab/data
+mkdir -p archive
+cp a.txt archive/
+mv b.txt notes.txt
+mv c.txt archive/</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-2-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-2-3">Exercise 2.3 — Wildcards (globbing)</a></h3>
+ 
+    </div>
+
+    <p><strong>Goal:</strong> Use <code>*</code>, <code>?</code>, and character sets.</p>
+    <ol>
+      <li>Create files: <code>log1.txt</code>, <code>log2.txt</code>, <code>logA.txt</code>, <code>logB.txt</code>.</li>
+      <li>List only files matching <code>log?.txt</code>.</li>
+      <li>List only files matching <code>log[12].txt</code>.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab/data
+touch log1.txt log2.txt logA.txt logB.txt
+ls -1 log?.txt
+ls -1 log[12].txt</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-2-4">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-2-4">Exercise 2.4 — Hard links vs symlinks (basic)</a></h3>
+ 
+    </div>
+
+    <p><strong>Goal:</strong> Understand links by observing behavior.</p>
+    <ol>
+      <li>Create a file <code>original.txt</code> with a short line of text.</li>
+      <li>Create a hard link <code>hardlink.txt</code> pointing to it.</li>
+      <li>Create a symlink <code>symlink.txt</code> pointing to it.</li>
+      <li>Show link count with <code>ls -li</code>.</li>
+      <li>Delete <code>original.txt</code>. Observe what happens when you <code>cat</code> the link files.</li>
+    </ol>
+
+    <div class="callout danger">
+      <strong>Safety:</strong> Do this only inside the lab folder.
+    </div>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab/data
+printf "hello links\n" &gt; original.txt
+ln original.txt hardlink.txt
+ln -s original.txt symlink.txt
+
+ls -li original.txt hardlink.txt symlink.txt
+rm original.txt
+
+# Hard link still has the content; symlink breaks
+cat hardlink.txt
+cat symlink.txt</code></pre>
+      <p class="muted">
+        Expected: hard link keeps working; symlink reports “No such file or directory”.
+      </p>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 3) Viewing & Editing Text -->
+  <h2 id="text">3) Viewing & Editing Text</h2>
+
+  <article class="exercise" id="ex-3-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-3-1">Exercise 3.1 — Create a text file from the terminal</a></h3>
+ 
+    </div>
+
+    <p><strong>Goal:</strong> Practice creating text content with redirection.</p>
+    <ol>
+      <li>In <code>~/linux-fundamentals-lab/notes</code>, create <code>about.txt</code> with 3 lines.</li>
+      <li>Append 2 more lines.</li>
+      <li>Display the file content.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab/notes
+
+cat &gt; about.txt &lt;&lt;'EOF'
+Name: (your name)
+Goal: Learn Linux fundamentals
+Notes: Practice daily
+EOF
+
+cat &gt;&gt; about.txt &lt;&lt;'EOF'
+Favorite command: ls
+Next topic: permissions
+EOF
+
+cat about.txt</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-3-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-3-2">Exercise 3.2 — View big files safely</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Use tools that don’t flood your terminal.</p>
+    <ol>
+      <li>View <code>/etc/services</code> (or any large system text file) using <code>less</code>.</li>
+      <li>Search inside <code>less</code> for the word <code>ssh</code>.</li>
+      <li>Jump to the end and then back to the start.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>less /etc/services
+# Inside less:
+#   /ssh   (search)
+#   G      (end)
+#   g      (start)
+#   q      (quit)</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-3-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-3-3">Exercise 3.3 — Extract lines and fields</a></h3>
+ 
+    </div>
+
+    <p><strong>Goal:</strong> Use <code>head</code>, <code>tail</code>, and <code>cut</code>.</p>
+    <ol>
+      <li>Show the first 5 lines of <code>/etc/passwd</code>.</li>
+      <li>Show the last 5 lines of <code>/etc/passwd</code>.</li>
+      <li>Print only usernames (field 1) from <code>/etc/passwd</code>.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>head -n 5 /etc/passwd
+tail -n 5 /etc/passwd
+cut -d: -f1 /etc/passwd</code></pre>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 4) Redirection & Pipes -->
+  <h2 id="pipes">4) Redirection & Pipes</h2>
+
+  <article class="exercise" id="ex-4-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-4-1">Exercise 4.1 — stdout vs stderr</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Understand standard output and standard error.</p>
+    <ol>
+      <li>Run a command that succeeds and one that fails.</li>
+      <li>Redirect stdout to a file.</li>
+      <li>Redirect stderr to a file.</li>
+      <li>Redirect both stdout and stderr to the same file.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab
+
+# Success (stdout)
+ls /etc &gt; out.txt
+
+# Failure (stderr) - file likely doesn't exist
+ls /this/does/not/exist 2&gt; err.txt
+
+# Both together
+( ls /etc; ls /this/does/not/exist ) &gt; all.txt 2&gt;&amp;1
+
+# Inspect
+wc -l out.txt err.txt all.txt
+tail -n 5 all.txt</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-4-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-4-2">Exercise 4.2 — Pipes: count and sort</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Use pipelines to transform data.</p>
+    <ol>
+      <li>List files in your lab <code>data</code> folder.</li>
+      <li>Count how many entries there are.</li>
+      <li>Sort by name and display one per line.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab/data
+ls | wc -l
+ls -1 | sort</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-4-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-4-3">Exercise 4.3 — Build a simple CSV report</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Generate a small report from command output.</p>
+    <ol>
+      <li>Create a file <code>report.csv</code> in your lab root with a header: <code>name,size_bytes</code>.</li>
+      <li>Append lines for each file in <code>data</code> showing filename and size in bytes.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab
+printf "name,size_bytes\n" &gt; report.csv
+
+# GNU stat (common on Linux):
+for f in data/*; do
+  [ -f "$f" ] || continue
+  printf "%s,%s\n" "$(basename "$f")" "$(stat -c %s "$f")" &gt;&gt; report.csv
+done
+
+column -s, -t report.csv | head</code></pre>
+      <p class="muted">
+        If <code>stat -c</code> doesn’t work (rare on Linux), your system might be using BSD stat syntax.
+      </p>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 5) Finding Things -->
+  <h2 id="search">5) Finding Things (find/grep)</h2>
+
+  <article class="exercise" id="ex-5-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-5-1">Exercise 5.1 — Find files by name</a></h3>
+ 
+    </div>
+
+    <p><strong>Goal:</strong> Use <code>find</code> to locate files under a directory tree.</p>
+    <ol>
+      <li>Find all <code>.txt</code> files under <code>~/linux-fundamentals-lab</code>.</li>
+      <li>Find files whose name contains “log”.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>find ~/linux-fundamentals-lab -type f -name "*.txt"
+find ~/linux-fundamentals-lab -type f -name "*log*"</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-5-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-5-2">Exercise 5.2 — Grep for content</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Search inside files for text patterns.</p>
+    <ol>
+      <li>Add the word <code>ERROR</code> on one line in any file under <code>~/linux-fundamentals-lab</code>.</li>
+      <li>Search recursively for <code>ERROR</code> and show matching line numbers.</li>
+      <li>Show only filenames that contain matches.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab
+printf "ERROR: something happened\n" &gt;&gt; notes/about.txt
+
+grep -RIn "ERROR" .
+grep -RIl "ERROR" .</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-5-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-5-3">Exercise 5.3 — Combine find + grep safely</a></h3>
+
+    </div>
+
+    <p><strong>Goal:</strong> Search only within a filtered file set.</p>
+    <ol>
+      <li>Search for the word <code>Goal</code> only in <code>.txt</code> files under <code>notes</code>.</li>
+      <li>Do it using <code>find ... -exec</code> (no pipes required).</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab
+find notes -type f -name "*.txt" -exec grep -nH "Goal" {} \;</code></pre>
+      <p class="muted">
+        Flags meaning: <code>-n</code> line numbers, <code>-H</code> show filename.
+      </p>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 6) Permissions -->
+  <h2 id="perms">6) Permissions</h2>
+
+  <article class="exercise" id="ex-6-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-6-1">Exercise 6.1 — Read permissions from ls -l</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Decode <code>rwx</code> for user/group/others.</p>
+    <ol>
+      <li>In your lab folder, run <code>ls -l</code> on a file.</li>
+      <li>Write down what the first 10 characters mean (e.g., <code>-rw-r--r--</code>).</li>
+      <li>Identify: file type, user perms, group perms, other perms.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <p>
+        Example: <code>-rw-r--r--</code>
+      </p>
+      <ul>
+        <li><code>-</code> = regular file (could also be <code>d</code> directory, <code>l</code> symlink)</li>
+        <li><code>rw-</code> = user can read/write</li>
+        <li><code>r--</code> = group can read</li>
+        <li><code>r--</code> = others can read</li>
+      </ul>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-6-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-6-2">Exercise 6.2 — chmod with symbolic modes</a></h3>
+     
+    </div>
+
+    <p><strong>Goal:</strong> Modify permissions using <code>u/g/o</code> and <code>+/-/=</code>.</p>
+    <ol>
+      <li>Create <code>script.sh</code> in <code>~/linux-fundamentals-lab/bin</code> with a simple echo.</li>
+      <li>Make it executable for your user only.</li>
+      <li>Run it using <code>./script.sh</code>.</li>
+      <li>Remove execute permission again.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab/bin
+cat &gt; script.sh &lt;&lt;'EOF'
+#!/usr/bin/env bash
+echo "Hello from script"
+EOF
+
+# user execute only; remove exec from group/others
+chmod u+x,go-x script.sh
+
+./script.sh
+
+chmod u-x script.sh</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-6-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-6-3">Exercise 6.3 — chmod with numeric (octal) modes</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Understand <code>chmod 600/644/755</code> patterns.</p>
+    <ol>
+      <li>Create a file <code>secret.txt</code> in <code>notes</code>.</li>
+      <li>Set permissions to: user read/write, nobody else any access.</li>
+      <li>Verify using <code>ls -l</code>.</li>
+      <li>Change to: user read/write, group read, others read.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab/notes
+printf "top secret\n" &gt; secret.txt
+
+chmod 600 secret.txt
+ls -l secret.txt
+
+chmod 644 secret.txt
+ls -l secret.txt</code></pre>
+      <p class="muted">
+        Octal: r=4, w=2, x=1. So 6=rw-, 4=r--.
+      </p>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-6-4">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-6-4">Exercise 6.4 — Default permissions (umask)</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Observe how <code>umask</code> impacts new files/dirs.</p>
+    <ol>
+      <li>Check your current <code>umask</code>.</li>
+      <li>Create a new file and a new directory.</li>
+      <li>Check their permissions with <code>ls -l</code> and <code>ls -ld</code>.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab
+umask
+touch umask_file.txt
+mkdir -p umask_dir
+ls -l umask_file.txt
+ls -ld umask_dir</code></pre>
+      <p class="muted">
+        Typical default: files become <code>644</code>, dirs become <code>755</code> (but this can vary).
+      </p>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 7) Processes & Jobs -->
+  <h2 id="procs">7) Processes & Jobs</h2>
+
+  <article class="exercise" id="ex-7-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-7-1">Exercise 7.1 — Inspect running processes</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Learn basic process visibility.</p>
+    <ol>
+      <li>Show processes for your user.</li>
+      <li>Show all processes with full format.</li>
+      <li>Find the PID of your shell (bash/zsh).</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>ps -u "$USER"
+ps aux
+ps aux | grep -E "bash|zsh" | head</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-7-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-7-2">Exercise 7.2 — Foreground/background jobs</a></h3>
+  
+    </div>
+
+    <p><strong>Goal:</strong> Use job control: <code>&amp;</code>, <code>jobs</code>, <code>fg</code>, <code>bg</code>.</p>
+    <ol>
+      <li>Start a command that runs ~30 seconds in the background.</li>
+      <li>List jobs.</li>
+      <li>Bring it to foreground.</li>
+      <li>Stop it (Ctrl+Z), then resume in background.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>sleep 30 &amp;
+jobs
+fg
+
+# While it is running in foreground, press:
+#   Ctrl+Z
+
+bg
+jobs</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-7-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-7-3">Exercise 7.3 — Signals: terminate a process you started</a></h3>
+   
+    </div>
+
+    <p><strong>Goal:</strong> Practice <code>kill</code> safely on your own process.</p>
+    <ol>
+      <li>Start a long sleep in background.</li>
+      <li>Find its PID.</li>
+      <li>Send SIGTERM, confirm it ended.</li>
+      <li>If still running, send SIGKILL (last resort).</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>sleep 9999 &amp;
+ps -o pid,cmd -u "$USER" | grep "sleep 9999" | grep -v grep
+
+# Suppose PID is 12345:
+kill 12345
+ps -p 12345 || echo "Process ended"
+
+# Last resort:
+kill -9 12345</code></pre>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 8) Networking Basics -->
+  <h2 id="net">8) Networking Basics</h2>
+
+  <article class="exercise" id="ex-8-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-8-1">Exercise 8.1 — Check IP and routes</a></h3>
+    
+    </div>
+
+    <p><strong>Goal:</strong> Identify your IP, interface, and default route.</p>
+    <ol>
+      <li>Show IP addresses.</li>
+      <li>Show routing table.</li>
+      <li>Identify the default route.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>ip addr
+ip route
+# Look for a line like:
+# default via X.X.X.X dev eth0</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-8-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-8-2">Exercise 8.2 — DNS resolution</a></h3>
+   
+    </div>
+
+    <p><strong>Goal:</strong> Test name resolution and learn common tools.</p>
+    <ol>
+      <li>Resolve an IP for <code>example.com</code> using <code>getent</code>.</li>
+      <li>If available, try <code>dig</code> or <code>nslookup</code>.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>getent hosts example.com
+
+# Optional (may not be installed):
+dig example.com +short
+nslookup example.com</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-8-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-8-3">Exercise 8.3 — Test connectivity (ping / curl)</a></h3>
+     
+    </div>
+
+    <p><strong>Goal:</strong> Check whether you can reach a host and fetch a page.</p>
+    <ol>
+      <li>Ping a public hostname 3 times.</li>
+      <li>Fetch HTTP headers from a site using <code>curl -I</code>.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>ping -c 3 example.com
+curl -I https://example.com</code></pre>
+      <p class="muted">
+        If ping is blocked on your network, <code>curl</code> can still work.
+      </p>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 9) Packages & Services -->
+  <h2 id="pkgsvc">9) Packages & Services</h2>
+
+  <article class="exercise" id="ex-9-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-9-1">Exercise 9.1 — Identify your package manager</a></h3>
+   
+    </div>
+
+    <p><strong>Goal:</strong> Figure out whether you’re on apt, dnf, yum, pacman, etc.</p>
+    <ol>
+      <li>Check which of these exist: <code>apt</code>, <code>dnf</code>, <code>yum</code>, <code>pacman</code>, <code>zypper</code>.</li>
+      <li>Pick the one that exists and find a package (e.g., <code>curl</code>) without installing it.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code># Which package manager exists?
+command -v apt dnf yum pacman zypper | cat
+
+# Debian/Ubuntu example:
+apt-cache policy curl
+
+# Fedora/RHEL example:
+dnf info curl
+
+# Arch example:
+pacman -Si curl</code></pre>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-9-2">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-9-2">Exercise 9.2 — Check service status (systemd)</a></h3>
+      
+    </div>
+
+    <p><strong>Goal:</strong> Learn the basics of <code>systemctl</code> (common on modern distros).</p>
+    <ol>
+      <li>Check whether systemd is present.</li>
+      <li>List running services.</li>
+      <li>Check status of a common service (try <code>ssh</code> or <code>sshd</code>).</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code># Is systemd present?
+ps -p 1 -o comm=
+
+# List running services (systemd)
+systemctl list-units --type=service --state=running
+
+# Check ssh service name (varies by distro)
+systemctl status ssh || systemctl status sshd</code></pre>
+      <p class="muted">If your system isn’t using systemd (rare), these commands may not work.</p>
+    </details>
+  </article>
+
+  <article class="exercise" id="ex-9-3">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-9-3">Exercise 9.3 — View logs with journalctl</a></h3>
+    
+    </div>
+
+    <p><strong>Goal:</strong> Read system logs without guesswork.</p>
+    <ol>
+      <li>View the most recent 50 log lines.</li>
+      <li>View logs for a specific service (ssh/sshd).</li>
+      <li>Follow logs live for ~10 seconds, then stop.</li>
+    </ol>
+
+    <details class="solution">
+      <summary>Show solution</summary>
+      <pre><code>journalctl -n 50
+
+# Service logs:
+journalctl -u ssh -n 50 || journalctl -u sshd -n 50
+
+# Follow live (Ctrl+C to stop)
+journalctl -f</code></pre>
+    </details>
+  </article>
+
+  <hr class="hr" />
+
+  <!-- 10) Mini Project -->
+  <h2 id="mini">10) Mini Project — Build a “system snapshot” script</h2>
+
+  <article class="exercise" id="ex-10-1">
+    <div class="exercise-header">
+      <h3 class="exercise-title"><a class="anchor" href="#ex-10-1">Exercise 10.1 — Create a snapshot script and save output</a></h3>
+    
+    </div>
+
+    <p><strong>Goal:</strong> Combine several fundamentals into a practical script.</p>
+
+    <p><strong>Requirements:</strong> Create <code>~/linux-fundamentals-lab/bin/snapshot.sh</code> that:</p>
+    <ol>
+      <li>Prints the current date/time.</li>
+      <li>Prints hostname and kernel info.</li>
+      <li>Prints uptime.</li>
+      <li>Prints disk usage for your home filesystem.</li>
+      <li>Prints top 5 memory-consuming processes (best-effort).</li>
+      <li>Saves all output to <code>~/linux-fundamentals-lab/notes/snapshot.txt</code>.</li>
+    </ol>
+
+    <ul class="checklist" aria-label="Self-check">
+      <li><input type="checkbox" />Script runs without errors.</li>
+      <li><input type="checkbox" />Output is written to snapshot.txt.</li>
+      <li><input type="checkbox" />Script is executable.</li>
+    </ul>
+
+    <details class="solution">
+      <summary>Show one possible solution</summary>
+      <pre><code>cd ~/linux-fundamentals-lab
+
+cat &gt; bin/snapshot.sh &lt;&lt;'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUT="$HOME/linux-fundamentals-lab/notes/snapshot.txt"
+
+{
+  echo "=== SNAPSHOT ==="
+  echo "Time: $(date -Is)"
+  echo
+  echo "Host: $(hostname)"
+  echo "Kernel: $(uname -r)"
+  echo
+  echo "Uptime:"
+  uptime || true
+  echo
+  echo "Disk usage (home filesystem):"
+  df -h "$HOME" || true
+  echo
+  echo "Top 5 processes by RSS (memory):"
+  # RSS is in KB; sort descending; show first 5 processes after header
+  ps -eo pid,comm,rss --sort=-rss | head -n 6 || true
+  echo
+  echo "Network (IP addresses):"
+  ip -brief addr || ip addr || true
+  echo "=== END ==="
+} | tee "$OUT"
+EOF
+
+chmod u+x bin/snapshot.sh
+./bin/snapshot.sh
+ls -l notes/snapshot.txt
+tail -n 20 notes/snapshot.txt</code></pre>
+      <p class="muted">
+        Notes:
+        <br/>• <code>set -euo pipefail</code> makes scripts safer (fail fast).
+        <br/>• Some commands may differ slightly by distro; the script uses “best-effort” fallbacks.
+      </p>
+    </details>
+  </article>
+
+  <div class="callout">
+    <strong>Next steps (optional):</strong>
+    <ul>
+      <li>Add argument support: <code>snapshot.sh --out /path/file</code></li>
+      <li>Write snapshots to a timestamped filename</li>
+      <li>Compress output using <code>gzip</code> or <code>tar</code></li>
+    </ul>
+  </div>
+
+  <p class="muted">
+    End of lab. <a href="#top">Back to top</a>
+  </p>
+</div>
