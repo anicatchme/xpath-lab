@@ -1,0 +1,2222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JSON Interactive Labs (10 Labs)</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --text:#1b1b1b;
+  --muted:#555;
+  --border:#e5e7eb;
+  --codebg:#0b1020;
+  --codefg:#e6edf3;
+  --good:#047857;
+  --bad:#b91c1c;
+  --warn:#b45309;
+  --link:#0b5fff;
+  --soft:#f8fafc;
+}
+body{background:var(--bg);color:var(--text);font-family:Segoe UI, Roboto, Arial, sans-serif;line-height:1.45;margin:0;padding:24px;}
+.container{max-width:1120px;margin:0 auto;}
+h1{margin:0 0 6px;font-size:28px;}
+h2{margin:18px 0 10px;font-size:22px;}
+h3{margin:10px 0 6px;font-size:18px;}
+.meta{color:var(--muted);font-size:14px;margin-bottom:14px;}
+.card{border:1px solid var(--border);border-radius:12px;background:#fff;padding:16px 18px;margin:14px 0;}
+.pill{display:inline-block;font-size:12px;color:var(--muted);border:1px solid var(--border);padding:2px 10px;border-radius:999px;margin-right:8px;}
+.headerline{margin-bottom:10px;}
+pre{background:var(--codebg);color:var(--codefg);padding:14px;border-radius:12px;overflow:auto;font-size:13px;line-height:1.4;margin:10px 0;}
+code{font-family:Consolas, Menlo, Monaco, monospace;}
+textarea{width:100%;min-height:220px;resize:vertical;font-family:Consolas, Menlo, Monaco, monospace;font-size:13px;line-height:1.4;padding:12px;border:1px solid var(--border);border-radius:12px;box-sizing:border-box;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width: 980px){.row{grid-template-columns:1fr;}}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+button{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 12px;cursor:pointer;font-weight:700;}
+button.primary{border-color:var(--link);background:var(--link);color:#fff;}
+button.danger{border-color:var(--bad);background:var(--bad);color:#fff;}
+button:active{transform:translateY(1px);}
+.result{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:12px;background:#fff;}
+.ok{color:var(--good);font-weight:800;}
+.err{color:var(--bad);font-weight:800;}
+.warn{color:var(--warn);font-weight:800;}
+.small{color:var(--muted);font-size:13px;}
+.callout{border:1px solid var(--border);background:var(--soft);border-radius:12px;padding:12px 14px;margin:12px 0;}
+details{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin:10px 0;background:#fff;}
+summary{cursor:pointer;font-weight:800;}
+a{color:var(--link);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width: 980px){.qgrid{grid-template-columns:1fr;}}
+.q label{display:block;margin:10px 0 6px;font-weight:700;}
+.q input, .q select{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;box-sizing:border-box;}
+.toc a{display:block;margin:6px 0;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>JSON Interactive Labs (10 Labs)</h1>
+  <div class="meta">
+    Each lab has: (A) Plain text → JSON conversion with instant validation + basic structure checks, and (B) a visible JSON quiz with <strong>10 questions</strong>.
+    <br/>
+    <strong>SharePoint note:</strong> If buttons don’t work when embedded, download this HTML and open it in a browser (some SharePoint views block scripts).
+  </div>
+
+  <div class="callout">
+    <strong>Ground rules for valid JSON</strong>
+    <ul>
+      <li>Use double quotes for keys and strings</li>
+      <li>No trailing commas</li>
+      <li>Objects use <code>{ }</code>, arrays use <code>[ ]</code></li>
+      <li>Keep types consistent (number vs string vs boolean vs null)</li>
+    </ul>
+  </div>
+
+  <div class="card toc">
+    <h2 style="margin-top:0;">Table of contents</h2>
+    <a href="#lab1">Lab 1 — Purchase Order Basics (Object + Array)</a>
+<a href="#lab2">Lab 2 — Invoice (Nested Objects + Null + Boolean)</a>
+<a href="#lab3">Lab 3 — Shipment Status (Arrays + Nested Location + Null)</a>
+<a href="#lab4">Lab 4 — Customer Profile (Arrays + Null vs String + Boolean)</a>
+<a href="#lab5">Lab 5 — Standard Error Payload (Support-Ready JSON)</a>
+<a href="#lab6">Lab 6 — Inventory Update (Array of Locations + Numbers)</a>
+<a href="#lab7">Lab 7 — Order Acknowledgement (Boolean + Optional Fields)</a>
+<a href="#lab8">Lab 8 — Return Request (RMA) (Boolean + Array of Items)</a>
+<a href="#lab9">Lab 9 — Price Catalog (Nested Arrays: tierPrices)</a>
+<a href="#lab10">Lab 10 — API Envelope (meta + data pattern)</a>
+  </div>
+
+  
+    <section class="card" id="lab1">
+      <div class="headerline">
+        <span class="pill">Lab 1 — Purchase Order Basics (Object + Array)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>PURCHASE ORDER
+
+PO Number: PO12345
+Order Date: 2026-01-03
+Customer: Acme Corp
+Currency: USD
+
+Items:
+  - SKU: WID100  Description: Widget  Qty: 10  Unit Price: 2.50
+  - SKU: GAD200  Description: Gadget  Qty: 5   Unit Price: 3.00
+  - SKU: CAB300  Description: Cable   Qty: 2   Unit Price: 12.00
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>purchaseOrderNumber</code> — <span class='small'>string</span></li><li><code>orderDate</code> — <span class='small'>string (YYYY-MM-DD)</span></li><li><code>customer</code> — <span class='small'>string</span></li><li><code>currency</code> — <span class='small'>string</span></li><li><code>items</code> — <span class='small'>array of objects</span></li><li><code>items[].sku</code> — <span class='small'>string</span></li><li><code>items[].description</code> — <span class='small'>string</span></li><li><code>items[].quantity</code> — <span class='small'>number</span></li><li><code>items[].unitPrice</code> — <span class='small'>number</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab1_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab1')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab1')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab1')">Reset</button>
+            </div>
+            <div id="lab1_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;purchaseOrderNumber&quot;: &quot;PO12345&quot;,
+  &quot;orderDate&quot;: &quot;2026-01-03&quot;,
+  &quot;customer&quot;: &quot;Acme Corp&quot;,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;items&quot;: [
+    {
+      &quot;sku&quot;: &quot;WID100&quot;,
+      &quot;description&quot;: &quot;Widget&quot;,
+      &quot;quantity&quot;: 10,
+      &quot;unitPrice&quot;: 2.5
+    },
+    {
+      &quot;sku&quot;: &quot;GAD200&quot;,
+      &quot;description&quot;: &quot;Gadget&quot;,
+      &quot;quantity&quot;: 5,
+      &quot;unitPrice&quot;: 3.0
+    },
+    {
+      &quot;sku&quot;: &quot;CAB300&quot;,
+      &quot;description&quot;: &quot;Cable&quot;,
+      &quot;quantity&quot;: 2,
+      &quot;unitPrice&quot;: 12.0
+    }
+  ]
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab1_q1">How many top-level keys are in the JSON?</label>
+              <input id="lab1_q1" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab1_q2">What is the JSON type of items?</label>
+              <select id="lab1_q2"><option value="">Select one…</option><option value="object">object</option><option value="array">array</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab1_q3">What is the value of purchaseOrderNumber?</label>
+              <input id="lab1_q3" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab1_q4">How many items are in items?</label>
+              <input id="lab1_q4" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab1_q5">What is items[0].sku?</label>
+              <input id="lab1_q5" type="text" placeholder="Exact value" />
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab1_q6">What is the JSON type of items[0].quantity?</label>
+              <select id="lab1_q6"><option value="">Select one…</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab1_q7">What is the computed total (sum of quantity × unitPrice) for all items?</label>
+              <input id="lab1_q7" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab1_q8">Which symbol starts a JSON object?</label>
+              <select id="lab1_q8"><option value="">Select one…</option><option value="{">{</option><option value="[">[</option><option value="(">(</option><option value="&lt;">&lt;</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab1_q9">Which symbol starts a JSON array?</label>
+              <select id="lab1_q9"><option value="">Select one…</option><option value="{">{</option><option value="[">[</option><option value="(">(</option><option value="&lt;">&lt;</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab1_q10">What is items[2].description?</label>
+              <input id="lab1_q10" type="text" placeholder="Exact value" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab1')">Check Answers</button>
+              <button onclick="revealQuiz('lab1')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab1')">Reset Quiz</button>
+            </div>
+            <div id="lab1_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;purchaseOrderNumber&quot;: &quot;PO12345&quot;,
+  &quot;orderDate&quot;: &quot;2026-01-03&quot;,
+  &quot;customer&quot;: &quot;Acme Corp&quot;,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;items&quot;: [
+    {
+      &quot;sku&quot;: &quot;WID100&quot;,
+      &quot;description&quot;: &quot;Widget&quot;,
+      &quot;quantity&quot;: 10,
+      &quot;unitPrice&quot;: 2.5
+    },
+    {
+      &quot;sku&quot;: &quot;GAD200&quot;,
+      &quot;description&quot;: &quot;Gadget&quot;,
+      &quot;quantity&quot;: 5,
+      &quot;unitPrice&quot;: 3.0
+    },
+    {
+      &quot;sku&quot;: &quot;CAB300&quot;,
+      &quot;description&quot;: &quot;Cable&quot;,
+      &quot;quantity&quot;: 2,
+      &quot;unitPrice&quot;: 12.0
+    }
+  ]
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab2">
+      <div class="headerline">
+        <span class="pill">Lab 2 — Invoice (Nested Objects + Null + Boolean)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>INVOICE
+
+Invoice Number: INV9001
+Invoice Date: 2026-01-04
+Currency: USD
+
+Bill To:
+  Name: Acme Corp
+  City: Dallas
+  State: TX
+
+Tax Included: false
+Discount: (none)
+
+Line Items:
+  1) SKU: SHIRT100  Qty: 10  Unit Price: 25.00
+  2) SKU: PANTS100  Qty: 5   Unit Price: 50.00
+
+Tax Rate: 0.08
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>invoiceNumber</code> — <span class='small'>string</span></li><li><code>invoiceDate</code> — <span class='small'>string (YYYY-MM-DD)</span></li><li><code>currency</code> — <span class='small'>string</span></li><li><code>billTo</code> — <span class='small'>object</span></li><li><code>billTo.address</code> — <span class='small'>object</span></li><li><code>taxIncluded</code> — <span class='small'>boolean</span></li><li><code>discount</code> — <span class='small'>null (when none)</span></li><li><code>taxRate</code> — <span class='small'>number</span></li><li><code>items</code> — <span class='small'>array of objects</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab2_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab2')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab2')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab2')">Reset</button>
+            </div>
+            <div id="lab2_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;invoiceNumber&quot;: &quot;INV9001&quot;,
+  &quot;invoiceDate&quot;: &quot;2026-01-04&quot;,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;billTo&quot;: {
+    &quot;name&quot;: &quot;Acme Corp&quot;,
+    &quot;address&quot;: {
+      &quot;city&quot;: &quot;Dallas&quot;,
+      &quot;state&quot;: &quot;TX&quot;
+    }
+  },
+  &quot;taxIncluded&quot;: false,
+  &quot;discount&quot;: null,
+  &quot;taxRate&quot;: 0.08,
+  &quot;items&quot;: [
+    {
+      &quot;line&quot;: 1,
+      &quot;sku&quot;: &quot;SHIRT100&quot;,
+      &quot;quantity&quot;: 10,
+      &quot;unitPrice&quot;: 25.0
+    },
+    {
+      &quot;line&quot;: 2,
+      &quot;sku&quot;: &quot;PANTS100&quot;,
+      &quot;quantity&quot;: 5,
+      &quot;unitPrice&quot;: 50.0
+    }
+  ],
+  &quot;subtotalAmount&quot;: 500.0,
+  &quot;taxAmount&quot;: 40.0,
+  &quot;totalAmount&quot;: 540.0
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab2_q1">What is the value of invoiceNumber?</label>
+              <input id="lab2_q1" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab2_q2">What is the JSON type of billTo?</label>
+              <select id="lab2_q2"><option value="">Select one…</option><option value="object">object</option><option value="array">array</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab2_q3">What is billTo.address.city?</label>
+              <input id="lab2_q3" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab2_q4">How many items are in items?</label>
+              <input id="lab2_q4" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab2_q5">What is items[1].line?</label>
+              <input id="lab2_q5" type="number" placeholder="Enter a number" />
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab2_q6">taxIncluded is which JSON type?</label>
+              <select id="lab2_q6"><option value="">Select one…</option><option value="boolean">boolean</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab2_q7">discount is which JSON type?</label>
+              <select id="lab2_q7"><option value="">Select one…</option><option value="null">null</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="boolean">boolean</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab2_q8">What is subtotalAmount?</label>
+              <input id="lab2_q8" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab2_q9">What is taxAmount?</label>
+              <input id="lab2_q9" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab2_q10">What is totalAmount?</label>
+              <input id="lab2_q10" type="number" placeholder="Enter a number" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab2')">Check Answers</button>
+              <button onclick="revealQuiz('lab2')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab2')">Reset Quiz</button>
+            </div>
+            <div id="lab2_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;invoiceNumber&quot;: &quot;INV9001&quot;,
+  &quot;invoiceDate&quot;: &quot;2026-01-04&quot;,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;billTo&quot;: {
+    &quot;name&quot;: &quot;Acme Corp&quot;,
+    &quot;address&quot;: {
+      &quot;city&quot;: &quot;Dallas&quot;,
+      &quot;state&quot;: &quot;TX&quot;
+    }
+  },
+  &quot;taxIncluded&quot;: false,
+  &quot;discount&quot;: null,
+  &quot;taxRate&quot;: 0.08,
+  &quot;items&quot;: [
+    {
+      &quot;line&quot;: 1,
+      &quot;sku&quot;: &quot;SHIRT100&quot;,
+      &quot;quantity&quot;: 10,
+      &quot;unitPrice&quot;: 25.0
+    },
+    {
+      &quot;line&quot;: 2,
+      &quot;sku&quot;: &quot;PANTS100&quot;,
+      &quot;quantity&quot;: 5,
+      &quot;unitPrice&quot;: 50.0
+    }
+  ],
+  &quot;subtotalAmount&quot;: 500.0,
+  &quot;taxAmount&quot;: 40.0,
+  &quot;totalAmount&quot;: 540.0
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab3">
+      <div class="headerline">
+        <span class="pill">Lab 3 — Shipment Status (Arrays + Nested Location + Null)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>SHIPMENT STATUS
+
+Tracking Number: TRK5550001
+Carrier: Northwind Logistics
+Status: IN_TRANSIT
+Shipped Date: 2026-01-03
+Delivered Date: (not delivered yet)
+
+Events:
+  - 2026-01-03T10:00:00Z | Dallas, TX | PICKED_UP
+  - 2026-01-04T08:30:00Z | Waco, TX   | IN_TRANSIT
+  - 2026-01-04T18:00:00Z | Austin, TX | OUT_FOR_DELIVERY
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>trackingNumber</code> — <span class='small'>string</span></li><li><code>carrier</code> — <span class='small'>string</span></li><li><code>status</code> — <span class='small'>string</span></li><li><code>shippedDate</code> — <span class='small'>string (YYYY-MM-DD)</span></li><li><code>deliveredDate</code> — <span class='small'>null (until delivered)</span></li><li><code>isDelivered</code> — <span class='small'>boolean</span></li><li><code>events</code> — <span class='small'>array of objects</span></li><li><code>events[].timestamp</code> — <span class='small'>string (ISO 8601)</span></li><li><code>events[].location.city</code> — <span class='small'>string</span></li><li><code>events[].code</code> — <span class='small'>string</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab3_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab3')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab3')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab3')">Reset</button>
+            </div>
+            <div id="lab3_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;trackingNumber&quot;: &quot;TRK5550001&quot;,
+  &quot;carrier&quot;: &quot;Northwind Logistics&quot;,
+  &quot;status&quot;: &quot;IN_TRANSIT&quot;,
+  &quot;shippedDate&quot;: &quot;2026-01-03&quot;,
+  &quot;deliveredDate&quot;: null,
+  &quot;isDelivered&quot;: false,
+  &quot;events&quot;: [
+    {
+      &quot;timestamp&quot;: &quot;2026-01-03T10:00:00Z&quot;,
+      &quot;location&quot;: {
+        &quot;city&quot;: &quot;Dallas&quot;,
+        &quot;state&quot;: &quot;TX&quot;
+      },
+      &quot;code&quot;: &quot;PICKED_UP&quot;
+    },
+    {
+      &quot;timestamp&quot;: &quot;2026-01-04T08:30:00Z&quot;,
+      &quot;location&quot;: {
+        &quot;city&quot;: &quot;Waco&quot;,
+        &quot;state&quot;: &quot;TX&quot;
+      },
+      &quot;code&quot;: &quot;IN_TRANSIT&quot;
+    },
+    {
+      &quot;timestamp&quot;: &quot;2026-01-04T18:00:00Z&quot;,
+      &quot;location&quot;: {
+        &quot;city&quot;: &quot;Austin&quot;,
+        &quot;state&quot;: &quot;TX&quot;
+      },
+      &quot;code&quot;: &quot;OUT_FOR_DELIVERY&quot;
+    }
+  ]
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab3_q1">What is the value of trackingNumber?</label>
+              <input id="lab3_q1" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab3_q2">What is the JSON type of events?</label>
+              <select id="lab3_q2"><option value="">Select one…</option><option value="array">array</option><option value="object">object</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab3_q3">How many events are in events?</label>
+              <input id="lab3_q3" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab3_q4">What is events[2].location.city?</label>
+              <input id="lab3_q4" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab3_q5">What is events[0].code?</label>
+              <input id="lab3_q5" type="text" placeholder="Exact value" />
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab3_q6">What is the JSON type of deliveredDate?</label>
+              <select id="lab3_q6"><option value="">Select one…</option><option value="null">null</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="boolean">boolean</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab3_q7">isDelivered is which JSON type?</label>
+              <select id="lab3_q7"><option value="">Select one…</option><option value="boolean">boolean</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab3_q8">What is the value of isDelivered?</label>
+              <select id="lab3_q8"><option value="">Select one…</option><option value="true">true</option><option value="false">false</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab3_q9">What is events[1].location.city?</label>
+              <input id="lab3_q9" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab3_q10">What is shippedDate?</label>
+              <input id="lab3_q10" type="text" placeholder="Exact value" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab3')">Check Answers</button>
+              <button onclick="revealQuiz('lab3')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab3')">Reset Quiz</button>
+            </div>
+            <div id="lab3_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;trackingNumber&quot;: &quot;TRK5550001&quot;,
+  &quot;carrier&quot;: &quot;Northwind Logistics&quot;,
+  &quot;status&quot;: &quot;IN_TRANSIT&quot;,
+  &quot;shippedDate&quot;: &quot;2026-01-03&quot;,
+  &quot;deliveredDate&quot;: null,
+  &quot;isDelivered&quot;: false,
+  &quot;events&quot;: [
+    {
+      &quot;timestamp&quot;: &quot;2026-01-03T10:00:00Z&quot;,
+      &quot;location&quot;: {
+        &quot;city&quot;: &quot;Dallas&quot;,
+        &quot;state&quot;: &quot;TX&quot;
+      },
+      &quot;code&quot;: &quot;PICKED_UP&quot;
+    },
+    {
+      &quot;timestamp&quot;: &quot;2026-01-04T08:30:00Z&quot;,
+      &quot;location&quot;: {
+        &quot;city&quot;: &quot;Waco&quot;,
+        &quot;state&quot;: &quot;TX&quot;
+      },
+      &quot;code&quot;: &quot;IN_TRANSIT&quot;
+    },
+    {
+      &quot;timestamp&quot;: &quot;2026-01-04T18:00:00Z&quot;,
+      &quot;location&quot;: {
+        &quot;city&quot;: &quot;Austin&quot;,
+        &quot;state&quot;: &quot;TX&quot;
+      },
+      &quot;code&quot;: &quot;OUT_FOR_DELIVERY&quot;
+    }
+  ]
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab4">
+      <div class="headerline">
+        <span class="pill">Lab 4 — Customer Profile (Arrays + Null vs String + Boolean)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>CUSTOMER PROFILE
+
+Customer ID: C900
+Name: Acme Corp
+Active: true
+
+Contacts:
+  - Name: John Doe   Email: john.doe@acme.com   Phone: (none)
+  - Name: Jane Roe   Email: jane.roe@acme.com   Phone: 555-0102
+
+Preferences: email_notifications, paperless_billing
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>customerId</code> — <span class='small'>string</span></li><li><code>name</code> — <span class='small'>string</span></li><li><code>active</code> — <span class='small'>boolean</span></li><li><code>contacts</code> — <span class='small'>array of objects</span></li><li><code>contacts[].name</code> — <span class='small'>string</span></li><li><code>contacts[].email</code> — <span class='small'>string</span></li><li><code>contacts[].phone</code> — <span class='small'>string or null</span></li><li><code>preferences</code> — <span class='small'>array of strings</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab4_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab4')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab4')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab4')">Reset</button>
+            </div>
+            <div id="lab4_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;customerId&quot;: &quot;C900&quot;,
+  &quot;name&quot;: &quot;Acme Corp&quot;,
+  &quot;active&quot;: true,
+  &quot;contacts&quot;: [
+    {
+      &quot;name&quot;: &quot;John Doe&quot;,
+      &quot;email&quot;: &quot;john.doe@acme.com&quot;,
+      &quot;phone&quot;: null
+    },
+    {
+      &quot;name&quot;: &quot;Jane Roe&quot;,
+      &quot;email&quot;: &quot;jane.roe@acme.com&quot;,
+      &quot;phone&quot;: &quot;555-0102&quot;
+    }
+  ],
+  &quot;preferences&quot;: [
+    &quot;email_notifications&quot;,
+    &quot;paperless_billing&quot;
+  ]
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab4_q1">What is the value of customerId?</label>
+              <input id="lab4_q1" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab4_q2">active is which JSON type?</label>
+              <select id="lab4_q2"><option value="">Select one…</option><option value="boolean">boolean</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab4_q3">What is the value of active?</label>
+              <select id="lab4_q3"><option value="">Select one…</option><option value="true">true</option><option value="false">false</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab4_q4">How many contacts are in contacts?</label>
+              <input id="lab4_q4" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab4_q5">What is contacts[1].email?</label>
+              <input id="lab4_q5" type="text" placeholder="Exact value" />
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab4_q6">What is the JSON type of contacts[0].phone?</label>
+              <select id="lab4_q6"><option value="">Select one…</option><option value="null">null</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="boolean">boolean</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab4_q7">What is contacts[0].name?</label>
+              <input id="lab4_q7" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab4_q8">preferences is which JSON type?</label>
+              <select id="lab4_q8"><option value="">Select one…</option><option value="array">array</option><option value="object">object</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab4_q9">How many values are in preferences?</label>
+              <input id="lab4_q9" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab4_q10">What is preferences[1]?</label>
+              <input id="lab4_q10" type="text" placeholder="Exact value" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab4')">Check Answers</button>
+              <button onclick="revealQuiz('lab4')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab4')">Reset Quiz</button>
+            </div>
+            <div id="lab4_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;customerId&quot;: &quot;C900&quot;,
+  &quot;name&quot;: &quot;Acme Corp&quot;,
+  &quot;active&quot;: true,
+  &quot;contacts&quot;: [
+    {
+      &quot;name&quot;: &quot;John Doe&quot;,
+      &quot;email&quot;: &quot;john.doe@acme.com&quot;,
+      &quot;phone&quot;: null
+    },
+    {
+      &quot;name&quot;: &quot;Jane Roe&quot;,
+      &quot;email&quot;: &quot;jane.roe@acme.com&quot;,
+      &quot;phone&quot;: &quot;555-0102&quot;
+    }
+  ],
+  &quot;preferences&quot;: [
+    &quot;email_notifications&quot;,
+    &quot;paperless_billing&quot;
+  ]
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab5">
+      <div class="headerline">
+        <span class="pill">Lab 5 — Standard Error Payload (Support-Ready JSON)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>ERROR REPORT
+
+Correlation ID: abc-123
+Status: REJECTED
+
+Error Code: VALIDATION_FAILED
+Message: Payload failed validation
+
+Details:
+  - Path: $.items[0].quantity   | Issue: type    | Message: quantity must be integer
+  - Path: $.items[1].unitPrice  | Issue: minimum | Message: unitPrice must be &gt;= 0
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>correlationId</code> — <span class='small'>string</span></li><li><code>status</code> — <span class='small'>string</span></li><li><code>error</code> — <span class='small'>object</span></li><li><code>error.code</code> — <span class='small'>string</span></li><li><code>error.message</code> — <span class='small'>string</span></li><li><code>error.details</code> — <span class='small'>array of objects</span></li><li><code>error.details[].path</code> — <span class='small'>string</span></li><li><code>error.details[].issue</code> — <span class='small'>string</span></li><li><code>error.details[].message</code> — <span class='small'>string</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab5_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab5')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab5')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab5')">Reset</button>
+            </div>
+            <div id="lab5_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;correlationId&quot;: &quot;abc-123&quot;,
+  &quot;status&quot;: &quot;REJECTED&quot;,
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;VALIDATION_FAILED&quot;,
+    &quot;message&quot;: &quot;Payload failed validation&quot;,
+    &quot;details&quot;: [
+      {
+        &quot;path&quot;: &quot;$.items[0].quantity&quot;,
+        &quot;issue&quot;: &quot;type&quot;,
+        &quot;message&quot;: &quot;quantity must be integer&quot;
+      },
+      {
+        &quot;path&quot;: &quot;$.items[1].unitPrice&quot;,
+        &quot;issue&quot;: &quot;minimum&quot;,
+        &quot;message&quot;: &quot;unitPrice must be &gt;= 0&quot;
+      }
+    ]
+  }
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab5_q1">What is correlationId?</label>
+              <input id="lab5_q1" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab5_q2">What is status?</label>
+              <input id="lab5_q2" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab5_q3">What is error.code?</label>
+              <input id="lab5_q3" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab5_q4">How many objects are in error.details?</label>
+              <input id="lab5_q4" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab5_q5">What is the JSON type of error.details?</label>
+              <select id="lab5_q5"><option value="">Select one…</option><option value="array">array</option><option value="object">object</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab5_q6">What is error.details[0].path?</label>
+              <input id="lab5_q6" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab5_q7">What is error.details[1].issue?</label>
+              <input id="lab5_q7" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab5_q8">What is the JSON type of error?</label>
+              <select id="lab5_q8"><option value="">Select one…</option><option value="object">object</option><option value="array">array</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab5_q9">What is error.details[1].message?</label>
+              <input id="lab5_q9" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab5_q10">Which structure best represents multiple failures?</label>
+              <select id="lab5_q10"><option value="">Select one…</option><option value="details as an array">details as an array</option><option value="details as a single string">details as a single string</option><option value="details omitted">details omitted</option><option value="details as a number">details as a number</option></select>
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab5')">Check Answers</button>
+              <button onclick="revealQuiz('lab5')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab5')">Reset Quiz</button>
+            </div>
+            <div id="lab5_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;correlationId&quot;: &quot;abc-123&quot;,
+  &quot;status&quot;: &quot;REJECTED&quot;,
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;VALIDATION_FAILED&quot;,
+    &quot;message&quot;: &quot;Payload failed validation&quot;,
+    &quot;details&quot;: [
+      {
+        &quot;path&quot;: &quot;$.items[0].quantity&quot;,
+        &quot;issue&quot;: &quot;type&quot;,
+        &quot;message&quot;: &quot;quantity must be integer&quot;
+      },
+      {
+        &quot;path&quot;: &quot;$.items[1].unitPrice&quot;,
+        &quot;issue&quot;: &quot;minimum&quot;,
+        &quot;message&quot;: &quot;unitPrice must be &gt;= 0&quot;
+      }
+    ]
+  }
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab6">
+      <div class="headerline">
+        <span class="pill">Lab 6 — Inventory Update (Array of Locations + Numbers)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>INVENTORY UPDATE
+
+Product SKU: WID100
+Update Date: 2026-01-05
+
+Warehouses:
+  - Code: DAL1  On Hand: 120  Reserved: 20
+  - Code: AUS1  On Hand: 80   Reserved: 5
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>sku</code> — <span class='small'>string</span></li><li><code>updateDate</code> — <span class='small'>string (YYYY-MM-DD)</span></li><li><code>warehouses</code> — <span class='small'>array of objects</span></li><li><code>warehouses[].code</code> — <span class='small'>string</span></li><li><code>warehouses[].onHand</code> — <span class='small'>number</span></li><li><code>warehouses[].reserved</code> — <span class='small'>number</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab6_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab6')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab6')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab6')">Reset</button>
+            </div>
+            <div id="lab6_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;sku&quot;: &quot;WID100&quot;,
+  &quot;updateDate&quot;: &quot;2026-01-05&quot;,
+  &quot;warehouses&quot;: [
+    {
+      &quot;code&quot;: &quot;DAL1&quot;,
+      &quot;onHand&quot;: 120,
+      &quot;reserved&quot;: 20
+    },
+    {
+      &quot;code&quot;: &quot;AUS1&quot;,
+      &quot;onHand&quot;: 80,
+      &quot;reserved&quot;: 5
+    }
+  ]
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab6_q1">How many top-level keys are in the JSON?</label>
+              <input id="lab6_q1" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab6_q2">What is the JSON type of warehouses?</label>
+              <select id="lab6_q2"><option value="">Select one…</option><option value="array">array</option><option value="object">object</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab6_q3">What is the value of sku?</label>
+              <input id="lab6_q3" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab6_q4">How many warehouses are listed?</label>
+              <input id="lab6_q4" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab6_q5">What is warehouses[0].code?</label>
+              <input id="lab6_q5" type="text" placeholder="Exact value" />
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab6_q6">onHand is which JSON type?</label>
+              <select id="lab6_q6"><option value="">Select one…</option><option value="number">number</option><option value="string">string</option><option value="boolean">boolean</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab6_q7">What is DAL1 available = onHand - reserved?</label>
+              <input id="lab6_q7" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab6_q8">What is total onHand (sum)?</label>
+              <input id="lab6_q8" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab6_q9">What is total reserved (sum)?</label>
+              <input id="lab6_q9" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab6_q10">Which warehouse has the lower reserved quantity?</label>
+              <input id="lab6_q10" type="text" placeholder="Exact value" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab6')">Check Answers</button>
+              <button onclick="revealQuiz('lab6')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab6')">Reset Quiz</button>
+            </div>
+            <div id="lab6_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;sku&quot;: &quot;WID100&quot;,
+  &quot;updateDate&quot;: &quot;2026-01-05&quot;,
+  &quot;warehouses&quot;: [
+    {
+      &quot;code&quot;: &quot;DAL1&quot;,
+      &quot;onHand&quot;: 120,
+      &quot;reserved&quot;: 20
+    },
+    {
+      &quot;code&quot;: &quot;AUS1&quot;,
+      &quot;onHand&quot;: 80,
+      &quot;reserved&quot;: 5
+    }
+  ]
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab7">
+      <div class="headerline">
+        <span class="pill">Lab 7 — Order Acknowledgement (Boolean + Optional Fields)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>ORDER ACKNOWLEDGEMENT
+
+Ack ID: ACK7001
+Original Order ID: PO12345
+Accepted: true
+Status: ACCEPTED
+
+Line Statuses:
+  - Line: 1  SKU: WID100  Status: ACCEPTED
+  - Line: 2  SKU: GAD200  Status: BACKORDERED  Expected Ship Date: 2026-01-10
+  - Line: 3  SKU: CAB300  Status: ACCEPTED
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>ackId</code> — <span class='small'>string</span></li><li><code>orderId</code> — <span class='small'>string</span></li><li><code>accepted</code> — <span class='small'>boolean</span></li><li><code>status</code> — <span class='small'>string</span></li><li><code>lineStatuses</code> — <span class='small'>array of objects</span></li><li><code>lineStatuses[].line</code> — <span class='small'>number</span></li><li><code>lineStatuses[].sku</code> — <span class='small'>string</span></li><li><code>lineStatuses[].status</code> — <span class='small'>string</span></li><li><code>lineStatuses[].expectedShipDate</code> — <span class='small'>string or null</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab7_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab7')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab7')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab7')">Reset</button>
+            </div>
+            <div id="lab7_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;ackId&quot;: &quot;ACK7001&quot;,
+  &quot;orderId&quot;: &quot;PO12345&quot;,
+  &quot;accepted&quot;: true,
+  &quot;status&quot;: &quot;ACCEPTED&quot;,
+  &quot;lineStatuses&quot;: [
+    {
+      &quot;line&quot;: 1,
+      &quot;sku&quot;: &quot;WID100&quot;,
+      &quot;status&quot;: &quot;ACCEPTED&quot;,
+      &quot;expectedShipDate&quot;: null
+    },
+    {
+      &quot;line&quot;: 2,
+      &quot;sku&quot;: &quot;GAD200&quot;,
+      &quot;status&quot;: &quot;BACKORDERED&quot;,
+      &quot;expectedShipDate&quot;: &quot;2026-01-10&quot;
+    },
+    {
+      &quot;line&quot;: 3,
+      &quot;sku&quot;: &quot;CAB300&quot;,
+      &quot;status&quot;: &quot;ACCEPTED&quot;,
+      &quot;expectedShipDate&quot;: null
+    }
+  ]
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab7_q1">What is ackId?</label>
+              <input id="lab7_q1" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab7_q2">What is orderId?</label>
+              <input id="lab7_q2" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab7_q3">accepted is which JSON type?</label>
+              <select id="lab7_q3"><option value="">Select one…</option><option value="boolean">boolean</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab7_q4">What is the value of accepted?</label>
+              <select id="lab7_q4"><option value="">Select one…</option><option value="true">true</option><option value="false">false</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab7_q5">How many lineStatuses are there?</label>
+              <input id="lab7_q5" type="number" placeholder="Enter a number" />
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab7_q6">Which line is BACKORDERED?</label>
+              <input id="lab7_q6" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab7_q7">What is lineStatuses[1].expectedShipDate?</label>
+              <input id="lab7_q7" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab7_q8">What is the JSON type of lineStatuses[1].expectedShipDate?</label>
+              <select id="lab7_q8"><option value="">Select one…</option><option value="string">string</option><option value="null">null</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="boolean">boolean</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab7_q9">What is status?</label>
+              <input id="lab7_q9" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab7_q10">How many lines have status ACCEPTED?</label>
+              <input id="lab7_q10" type="number" placeholder="Enter a number" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab7')">Check Answers</button>
+              <button onclick="revealQuiz('lab7')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab7')">Reset Quiz</button>
+            </div>
+            <div id="lab7_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;ackId&quot;: &quot;ACK7001&quot;,
+  &quot;orderId&quot;: &quot;PO12345&quot;,
+  &quot;accepted&quot;: true,
+  &quot;status&quot;: &quot;ACCEPTED&quot;,
+  &quot;lineStatuses&quot;: [
+    {
+      &quot;line&quot;: 1,
+      &quot;sku&quot;: &quot;WID100&quot;,
+      &quot;status&quot;: &quot;ACCEPTED&quot;,
+      &quot;expectedShipDate&quot;: null
+    },
+    {
+      &quot;line&quot;: 2,
+      &quot;sku&quot;: &quot;GAD200&quot;,
+      &quot;status&quot;: &quot;BACKORDERED&quot;,
+      &quot;expectedShipDate&quot;: &quot;2026-01-10&quot;
+    },
+    {
+      &quot;line&quot;: 3,
+      &quot;sku&quot;: &quot;CAB300&quot;,
+      &quot;status&quot;: &quot;ACCEPTED&quot;,
+      &quot;expectedShipDate&quot;: null
+    }
+  ]
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab8">
+      <div class="headerline">
+        <span class="pill">Lab 8 — Return Request (RMA) (Boolean + Array of Items)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>RETURN REQUEST
+
+RMA Number: RMA8001
+Order ID: PO777001
+Customer: Acme Corp
+Reason: DAMAGED
+Pickup Required: true
+
+Items:
+  - SKU: CABLE10  Qty: 2  Condition: DAMAGED
+  - SKU: LABEL05  Qty: 1  Condition: UNOPENED
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>rmaNumber</code> — <span class='small'>string</span></li><li><code>orderId</code> — <span class='small'>string</span></li><li><code>customer</code> — <span class='small'>string</span></li><li><code>reason</code> — <span class='small'>string</span></li><li><code>pickupRequired</code> — <span class='small'>boolean</span></li><li><code>items</code> — <span class='small'>array of objects</span></li><li><code>items[].sku</code> — <span class='small'>string</span></li><li><code>items[].qty</code> — <span class='small'>number</span></li><li><code>items[].condition</code> — <span class='small'>string</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab8_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab8')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab8')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab8')">Reset</button>
+            </div>
+            <div id="lab8_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;rmaNumber&quot;: &quot;RMA8001&quot;,
+  &quot;orderId&quot;: &quot;PO777001&quot;,
+  &quot;customer&quot;: &quot;Acme Corp&quot;,
+  &quot;reason&quot;: &quot;DAMAGED&quot;,
+  &quot;pickupRequired&quot;: true,
+  &quot;items&quot;: [
+    {
+      &quot;sku&quot;: &quot;CABLE10&quot;,
+      &quot;qty&quot;: 2,
+      &quot;condition&quot;: &quot;DAMAGED&quot;
+    },
+    {
+      &quot;sku&quot;: &quot;LABEL05&quot;,
+      &quot;qty&quot;: 1,
+      &quot;condition&quot;: &quot;UNOPENED&quot;
+    }
+  ]
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab8_q1">What is rmaNumber?</label>
+              <input id="lab8_q1" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab8_q2">What is reason?</label>
+              <input id="lab8_q2" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab8_q3">pickupRequired is which JSON type?</label>
+              <select id="lab8_q3"><option value="">Select one…</option><option value="boolean">boolean</option><option value="string">string</option><option value="number">number</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab8_q4">What is the value of pickupRequired?</label>
+              <select id="lab8_q4"><option value="">Select one…</option><option value="true">true</option><option value="false">false</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab8_q5">items is which JSON type?</label>
+              <select id="lab8_q5"><option value="">Select one…</option><option value="array">array</option><option value="object">object</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab8_q6">How many items are in items?</label>
+              <input id="lab8_q6" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab8_q7">What is items[0].condition?</label>
+              <input id="lab8_q7" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab8_q8">What is items[1].qty?</label>
+              <input id="lab8_q8" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab8_q9">qty is which JSON type?</label>
+              <select id="lab8_q9"><option value="">Select one…</option><option value="number">number</option><option value="string">string</option><option value="boolean">boolean</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab8_q10">Which SKU has condition UNOPENED?</label>
+              <input id="lab8_q10" type="text" placeholder="Exact value" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab8')">Check Answers</button>
+              <button onclick="revealQuiz('lab8')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab8')">Reset Quiz</button>
+            </div>
+            <div id="lab8_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;rmaNumber&quot;: &quot;RMA8001&quot;,
+  &quot;orderId&quot;: &quot;PO777001&quot;,
+  &quot;customer&quot;: &quot;Acme Corp&quot;,
+  &quot;reason&quot;: &quot;DAMAGED&quot;,
+  &quot;pickupRequired&quot;: true,
+  &quot;items&quot;: [
+    {
+      &quot;sku&quot;: &quot;CABLE10&quot;,
+      &quot;qty&quot;: 2,
+      &quot;condition&quot;: &quot;DAMAGED&quot;
+    },
+    {
+      &quot;sku&quot;: &quot;LABEL05&quot;,
+      &quot;qty&quot;: 1,
+      &quot;condition&quot;: &quot;UNOPENED&quot;
+    }
+  ]
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab9">
+      <div class="headerline">
+        <span class="pill">Lab 9 — Price Catalog (Nested Arrays: tierPrices)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>PRICE CATALOG
+
+Catalog ID: CAT9001
+Currency: USD
+Effective Date: 2026-01-01
+
+Products:
+  - SKU: WID100  Base Price: 2.50  Tier Prices: (minQty 10 =&gt; 2.25), (minQty 50 =&gt; 2.00)
+  - SKU: GAD200  Base Price: 3.00  Tier Prices: (minQty 10 =&gt; 2.70)
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>catalogId</code> — <span class='small'>string</span></li><li><code>currency</code> — <span class='small'>string</span></li><li><code>effectiveDate</code> — <span class='small'>string (YYYY-MM-DD)</span></li><li><code>products</code> — <span class='small'>array of objects</span></li><li><code>products[].sku</code> — <span class='small'>string</span></li><li><code>products[].basePrice</code> — <span class='small'>number</span></li><li><code>products[].tierPrices</code> — <span class='small'>array of objects</span></li><li><code>products[].tierPrices[].minQty</code> — <span class='small'>number</span></li><li><code>products[].tierPrices[].price</code> — <span class='small'>number</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab9_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab9')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab9')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab9')">Reset</button>
+            </div>
+            <div id="lab9_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;catalogId&quot;: &quot;CAT9001&quot;,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;effectiveDate&quot;: &quot;2026-01-01&quot;,
+  &quot;products&quot;: [
+    {
+      &quot;sku&quot;: &quot;WID100&quot;,
+      &quot;basePrice&quot;: 2.5,
+      &quot;tierPrices&quot;: [
+        {
+          &quot;minQty&quot;: 10,
+          &quot;price&quot;: 2.25
+        },
+        {
+          &quot;minQty&quot;: 50,
+          &quot;price&quot;: 2.0
+        }
+      ]
+    },
+    {
+      &quot;sku&quot;: &quot;GAD200&quot;,
+      &quot;basePrice&quot;: 3.0,
+      &quot;tierPrices&quot;: [
+        {
+          &quot;minQty&quot;: 10,
+          &quot;price&quot;: 2.7
+        }
+      ]
+    }
+  ]
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab9_q1">How many products are in products?</label>
+              <input id="lab9_q1" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab9_q2">What is the JSON type of tierPrices?</label>
+              <select id="lab9_q2"><option value="">Select one…</option><option value="array">array</option><option value="object">object</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab9_q3">What is products[0].basePrice?</label>
+              <input id="lab9_q3" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab9_q4">How many tierPrices does WID100 have?</label>
+              <input id="lab9_q4" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab9_q5">What is products[0].tierPrices[1].minQty?</label>
+              <input id="lab9_q5" type="number" placeholder="Enter a number" />
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab9_q6">What is products[1].tierPrices[0].price?</label>
+              <input id="lab9_q6" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab9_q7">basePrice is which JSON type?</label>
+              <select id="lab9_q7"><option value="">Select one…</option><option value="number">number</option><option value="string">string</option><option value="boolean">boolean</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab9_q8">How many total tier rules exist across all products?</label>
+              <input id="lab9_q8" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab9_q9">What is currency?</label>
+              <input id="lab9_q9" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab9_q10">Which product has more tiers?</label>
+              <input id="lab9_q10" type="text" placeholder="Exact value" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab9')">Check Answers</button>
+              <button onclick="revealQuiz('lab9')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab9')">Reset Quiz</button>
+            </div>
+            <div id="lab9_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;catalogId&quot;: &quot;CAT9001&quot;,
+  &quot;currency&quot;: &quot;USD&quot;,
+  &quot;effectiveDate&quot;: &quot;2026-01-01&quot;,
+  &quot;products&quot;: [
+    {
+      &quot;sku&quot;: &quot;WID100&quot;,
+      &quot;basePrice&quot;: 2.5,
+      &quot;tierPrices&quot;: [
+        {
+          &quot;minQty&quot;: 10,
+          &quot;price&quot;: 2.25
+        },
+        {
+          &quot;minQty&quot;: 50,
+          &quot;price&quot;: 2.0
+        }
+      ]
+    },
+    {
+      &quot;sku&quot;: &quot;GAD200&quot;,
+      &quot;basePrice&quot;: 3.0,
+      &quot;tierPrices&quot;: [
+        {
+          &quot;minQty&quot;: 10,
+          &quot;price&quot;: 2.7
+        }
+      ]
+    }
+  ]
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+    <section class="card" id="lab10">
+      <div class="headerline">
+        <span class="pill">Lab 10 — API Envelope (meta + data pattern)</span>
+        <span class="pill">10-question quiz</span>
+        <span class="pill">Instant validation</span>
+      </div>
+
+      <details open>
+        <summary>Part A — Convert Plain Text → JSON (then validate)</summary>
+        <div class="row">
+          <div>
+            <h3>Plain text input</h3>
+            <pre><code>API MESSAGE ENVELOPE
+
+Message ID: msg-1001
+Version: 1.0
+Created At: 2026-01-03T12:00:00Z
+Resource: purchaseOrder
+
+Data:
+  PO Number: PO9999
+  Customer: Globex
+  Items:
+    - SKU: SHIRT100  Qty: 2  Unit Price: 25.00
+</code></pre>
+            <details>
+              <summary>Target structure (minimum required)</summary>
+              <ul><li><code>meta</code> — <span class='small'>object</span></li><li><code>meta.messageId</code> — <span class='small'>string</span></li><li><code>meta.version</code> — <span class='small'>string</span></li><li><code>meta.createdAt</code> — <span class='small'>string (ISO 8601)</span></li><li><code>meta.resource</code> — <span class='small'>string</span></li><li><code>data</code> — <span class='small'>object</span></li><li><code>data.purchaseOrderNumber</code> — <span class='small'>string</span></li><li><code>data.items</code> — <span class='small'>array of objects</span></li><li><code>data.items[].qty</code> — <span class='small'>number</span></li><li><code>data.items[].unitPrice</code> — <span class='small'>number</span></li></ul>
+            </details>
+          </div>
+          <div>
+            <h3>Your JSON</h3>
+            <textarea id="lab10_input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+            <div class="btns">
+              <button class="primary" onclick="validateAndCheck('lab10')">Validate + Check Structure</button>
+              <button onclick="insertSample('lab10')">Insert Sample Answer</button>
+              <button class="danger" onclick="clearLab('lab10')">Reset</button>
+            </div>
+            <div id="lab10_result" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Part B — Visible JSON + 10 Questions (score instantly)</summary>
+        <div class="row">
+          <div>
+            <h3>Visible JSON</h3>
+            <pre><code>{
+  &quot;meta&quot;: {
+    &quot;messageId&quot;: &quot;msg-1001&quot;,
+    &quot;version&quot;: &quot;1.0&quot;,
+    &quot;createdAt&quot;: &quot;2026-01-03T12:00:00Z&quot;,
+    &quot;resource&quot;: &quot;purchaseOrder&quot;
+  },
+  &quot;data&quot;: {
+    &quot;purchaseOrderNumber&quot;: &quot;PO9999&quot;,
+    &quot;customer&quot;: &quot;Globex&quot;,
+    &quot;items&quot;: [
+      {
+        &quot;sku&quot;: &quot;SHIRT100&quot;,
+        &quot;qty&quot;: 2,
+        &quot;unitPrice&quot;: 25.0
+      }
+    ]
+  }
+}</code></pre>
+            <div class="callout small">
+              <strong>Path examples:</strong>
+              <div><code>$.items[0].sku</code> → first item SKU</div>
+              <div><code>$.billTo.address.city</code> → nested city</div>
+              <div><code>$.meta.createdAt</code> → envelope timestamp</div>
+            </div>
+          </div>
+          <div>
+            <h3>Questions</h3>
+            <div class="qgrid"><div>
+            <div class="q">
+              <label for="lab10_q1">How many top-level keys are in the JSON?</label>
+              <input id="lab10_q1" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab10_q2">What is the JSON type of meta?</label>
+              <select id="lab10_q2"><option value="">Select one…</option><option value="object">object</option><option value="array">array</option><option value="string">string</option><option value="number">number</option><option value="boolean">boolean</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab10_q3">What is meta.version?</label>
+              <input id="lab10_q3" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab10_q4">What is meta.resource?</label>
+              <input id="lab10_q4" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab10_q5">What is data.purchaseOrderNumber?</label>
+              <input id="lab10_q5" type="text" placeholder="Exact value" />
+            </div>
+            </div><div>
+            <div class="q">
+              <label for="lab10_q6">How many items are in data.items?</label>
+              <input id="lab10_q6" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab10_q7">What is data.items[0].sku?</label>
+              <input id="lab10_q7" type="text" placeholder="Exact value" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab10_q8">qty is which JSON type?</label>
+              <select id="lab10_q8"><option value="">Select one…</option><option value="number">number</option><option value="string">string</option><option value="boolean">boolean</option><option value="object">object</option><option value="array">array</option><option value="null">null</option></select>
+            </div>
+            
+
+            <div class="q">
+              <label for="lab10_q9">What is computed total = qty × unitPrice?</label>
+              <input id="lab10_q9" type="number" placeholder="Enter a number" />
+            </div>
+            
+
+            <div class="q">
+              <label for="lab10_q10">What is meta.createdAt?</label>
+              <input id="lab10_q10" type="text" placeholder="Exact value" />
+            </div>
+            </div></div>
+            <div class="btns">
+              <button class="primary" onclick="gradeQuiz('lab10')">Check Answers</button>
+              <button onclick="revealQuiz('lab10')">Reveal Answers</button>
+              <button class="danger" onclick="resetQuiz('lab10')">Reset Quiz</button>
+            </div>
+            <div id="lab10_quizResult" class="result"></div>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Sample JSON answer (reference)</summary>
+        <pre><code>{
+  &quot;meta&quot;: {
+    &quot;messageId&quot;: &quot;msg-1001&quot;,
+    &quot;version&quot;: &quot;1.0&quot;,
+    &quot;createdAt&quot;: &quot;2026-01-03T12:00:00Z&quot;,
+    &quot;resource&quot;: &quot;purchaseOrder&quot;
+  },
+  &quot;data&quot;: {
+    &quot;purchaseOrderNumber&quot;: &quot;PO9999&quot;,
+    &quot;customer&quot;: &quot;Globex&quot;,
+    &quot;items&quot;: [
+      {
+        &quot;sku&quot;: &quot;SHIRT100&quot;,
+        &quot;qty&quot;: 2,
+        &quot;unitPrice&quot;: 25.0
+      }
+    ]
+  }
+}</code></pre>
+        <div class="small">Tip: Use this only after trying on your own.</div>
+      </details>
+    </section>
+    
+
+  <div class="card">
+    <h2 style="margin-top:0;">Trainer tips (optional)</h2>
+    <ul>
+      <li>Run labs in pairs: build → validate → quiz → peer review.</li>
+      <li>Ask students to say the “path” to answers (example: <code>$.data.items[0].sku</code>).</li>
+      <li>After each lab, ask: “What would break if quantity was sent as a string?”</li>
+    </ul>
+  </div>
+
+  <div class="meta">Generated: 2026-01-03</div>
+</div>
+
+<script>
+function escapeHtml(str){
+  return String(str)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;');
+}
+
+function parseJsonWithLocation(text){
+  try{
+    const value = JSON.parse(text);
+    return { ok:true, value };
+  }catch(e){
+    const msg = String(e && e.message ? e.message : e);
+    const match = msg.match(/position\s+(\d+)/i);
+    let pos = match ? parseInt(match[1], 10) : null;
+    let line = null, col = null;
+    if(pos !== null && !Number.isNaN(pos)){
+      const upto = text.slice(0, pos);
+      const lines = upto.split(/\r\n|\n|\r/);
+      line = lines.length;
+      col = lines[lines.length-1].length + 1;
+    }
+    return { ok:false, error: msg, pos, line, col };
+  }
+}
+
+function setResult(id, html){ document.getElementById(id).innerHTML = html; }
+
+function typeOfJson(v){
+  if(v === null) return 'null';
+  if(Array.isArray(v)) return 'array';
+  return typeof v;
+}
+
+function eqNumber(a,b,tol=0.00001){
+  if(typeof a !== 'number' || typeof b !== 'number') return false;
+  return Math.abs(a-b) <= tol;
+}
+
+const LABS = {"lab1": {"expected": {"purchaseOrderNumber": "PO12345", "orderDate": "2026-01-03", "customer": "Acme Corp", "currency": "USD", "items": [{"sku": "WID100", "description": "Widget", "quantity": 10, "unitPrice": 2.5}, {"sku": "GAD200", "description": "Gadget", "quantity": 5, "unitPrice": 3.0}, {"sku": "CAB300", "description": "Cable", "quantity": 2, "unitPrice": 12.0}]}, "quizAnswers": {"q1": 5, "q2": "array", "q3": "PO12345", "q4": 3, "q5": "WID100", "q6": "number", "q7": 64.0, "q8": "{", "q9": "[", "q10": "Cable"}, "quizKinds": {"q1": "number", "q2": "select", "q3": "text", "q4": "number", "q5": "text", "q6": "select", "q7": "number", "q8": "select", "q9": "select", "q10": "text"}, "quizTolerances": {"q7": 0.01}}, "lab2": {"expected": {"invoiceNumber": "INV9001", "invoiceDate": "2026-01-04", "currency": "USD", "billTo": {"name": "Acme Corp", "address": {"city": "Dallas", "state": "TX"}}, "taxIncluded": false, "discount": null, "taxRate": 0.08, "items": [{"line": 1, "sku": "SHIRT100", "quantity": 10, "unitPrice": 25.0}, {"line": 2, "sku": "PANTS100", "quantity": 5, "unitPrice": 50.0}], "subtotalAmount": 500.0, "taxAmount": 40.0, "totalAmount": 540.0}, "quizAnswers": {"q1": "INV9001", "q2": "object", "q3": "Dallas", "q4": 2, "q5": 2, "q6": "boolean", "q7": "null", "q8": 500.0, "q9": 40.0, "q10": 540.0}, "quizKinds": {"q1": "text", "q2": "select", "q3": "text", "q4": "number", "q5": "number", "q6": "select", "q7": "select", "q8": "number", "q9": "number", "q10": "number"}, "quizTolerances": {"q8": 0.01, "q9": 0.01, "q10": 0.01}}, "lab3": {"expected": {"trackingNumber": "TRK5550001", "carrier": "Northwind Logistics", "status": "IN_TRANSIT", "shippedDate": "2026-01-03", "deliveredDate": null, "isDelivered": false, "events": [{"timestamp": "2026-01-03T10:00:00Z", "location": {"city": "Dallas", "state": "TX"}, "code": "PICKED_UP"}, {"timestamp": "2026-01-04T08:30:00Z", "location": {"city": "Waco", "state": "TX"}, "code": "IN_TRANSIT"}, {"timestamp": "2026-01-04T18:00:00Z", "location": {"city": "Austin", "state": "TX"}, "code": "OUT_FOR_DELIVERY"}]}, "quizAnswers": {"q1": "TRK5550001", "q2": "array", "q3": 3, "q4": "Austin", "q5": "PICKED_UP", "q6": "null", "q7": "boolean", "q8": "false", "q9": "Waco", "q10": "2026-01-03"}, "quizKinds": {"q1": "text", "q2": "select", "q3": "number", "q4": "text", "q5": "text", "q6": "select", "q7": "select", "q8": "select", "q9": "text", "q10": "text"}, "quizTolerances": {}}, "lab4": {"expected": {"customerId": "C900", "name": "Acme Corp", "active": true, "contacts": [{"name": "John Doe", "email": "john.doe@acme.com", "phone": null}, {"name": "Jane Roe", "email": "jane.roe@acme.com", "phone": "555-0102"}], "preferences": ["email_notifications", "paperless_billing"]}, "quizAnswers": {"q1": "C900", "q2": "boolean", "q3": "true", "q4": 2, "q5": "jane.roe@acme.com", "q6": "null", "q7": "John Doe", "q8": "array", "q9": 2, "q10": "paperless_billing"}, "quizKinds": {"q1": "text", "q2": "select", "q3": "select", "q4": "number", "q5": "text", "q6": "select", "q7": "text", "q8": "select", "q9": "number", "q10": "text"}, "quizTolerances": {}}, "lab5": {"expected": {"correlationId": "abc-123", "status": "REJECTED", "error": {"code": "VALIDATION_FAILED", "message": "Payload failed validation", "details": [{"path": "$.items[0].quantity", "issue": "type", "message": "quantity must be integer"}, {"path": "$.items[1].unitPrice", "issue": "minimum", "message": "unitPrice must be >= 0"}]}}, "quizAnswers": {"q1": "abc-123", "q2": "REJECTED", "q3": "VALIDATION_FAILED", "q4": 2, "q5": "array", "q6": "$.items[0].quantity", "q7": "minimum", "q8": "object", "q9": "unitPrice must be >= 0", "q10": "details as an array"}, "quizKinds": {"q1": "text", "q2": "text", "q3": "text", "q4": "number", "q5": "select", "q6": "text", "q7": "text", "q8": "select", "q9": "text", "q10": "select"}, "quizTolerances": {}}, "lab6": {"expected": {"sku": "WID100", "updateDate": "2026-01-05", "warehouses": [{"code": "DAL1", "onHand": 120, "reserved": 20}, {"code": "AUS1", "onHand": 80, "reserved": 5}]}, "quizAnswers": {"q1": 3, "q2": "array", "q3": "WID100", "q4": 2, "q5": "DAL1", "q6": "number", "q7": 100, "q8": 200, "q9": 25, "q10": "AUS1"}, "quizKinds": {"q1": "number", "q2": "select", "q3": "text", "q4": "number", "q5": "text", "q6": "select", "q7": "number", "q8": "number", "q9": "number", "q10": "text"}, "quizTolerances": {"q7": 0.01, "q8": 0.01, "q9": 0.01}}, "lab7": {"expected": {"ackId": "ACK7001", "orderId": "PO12345", "accepted": true, "status": "ACCEPTED", "lineStatuses": [{"line": 1, "sku": "WID100", "status": "ACCEPTED", "expectedShipDate": null}, {"line": 2, "sku": "GAD200", "status": "BACKORDERED", "expectedShipDate": "2026-01-10"}, {"line": 3, "sku": "CAB300", "status": "ACCEPTED", "expectedShipDate": null}]}, "quizAnswers": {"q1": "ACK7001", "q2": "PO12345", "q3": "boolean", "q4": "true", "q5": 3, "q6": 2, "q7": "2026-01-10", "q8": "string", "q9": "ACCEPTED", "q10": 2}, "quizKinds": {"q1": "text", "q2": "text", "q3": "select", "q4": "select", "q5": "number", "q6": "number", "q7": "text", "q8": "select", "q9": "text", "q10": "number"}, "quizTolerances": {}}, "lab8": {"expected": {"rmaNumber": "RMA8001", "orderId": "PO777001", "customer": "Acme Corp", "reason": "DAMAGED", "pickupRequired": true, "items": [{"sku": "CABLE10", "qty": 2, "condition": "DAMAGED"}, {"sku": "LABEL05", "qty": 1, "condition": "UNOPENED"}]}, "quizAnswers": {"q1": "RMA8001", "q2": "DAMAGED", "q3": "boolean", "q4": "true", "q5": "array", "q6": 2, "q7": "DAMAGED", "q8": 1, "q9": "number", "q10": "LABEL05"}, "quizKinds": {"q1": "text", "q2": "text", "q3": "select", "q4": "select", "q5": "select", "q6": "number", "q7": "text", "q8": "number", "q9": "select", "q10": "text"}, "quizTolerances": {}}, "lab9": {"expected": {"catalogId": "CAT9001", "currency": "USD", "effectiveDate": "2026-01-01", "products": [{"sku": "WID100", "basePrice": 2.5, "tierPrices": [{"minQty": 10, "price": 2.25}, {"minQty": 50, "price": 2.0}]}, {"sku": "GAD200", "basePrice": 3.0, "tierPrices": [{"minQty": 10, "price": 2.7}]}]}, "quizAnswers": {"q1": 2, "q2": "array", "q3": 2.5, "q4": 2, "q5": 50, "q6": 2.7, "q7": "number", "q8": 3, "q9": "USD", "q10": "WID100"}, "quizKinds": {"q1": "number", "q2": "select", "q3": "number", "q4": "number", "q5": "number", "q6": "number", "q7": "select", "q8": "number", "q9": "text", "q10": "text"}, "quizTolerances": {"q3": 0.01, "q6": 0.01}}, "lab10": {"expected": {"meta": {"messageId": "msg-1001", "version": "1.0", "createdAt": "2026-01-03T12:00:00Z", "resource": "purchaseOrder"}, "data": {"purchaseOrderNumber": "PO9999", "customer": "Globex", "items": [{"sku": "SHIRT100", "qty": 2, "unitPrice": 25.0}]}}, "quizAnswers": {"q1": 2, "q2": "object", "q3": "1.0", "q4": "purchaseOrder", "q5": "PO9999", "q6": 1, "q7": "SHIRT100", "q8": "number", "q9": 50.0, "q10": "2026-01-03T12:00:00Z"}, "quizKinds": {"q1": "number", "q2": "select", "q3": "text", "q4": "text", "q5": "text", "q6": "number", "q7": "text", "q8": "select", "q9": "number", "q10": "text"}, "quizTolerances": {"q9": 0.01}}};
+
+// --- Basic validators per lab (kept simple on purpose) ---
+function validateLabStructure(labId, obj){
+  const errs = [];
+  function err(path, msg){ errs.push({path, msg}); }
+
+  if(typeOfJson(obj) !== 'object'){
+    err('$','Top-level must be a JSON object.');
+    return errs;
+  }
+
+  // Lab 1
+  if(labId === 'lab1'){
+    if(typeOfJson(obj.purchaseOrderNumber) !== 'string') err('$.purchaseOrderNumber','Must be a string.');
+    if(typeOfJson(obj.orderDate) !== 'string') err('$.orderDate','Must be a string.');
+    if(typeOfJson(obj.customer) !== 'string') err('$.customer','Must be a string.');
+    if(typeOfJson(obj.currency) !== 'string') err('$.currency','Must be a string.');
+    if(typeOfJson(obj.items) !== 'array') err('$.items','Must be an array.');
+    else obj.items.forEach((it, idx)=>{
+      const p = `$.items[${idx}]`;
+      if(typeOfJson(it) !== 'object') err(p,'Each item must be an object.');
+      else{
+        if(typeOfJson(it.sku) !== 'string') err(`${p}.sku`,'Must be a string.');
+        if(typeOfJson(it.description) !== 'string') err(`${p}.description`,'Must be a string.');
+        if(typeOfJson(it.quantity) !== 'number') err(`${p}.quantity`,'Must be a number.');
+        if(typeOfJson(it.unitPrice) !== 'number') err(`${p}.unitPrice`,'Must be a number.');
+      }
+    });
+    return errs;
+  }
+
+  // Lab 2
+  if(labId === 'lab2'){
+    if(typeOfJson(obj.invoiceNumber) !== 'string') err('$.invoiceNumber','Must be a string.');
+    if(typeOfJson(obj.invoiceDate) !== 'string') err('$.invoiceDate','Must be a string.');
+    if(typeOfJson(obj.currency) !== 'string') err('$.currency','Must be a string.');
+    if(typeOfJson(obj.billTo) !== 'object') err('$.billTo','Must be an object.');
+    else{
+      if(typeOfJson(obj.billTo.name) !== 'string') err('$.billTo.name','Must be a string.');
+      if(typeOfJson(obj.billTo.address) !== 'object') err('$.billTo.address','Must be an object.');
+    }
+    if(typeOfJson(obj.taxIncluded) !== 'boolean') err('$.taxIncluded','Must be boolean.');
+    if(typeOfJson(obj.discount) !== 'null' && typeOfJson(obj.discount) !== 'number') err('$.discount','Must be null or number.');
+    if(typeOfJson(obj.taxRate) !== 'number') err('$.taxRate','Must be a number.');
+    if(typeOfJson(obj.items) !== 'array') err('$.items','Must be an array.');
+    return errs;
+  }
+
+  // Lab 3
+  if(labId === 'lab3'){
+    if(typeOfJson(obj.trackingNumber) !== 'string') err('$.trackingNumber','Must be a string.');
+    if(typeOfJson(obj.carrier) !== 'string') err('$.carrier','Must be a string.');
+    if(typeOfJson(obj.status) !== 'string') err('$.status','Must be a string.');
+    if(typeOfJson(obj.shippedDate) !== 'string') err('$.shippedDate','Must be a string.');
+    if(typeOfJson(obj.deliveredDate) !== 'null' && typeOfJson(obj.deliveredDate) !== 'string') err('$.deliveredDate','Must be null or string.');
+    if(typeOfJson(obj.isDelivered) !== 'boolean') err('$.isDelivered','Must be boolean.');
+    if(typeOfJson(obj.events) !== 'array') err('$.events','Must be an array.');
+    return errs;
+  }
+
+  // Lab 4
+  if(labId === 'lab4'){
+    if(typeOfJson(obj.customerId) !== 'string') err('$.customerId','Must be a string.');
+    if(typeOfJson(obj.name) !== 'string') err('$.name','Must be a string.');
+    if(typeOfJson(obj.active) !== 'boolean') err('$.active','Must be boolean.');
+    if(typeOfJson(obj.contacts) !== 'array') err('$.contacts','Must be an array.');
+    if(typeOfJson(obj.preferences) !== 'array') err('$.preferences','Must be an array.');
+    return errs;
+  }
+
+  // Lab 5
+  if(labId === 'lab5'){
+    if(typeOfJson(obj.correlationId) !== 'string') err('$.correlationId','Must be a string.');
+    if(typeOfJson(obj.status) !== 'string') err('$.status','Must be a string.');
+    if(typeOfJson(obj.error) !== 'object') err('$.error','Must be an object.');
+    return errs;
+  }
+
+  // Lab 6
+  if(labId === 'lab6'){
+    if(typeOfJson(obj.sku) !== 'string') err('$.sku','Must be a string.');
+    if(typeOfJson(obj.updateDate) !== 'string') err('$.updateDate','Must be a string.');
+    if(typeOfJson(obj.warehouses) !== 'array') err('$.warehouses','Must be an array.');
+    return errs;
+  }
+
+  // Lab 7
+  if(labId === 'lab7'){
+    if(typeOfJson(obj.ackId) !== 'string') err('$.ackId','Must be a string.');
+    if(typeOfJson(obj.orderId) !== 'string') err('$.orderId','Must be a string.');
+    if(typeOfJson(obj.accepted) !== 'boolean') err('$.accepted','Must be boolean.');
+    if(typeOfJson(obj.lineStatuses) !== 'array') err('$.lineStatuses','Must be an array.');
+    return errs;
+  }
+
+  // Lab 8
+  if(labId === 'lab8'){
+    if(typeOfJson(obj.rmaNumber) !== 'string') err('$.rmaNumber','Must be a string.');
+    if(typeOfJson(obj.orderId) !== 'string') err('$.orderId','Must be a string.');
+    if(typeOfJson(obj.pickupRequired) !== 'boolean') err('$.pickupRequired','Must be boolean.');
+    if(typeOfJson(obj.items) !== 'array') err('$.items','Must be an array.');
+    return errs;
+  }
+
+  // Lab 9
+  if(labId === 'lab9'){
+    if(typeOfJson(obj.catalogId) !== 'string') err('$.catalogId','Must be a string.');
+    if(typeOfJson(obj.currency) !== 'string') err('$.currency','Must be a string.');
+    if(typeOfJson(obj.products) !== 'array') err('$.products','Must be an array.');
+    return errs;
+  }
+
+  // Lab 10
+  if(labId === 'lab10'){
+    if(typeOfJson(obj.meta) !== 'object') err('$.meta','Must be an object.');
+    if(typeOfJson(obj.data) !== 'object') err('$.data','Must be an object.');
+    return errs;
+  }
+
+  return errs;
+}
+
+function validateAndCheck(labId){
+  const t = (document.getElementById(`${labId}_input`).value || '').trim();
+  if(!t){
+    setResult(`${labId}_result`, '<span class="warn">Paste your JSON first.</span>');
+    return;
+  }
+  const res = parseJsonWithLocation(t);
+  if(!res.ok){
+    const loc = (res.line && res.col) ? ` (line ${res.line}, col ${res.col})` : '';
+    setResult(`${labId}_result`, `<div><span class="err">Invalid JSON ❌</span></div><div class="small">${escapeHtml(res.error + loc)}</div>`);
+    return;
+  }
+  const errs = validateLabStructure(labId, res.value);
+  if(errs.length){
+    const li = errs.map(e=>`<li><code>${escapeHtml(e.path)}</code>: ${escapeHtml(e.msg)}</li>`).join('');
+    setResult(`${labId}_result`, `<div><span class="warn">Valid JSON ✅</span> <span class="small">…but structure needs fixes.</span></div>
+      <div class="small"><strong>Fix these:</strong></div><ul>${li}</ul>`);
+    return;
+  }
+
+  // Quick computed feedback (optional)
+  let extra = '';
+  try{
+    if(labId === 'lab1' && Array.isArray(res.value.items)){
+      const total = res.value.items.reduce((s,it)=> s + (it.quantity*it.unitPrice), 0);
+      extra = `<div class="small">Computed total: <strong>${total.toFixed(2)}</strong></div>`;
+    }
+    if(labId === 'lab2' && Array.isArray(res.value.items) && typeof res.value.taxRate === 'number'){
+      const subtotal = res.value.items.reduce((s,it)=> s + (it.quantity*it.unitPrice), 0);
+      const tax = subtotal * res.value.taxRate;
+      const total = subtotal + tax;
+      extra = `<div class="small">Computed subtotal: <strong>${subtotal.toFixed(2)}</strong></div>
+               <div class="small">Computed tax: <strong>${tax.toFixed(2)}</strong></div>
+               <div class="small">Computed total: <strong>${total.toFixed(2)}</strong></div>`;
+    }
+    if(labId === 'lab10' && res.value.data && Array.isArray(res.value.data.items)){
+      const total = res.value.data.items.reduce((s,it)=> s + (it.qty*it.unitPrice), 0);
+      extra = `<div class="small">Computed total: <strong>${total.toFixed(2)}</strong></div>`;
+    }
+  }catch(_e){}
+
+  setResult(`${labId}_result`, `<div><span class="ok">Valid JSON ✅</span> <span class="small">Structure checks passed.</span></div>${extra}
+    <div class="small">Tip: Use the quiz below to build speed and confidence.</div>`);
+}
+
+function insertSample(labId){
+  document.getElementById(`${labId}_input`).value = JSON.stringify(LABS[labId].expected, null, 2);
+  setResult(`${labId}_result`, '<span class="small">Sample inserted. Now click “Validate + Check Structure”.</span>');
+}
+function clearLab(labId){
+  document.getElementById(`${labId}_input`).value = '';
+  setResult(`${labId}_result`, '<span class="small">Reset. Paste your JSON to begin.</span>');
+}
+
+function normalizeText(v){ return (v ?? '').toString().trim().toLowerCase(); }
+
+function gradeQuiz(labId){
+  const config = LABS[labId];
+  const ans = config.quizAnswers;
+  const kinds = config.quizKinds;
+  const tols = config.quizTolerances || {};
+
+  let total = 0;
+  let score = 0;
+  const feedback = [];
+
+  for(const qid in ans){
+    total++;
+    const el = document.getElementById(`${labId}_${qid}`);
+    let raw = (el.value ?? '').toString().trim();
+
+    let ok = false;
+    const expected = ans[qid];
+    const kind = kinds[qid];
+
+    if(kind === 'number'){
+      const v = Number(raw);
+      const tol = tols[qid] ?? 0.00001;
+      ok = eqNumber(v, Number(expected), tol);
+    } else if(kind === 'text'){
+      ok = normalizeText(raw) === normalizeText(expected);
+    } else if(kind === 'select'){
+      ok = raw === String(expected);
+    }
+
+    if(ok) score++;
+    feedback.push({qid, ok});
+  }
+
+  const lis = feedback.map(f => `<li><strong>${f.qid.toUpperCase()}</strong>: ${f.ok ? '<span class="ok">Correct</span>' : '<span class="err">Incorrect</span>'}</li>`).join('');
+  setResult(`${labId}_quizResult`, `<div><strong>Score:</strong> ${score} / ${total}</div>
+    <ul>${lis}</ul>
+    <div class="small">Use “Reveal Answers” to learn quickly.</div>`);
+}
+
+function revealQuiz(labId){
+  const ans = LABS[labId].quizAnswers;
+  const keys = Object.keys(ans).sort();
+  const rows = keys.map(k => {
+    let v = ans[k];
+    if(typeof v === 'string') v = escapeHtml(v);
+    return `<li><strong>${k.toUpperCase()}</strong>: <code>${v}</code></li>`;
+  }).join('');
+  setResult(`${labId}_quizResult`, `<div><span class="ok">Answer key</span></div><ul>${rows}</ul>`);
+}
+
+function resetQuiz(labId){
+  const ans = LABS[labId].quizAnswers;
+  for(const qid in ans){
+    const el = document.getElementById(`${labId}_${qid}`);
+    if(!el) continue;
+    if(el.tagName.toLowerCase() === 'select') el.value = '';
+    else el.value = '';
+  }
+  setResult(`${labId}_quizResult`, '<span class="small">Reset. Answer again.</span>');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setResult('lab1_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab1_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab2_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab2_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab3_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab3_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab4_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab4_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab5_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab5_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab6_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab6_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab7_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab7_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab8_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab8_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab9_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab9_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+setResult('lab10_result','<span class="small">Paste your JSON to begin.</span>');
+setResult('lab10_quizResult','<span class="small">Answer the questions and click “Check Answers”.</span>');
+});
+</script>
+</body>
+</html>
