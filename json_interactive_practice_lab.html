@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JSON Interactive Practice Lab (Zero → Confident)</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#1b1b1b;
+      --muted:#555;
+      --border:#e5e7eb;
+      --codebg:#0b1020;
+      --codefg:#e6edf3;
+      --good:#047857;
+      --bad:#b91c1c;
+      --warn:#b45309;
+      --link:#0b5fff;
+      --card:#ffffff;
+      --soft:#f8fafc;
+    }
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family: Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.45;
+      margin:0;
+      padding:24px;
+    }
+    .container{max-width:1100px;margin:0 auto;}
+    h1{margin:0 0 6px;font-size:28px;}
+    .meta{color:var(--muted);font-size:14px;margin-bottom:18px;}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media (max-width: 900px){.row{grid-template-columns:1fr;}}
+    .card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:var(--card);
+      padding:16px 18px;
+      margin:14px 0;
+    }
+    .callout{
+      border:1px solid var(--border);
+      background:var(--soft);
+      border-radius:12px;
+      padding:12px 14px;
+      margin:12px 0;
+    }
+    pre{
+      background:var(--codebg);
+      color:var(--codefg);
+      padding:14px;
+      border-radius:12px;
+      overflow:auto;
+      font-size:13px;
+      line-height:1.4;
+      margin:10px 0;
+    }
+    code{font-family: Consolas, Menlo, Monaco, monospace;}
+    textarea{
+      width:100%;
+      min-height:220px;
+      resize:vertical;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size:13px;
+      line-height:1.4;
+      padding:12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      box-sizing:border-box;
+    }
+    .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+    button{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:10px;
+      padding:9px 12px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    button.primary{
+      border-color: var(--link);
+      color:#fff;
+      background: var(--link);
+    }
+    button.danger{
+      border-color: var(--bad);
+      color:#fff;
+      background: var(--bad);
+    }
+    button:active{transform: translateY(1px);}
+    .result{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px 14px;
+      margin-top:12px;
+      background:#fff;
+    }
+    .ok{color:var(--good);font-weight:700;}
+    .err{color:var(--bad);font-weight:700;}
+    .warn{color:var(--warn);font-weight:700;}
+    .small{color:var(--muted);font-size:13px;}
+    .pill{
+      display:inline-block;
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:2px 10px;
+      border-radius:999px;
+      margin-right:8px;
+    }
+    details{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      margin:10px 0;
+      background:#fff;
+    }
+    summary{
+      cursor:pointer;
+      font-weight:700;
+    }
+    label{display:block;margin:10px 0 6px;font-weight:600;}
+    input[type="text"], input[type="number"], select{
+      width:100%;
+      padding:10px 10px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:14px;
+      box-sizing:border-box;
+    }
+    .qgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media (max-width: 900px){.qgrid{grid-template-columns:1fr;}}
+    .score{
+      font-size:16px;
+      font-weight:800;
+      margin-top:10px;
+    }
+    .footer{margin-top:18px;color:var(--muted);font-size:13px;}
+    a{color:var(--link);text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    .mono{font-family:Consolas, Menlo, Monaco, monospace;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>JSON Interactive Practice Lab</h1>
+  <div class="meta">
+    Learn JSON by doing: convert plain text to JSON, validate instantly, and answer questions to build deep understanding.
+    <br/>
+      </div>
+
+  <div class="callout">
+    <strong>Rules for valid JSON</strong>
+    <ul>
+      <li>Keys and string values use <strong>double quotes</strong> (")</li>
+      <li>No trailing commas</li>
+      <li>Objects use <code>{ }</code>, arrays use <code>[ ]</code></li>
+      <li>Validate often</li>
+    </ul>
+  </div>
+
+  <!-- Module 0 -->
+  <div class="card" id="validator">
+    <div>
+      <span class="pill">Module 0</span>
+      <span class="pill">Quick Validator</span>
+      <span class="pill">Any JSON</span>
+    </div>
+    <h2 style="margin:10px 0 6px;">Instant JSON Validator</h2>
+    <p class="small">Paste any JSON here and click <strong>Validate</strong> (and optionally <strong>Format</strong>).</p>
+
+    <textarea id="validatorInput" spellcheck="false" placeholder='Paste JSON here...'></textarea>
+    <div class="btns">
+      <button class="primary" onclick="validateOnly()">Validate</button>
+      <button onclick="formatJson()">Format (Pretty Print)</button>
+      <button class="danger" onclick="clearBox('validatorInput','validatorResult')">Clear</button>
+    </div>
+    <div id="validatorResult" class="result"></div>
+  </div>
+
+  <!-- Module 1 -->
+  <div class="card" id="m1">
+    <div>
+      <span class="pill">Module 1</span>
+      <span class="pill">Convert text → JSON</span>
+      <span class="pill">Validate + shape checks</span>
+    </div>
+    <h2 style="margin:10px 0 6px;">Exercise 1 — Convert Plain Text into Valid JSON</h2>
+    <p class="small">Task: Convert the plain text purchase order into a <strong>valid JSON</strong> document. Then validate it here.</p>
+
+    <div class="row">
+      <div>
+        <h3 style="margin:10px 0 6px;">Plain text input</h3>
+        <pre><code>PURCHASE ORDER
+
+PO Number: PO12345
+Customer: Acme Corp
+Priority: HIGH
+
+Items:
+  - Item: Widget   Quantity: 10   Unit Price: 2.50
+  - Item: Gadget   Quantity: 5    Unit Price: 3.00</code></pre>
+
+        <details>
+          <summary>Target structure (what your JSON must contain)</summary>
+          <ul>
+            <li><code>purchaseOrderNumber</code> (string)</li>
+            <li><code>customer</code> (string)</li>
+            <li><code>priority</code> (string)</li>
+            <li><code>items</code> (array of objects)</li>
+            <li>Each item object must have: <code>item</code> (string), <code>quantity</code> (number), <code>unitPrice</code> (number)</li>
+          </ul>
+        </details>
+      </div>
+
+      <div>
+        <h3 style="margin:10px 0 6px;">Your JSON (edit here)</h3>
+        <textarea id="ex1Input" spellcheck="false" placeholder='Paste your JSON here...'></textarea>
+        <div class="btns">
+          <button class="primary" onclick="runExercise1()">Validate + Check Structure</button>
+          <button onclick="fillSample1()">Insert Sample Answer (for learning)</button>
+          <button class="danger" onclick="clearBox('ex1Input','ex1Result')">Reset</button>
+        </div>
+        <div id="ex1Result" class="result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module 2 -->
+  <div class="card" id="m2">
+    <div>
+      <span class="pill">Module 2</span>
+      <span class="pill">Read JSON deeply</span>
+      <span class="pill">Questions + scoring</span>
+    </div>
+    <h2 style="margin:10px 0 6px;">Exercise 2 — Read JSON and Answer Questions</h2>
+    <p class="small">Goal: Learn to navigate JSON (objects, arrays, types, and paths) by answering questions about the payload below.</p>
+
+    <div class="row">
+      <div>
+        <h3 style="margin:10px 0 6px;">Visible JSON</h3>
+        <pre><code id="ex2JsonView"></code></pre>
+
+        <details>
+          <summary>Hint: JSON path examples</summary>
+          <ul>
+            <li><code>$.purchaseOrderNumber</code> → top-level field</li>
+            <li><code>$.items[0].item</code> → first item name</li>
+            <li><code>$.items.length</code> → number of items (conceptually)</li>
+          </ul>
+        </details>
+      </div>
+
+      <div>
+        <h3 style="margin:10px 0 6px;">Questions</h3>
+
+        <div class="qgrid">
+          <div>
+            <label>Q1) How many top-level keys are in the JSON?</label>
+            <input id="q1" type="number" placeholder="Example: 4" />
+
+            <label>Q2) What is the JSON type of <span class="mono">items</span>?</label>
+            <select id="q2">
+              <option value="">Select one…</option>
+              <option>object</option>
+              <option>array</option>
+              <option>string</option>
+              <option>number</option>
+              <option>boolean</option>
+              <option>null</option>
+            </select>
+
+            <label>Q3) What is the value of <span class="mono">customer</span>?</label>
+            <input id="q3" type="text" placeholder="Exact text" />
+
+            <label>Q4) What is <span class="mono">items[1].quantity</span>?</label>
+            <input id="q4" type="number" placeholder="Example: 5" />
+          </div>
+
+          <div>
+            <label>Q5) Which symbol starts an object?</label>
+            <select id="q5">
+              <option value="">Select one…</option>
+              <option>{</option>
+              <option>[</option>
+              <option>(</option>
+              <option>&lt;</option>
+            </select>
+
+            <label>Q6) Which symbol starts an array?</label>
+            <select id="q6">
+              <option value="">Select one…</option>
+              <option>{</option>
+              <option>[</option>
+              <option>(</option>
+              <option>&lt;</option>
+            </select>
+
+            <label>Q7) Is <span class="mono">priority</span> a string or a number?</label>
+            <select id="q7">
+              <option value="">Select one…</option>
+              <option>string</option>
+              <option>number</option>
+            </select>
+
+            <label>Q8) What is <span class="mono">items[0].item</span>?</label>
+            <input id="q8" type="text" placeholder="Exact text" />
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="primary" onclick="gradeExercise2()">Check Answers</button>
+          <button onclick="revealAnswers2()">Reveal Correct Answers</button>
+          <button class="danger" onclick="resetExercise2()">Reset</button>
+        </div>
+
+        <div id="ex2Result" class="result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module 3 -->
+  <div class="card" id="m3">
+    <div>
+      <span class="pill">Module 3</span>
+      <span class="pill">Debug</span>
+      <span class="pill">Fix invalid JSON</span>
+    </div>
+    <h2 style="margin:10px 0 6px;">Exercise 3 — Fix Invalid JSON</h2>
+    <p class="small">Goal: Fix common JSON errors (missing commas, trailing commas, wrong quotes). Make the JSON valid.</p>
+
+    <div class="row">
+      <div>
+        <h3 style="margin:10px 0 6px;">Broken JSON (edit to fix)</h3>
+        <textarea id="ex3Input" spellcheck="false"></textarea>
+        <div class="btns">
+          <button class="primary" onclick="validateEx3()">Validate</button>
+          <button onclick="formatEx3()">Format</button>
+          <button onclick="fillBroken3()">Reset to Broken</button>
+          <button onclick="fillFixed3()">Show One Correct Answer</button>
+        </div>
+        <div id="ex3Result" class="result"></div>
+      </div>
+      <div>
+        <h3 style="margin:10px 0 6px;">What to look for</h3>
+        <ul>
+          <li>Missing commas between fields</li>
+          <li>Trailing commas (not allowed)</li>
+          <li>Keys must be in double quotes</li>
+          <li>Strings must be in double quotes</li>
+        </ul>
+        <details open>
+          <summary>Debug tip</summary>
+          <p class="small">Validate first, fix one issue, validate again. Repeat. Most teams waste time by changing too much at once.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    LVTMagus JSON Lab
+  </div>
+</div>
+
+<script>
+  // ---------- Utilities ----------
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#039;');
+  }
+
+  function parseJsonWithLocation(text){
+    try{
+      const value = JSON.parse(text);
+      return { ok:true, value };
+    }catch(e){
+      // Try to extract "position N" from common error messages
+      const msg = String(e && e.message ? e.message : e);
+      const match = msg.match(/position\s+(\d+)/i);
+      let pos = match ? parseInt(match[1], 10) : null;
+      let line = null, col = null;
+
+      if(pos !== null && !Number.isNaN(pos)){
+        // Convert pos to line/col
+        const upto = text.slice(0, pos);
+        const lines = upto.split(/\r\n|\n|\r/);
+        line = lines.length;
+        col = lines[lines.length-1].length + 1;
+      }
+      return { ok:false, error: msg, pos, line, col };
+    }
+  }
+
+  function setResult(elId, html){
+    document.getElementById(elId).innerHTML = html;
+  }
+
+  function clearBox(textareaId, resultId){
+    document.getElementById(textareaId).value = '';
+    setResult(resultId, '<span class="small">Cleared.</span>');
+  }
+
+  function pretty(obj){
+    return JSON.stringify(obj, null, 2);
+  }
+
+  // ---------- Module 0: Validator ----------
+  function validateOnly(){
+    const t = document.getElementById('validatorInput').value.trim();
+    if(!t){
+      setResult('validatorResult', '<span class="warn">Paste JSON first.</span>');
+      return;
+    }
+    const res = parseJsonWithLocation(t);
+    if(res.ok){
+      const type = Array.isArray(res.value) ? 'array' : (res.value === null ? 'null' : typeof res.value);
+      setResult('validatorResult', `<div><span class="ok">Valid JSON ✅</span></div>
+        <div class="small">Top-level type: <strong>${type}</strong></div>`);
+    }else{
+      const loc = (res.line && res.col) ? ` (line ${res.line}, col ${res.col})` : '';
+      setResult('validatorResult', `<div><span class="err">Invalid JSON ❌</span></div>
+        <div class="small">${escapeHtml(res.error)}${escapeHtml(loc)}</div>`);
+    }
+  }
+
+  function formatJson(){
+    const t = document.getElementById('validatorInput').value.trim();
+    if(!t){
+      setResult('validatorResult', '<span class="warn">Paste JSON first.</span>');
+      return;
+    }
+    const res = parseJsonWithLocation(t);
+    if(!res.ok){
+      validateOnly();
+      return;
+    }
+    document.getElementById('validatorInput').value = pretty(res.value);
+    setResult('validatorResult', '<span class="ok">Formatted ✅</span> <span class="small">JSON pretty-printed.</span>');
+  }
+
+  // ---------- Module 1: Convert text -> JSON ----------
+  const ex1Expected = {
+    purchaseOrderNumber: "PO12345",
+    customer: "Acme Corp",
+    priority: "HIGH",
+    items: [
+      { item:"Widget", quantity:10, unitPrice:2.50 },
+      { item:"Gadget", quantity:5, unitPrice:3.00 }
+    ]
+  };
+
+  function validateShapeEx1(obj){
+    const errors = [];
+    function err(path, msg){ errors.push({path, msg}); }
+
+    if(typeof obj !== 'object' || obj === null || Array.isArray(obj)){
+      err('$', 'Top-level must be a JSON object.');
+      return errors;
+    }
+    if(typeof obj.purchaseOrderNumber !== 'string') err('$.purchaseOrderNumber','Must be a string.');
+    if(typeof obj.customer !== 'string') err('$.customer','Must be a string.');
+    if(typeof obj.priority !== 'string') err('$.priority','Must be a string.');
+    if(!Array.isArray(obj.items)) err('$.items','Must be an array.');
+    else{
+      if(obj.items.length < 1) err('$.items','Must contain at least 1 item.');
+      obj.items.forEach((it, idx)=>{
+        const p = `$.items[${idx}]`;
+        if(typeof it !== 'object' || it === null || Array.isArray(it)) err(p,'Each item must be an object.');
+        else{
+          if(typeof it.item !== 'string') err(`${p}.item`,'Must be a string.');
+          if(typeof it.quantity !== 'number') err(`${p}.quantity`,'Must be a number.');
+          if(typeof it.unitPrice !== 'number') err(`${p}.unitPrice`,'Must be a number.');
+        }
+      });
+    }
+    return errors;
+  }
+
+  function deepEqual(a,b){
+    if(a === b) return true;
+    if(typeof a !== typeof b) return false;
+    if(a === null || b === null) return a === b;
+    if(Array.isArray(a)){
+      if(!Array.isArray(b) || a.length !== b.length) return false;
+      for(let i=0;i<a.length;i++) if(!deepEqual(a[i], b[i])) return false;
+      return true;
+    }
+    if(typeof a === 'object'){
+      const ak = Object.keys(a).sort();
+      const bk = Object.keys(b).sort();
+      if(ak.length !== bk.length) return false;
+      for(let i=0;i<ak.length;i++){
+        if(ak[i] !== bk[i]) return false;
+        if(!deepEqual(a[ak[i]], b[bk[i]])) return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  function runExercise1(){
+    const t = document.getElementById('ex1Input').value.trim();
+    if(!t){
+      setResult('ex1Result', '<span class="warn">Paste your JSON first.</span>');
+      return;
+    }
+    const res = parseJsonWithLocation(t);
+    if(!res.ok){
+      const loc = (res.line && res.col) ? ` (line ${res.line}, col ${res.col})` : '';
+      setResult('ex1Result', `<div><span class="err">Invalid JSON ❌</span></div>
+        <div class="small">${escapeHtml(res.error)}${escapeHtml(loc)}</div>`);
+      return;
+    }
+
+    const errors = validateShapeEx1(res.value);
+    if(errors.length){
+      const li = errors.map(e => `<li><span class="mono">${escapeHtml(e.path)}</span>: ${escapeHtml(e.msg)}</li>`).join('');
+      setResult('ex1Result', `<div><span class="warn">Valid JSON ✅</span> <span class="small">…but structure needs fixes.</span></div>
+        <div class="small"><strong>Fix these:</strong></div>
+        <ul>${li}</ul>`);
+      return;
+    }
+
+    // compute total
+    const total = res.value.items.reduce((sum, it)=> sum + (it.quantity * it.unitPrice), 0);
+    const matches = deepEqual(res.value, ex1Expected);
+
+    setResult('ex1Result', `<div><span class="ok">Valid JSON ✅</span> <span class="small">Structure checks passed.</span></div>
+      <div class="small">Item count: <strong>${res.value.items.length}</strong></div>
+      <div class="small">Computed total (quantity × unitPrice): <strong>${total.toFixed(2)}</strong></div>
+      <div class="small">Matches expected sample exactly: <strong>${matches ? 'YES' : 'NO (that’s OK if your structure is valid)'}</strong></div>
+    `);
+  }
+
+  function fillSample1(){
+    document.getElementById('ex1Input').value = JSON.stringify(ex1Expected, null, 2);
+    setResult('ex1Result', '<span class="small">Sample inserted. Now click “Validate + Check Structure”.</span>');
+  }
+
+  // ---------- Module 2: Questions ----------
+  const ex2Json = {
+    purchaseOrderNumber: "PO12345",
+    customer: "Acme Corp",
+    priority: "HIGH",
+    items: [
+      { item:"Widget", quantity:10, unitPrice:2.50 },
+      { item:"Gadget", quantity:5, unitPrice:3.00 }
+    ]
+  };
+
+  const ex2Answers = {
+    q1: 4,
+    q2: "array",
+    q3: "Acme Corp",
+    q4: 5,
+    q5: "{",
+    q6: "[",
+    q7: "string",
+    q8: "Widget"
+  };
+
+  function initEx2(){
+    document.getElementById('ex2JsonView').innerHTML = escapeHtml(JSON.stringify(ex2Json, null, 2));
+    setResult('ex2Result','<span class="small">Answer the questions and click “Check Answers”.</span>');
+  }
+
+  function gradeExercise2(){
+    let score = 0;
+    let total = 8;
+    const feedback = [];
+
+    function check(id, expected, normalizeFn){
+      const raw = (document.getElementById(id).value ?? '').toString().trim();
+      const val = normalizeFn ? normalizeFn(raw) : raw;
+      const ok = (val === expected);
+      if(ok) score++;
+      feedback.push({id, ok, expected});
+    }
+
+    check('q1', ex2Answers.q1, v => Number(v));
+    check('q2', ex2Answers.q2);
+    check('q3', ex2Answers.q3);
+    check('q4', ex2Answers.q4, v => Number(v));
+    check('q5', ex2Answers.q5);
+    check('q6', ex2Answers.q6);
+    check('q7', ex2Answers.q7);
+    check('q8', ex2Answers.q8);
+
+    const lines = feedback.map(f => {
+      return `<li><strong>${f.id.toUpperCase()}</strong>: ${f.ok ? '<span class="ok">Correct</span>' : '<span class="err">Incorrect</span>'}</li>`;
+    }).join('');
+
+    setResult('ex2Result', `<div class="score">Score: ${score} / ${total}</div>
+      <ul>${lines}</ul>
+      <div class="small">Use “Reveal Correct Answers” to learn quickly.</div>`);
+  }
+
+  function revealAnswers2(){
+    const a = ex2Answers;
+    setResult('ex2Result', `<div><span class="ok">Correct answers</span></div>
+      <ul>
+        <li>Q1: ${a.q1}</li>
+        <li>Q2: ${a.q2}</li>
+        <li>Q3: ${escapeHtml(a.q3)}</li>
+        <li>Q4: ${a.q4}</li>
+        <li>Q5: ${escapeHtml(a.q5)}</li>
+        <li>Q6: ${escapeHtml(a.q6)}</li>
+        <li>Q7: ${a.q7}</li>
+        <li>Q8: ${escapeHtml(a.q8)}</li>
+      </ul>`);
+  }
+
+  function resetExercise2(){
+    ['q1','q2','q3','q4','q5','q6','q7','q8'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el.tagName.toLowerCase() === 'select') el.value = '';
+      else el.value = '';
+    });
+    setResult('ex2Result','<span class="small">Reset. Answer again.</span>');
+  }
+
+  // ---------- Module 3: Fix invalid JSON ----------
+  const ex3Broken = `{
+  "purchaseOrderNumber": "PO12345"
+  "customer": "Acme Corp",
+  "items": [
+    { "item": "Widget", "quantity": 10, "unitPrice": 2.50, },
+    { "item": "Gadget", "quantity": 5, "unitPrice": 3.00 }
+  ]
+}`;
+
+  const ex3Fixed = {
+    purchaseOrderNumber: "PO12345",
+    customer: "Acme Corp",
+    items: [
+      { item:"Widget", quantity:10, unitPrice:2.50 },
+      { item:"Gadget", quantity:5, unitPrice:3.00 }
+    ]
+  };
+
+  function fillBroken3(){
+    document.getElementById('ex3Input').value = ex3Broken;
+    setResult('ex3Result','<span class="small">Broken JSON inserted. Fix it, then validate.</span>');
+  }
+
+  function fillFixed3(){
+    document.getElementById('ex3Input').value = JSON.stringify(ex3Fixed, null, 2);
+    setResult('ex3Result','<span class="small">One correct answer inserted.</span>');
+  }
+
+  function validateEx3(){
+    const t = document.getElementById('ex3Input').value.trim();
+    if(!t){
+      setResult('ex3Result','<span class="warn">Paste JSON first.</span>');
+      return;
+    }
+    const res = parseJsonWithLocation(t);
+    if(!res.ok){
+      const loc = (res.line && res.col) ? ` (line ${res.line}, col ${res.col})` : '';
+      setResult('ex3Result', `<div><span class="err">Invalid JSON ❌</span></div>
+        <div class="small">${escapeHtml(res.error)}${escapeHtml(loc)}</div>`);
+      return;
+    }
+    setResult('ex3Result', `<div><span class="ok">Valid JSON ✅</span></div>
+      <div class="small">Nice! Now you can format it for readability.</div>`);
+  }
+
+  function formatEx3(){
+    const t = document.getElementById('ex3Input').value.trim();
+    if(!t){
+      setResult('ex3Result','<span class="warn">Paste JSON first.</span>');
+      return;
+    }
+    const res = parseJsonWithLocation(t);
+    if(!res.ok){
+      validateEx3();
+      return;
+    }
+    document.getElementById('ex3Input').value = JSON.stringify(res.value, null, 2);
+    setResult('ex3Result','<span class="ok">Formatted ✅</span> <span class="small">Pretty printed.</span>');
+  }
+
+  // Initialize
+  initEx2();
+  fillBroken3();
+  setResult('validatorResult','<span class="small">Ready.</span>');
+  setResult('ex1Result','<span class="small">Paste your JSON to begin.</span>');
+</script>
+</body>
+</html>
