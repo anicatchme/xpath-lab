@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ISO 20022 Face-to-Face Interview Simulation (HTML)</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --panel:#ffffff;
+      --panel2:#f9fafb;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:rgba(17,24,39,0.12);
+      --shadow:rgba(0,0,0,0.08);
+      --interviewer-bg:#eef2ff;  /* light indigo */
+      --interviewer-border:#2563eb;
+      --you-bg:#ecfdf5;          /* light green */
+      --you-border:#16a34a;
+      --chip:#f3f4f6;
+    }
+
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 40px;}
+
+    header{
+      padding:16px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:var(--panel2);
+      box-shadow:0 8px 24px var(--shadow);
+    }
+    h1{margin:0 0 8px 0;font-size:20px;letter-spacing:.2px;}
+    .meta-line{color:var(--muted);font-size:13px;line-height:1.4;}
+
+    .controls{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      margin:14px 0;padding:12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:var(--panel2);
+      box-shadow:0 6px 18px var(--shadow);
+    }
+    .controls .group{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+
+    button{
+      border:1px solid var(--border);
+      background:#ffffff;
+      color:var(--text);
+      border-radius:12px;
+      padding:9px 12px;
+      font-size:13px;
+      cursor:pointer;
+      transition:transform .04s ease, box-shadow .04s ease;
+      box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    }
+    button:hover{transform:translateY(-1px);}
+    button:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+    .pill{
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--chip);
+      color:var(--muted);
+      font-size:12px;
+    }
+    label{font-size:12px;color:var(--muted);}
+    input[type="checkbox"]{transform:translateY(1px);}
+
+    .chat{
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:hidden;
+      background:#ffffff;
+      box-shadow:0 10px 30px var(--shadow);
+    }
+    .chat-header{
+      padding:10px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      background:var(--panel2);
+    }
+    .chat-header .hint{font-size:12px;color:var(--muted);}
+
+    .chat-body{
+      padding:14px;
+      min-height:420px;
+      max-height:70vh;
+      overflow:auto;
+      background:#ffffff;
+    }
+
+    .row{display:flex;gap:10px;margin:12px 0;align-items:flex-start;}
+    .row.you{flex-direction:row-reverse;}
+
+    .avatar{
+      width:34px;height:34px;border-radius:50%;
+      background:var(--chip);
+      border:1px solid var(--border);
+      display:grid;place-items:center;
+      font-weight:700;color:var(--muted);
+      flex:0 0 auto;
+    }
+
+    .bubble{
+      max-width:78%;
+      border-radius:14px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      background:var(--interviewer-bg);
+      border-left:4px solid var(--interviewer-border);
+      line-height:1.45;
+      font-size:14px;
+      white-space:pre-wrap;
+    }
+    .row.you .bubble{
+      background:var(--you-bg);
+      border-left:4px solid var(--you-border);
+    }
+
+    .speaker{
+      font-size:11px;color:var(--muted);
+      margin-bottom:6px;
+      display:flex;justify-content:space-between;gap:10px;
+    }
+    .speaker .tag{font-weight:600;letter-spacing:.2px;}
+    .speaker .time{opacity:.8;}
+
+    .practice{margin-top:10px;border-top:1px dashed rgba(17,24,39,0.2);padding-top:10px;}
+
+    textarea{
+      width:100%;min-height:88px;border-radius:12px;
+      border:1px solid var(--border);
+      background:#ffffff;
+      color:var(--text);
+      padding:10px;font-size:13px;resize:vertical;
+    }
+    .practice-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center;}
+    .small{font-size:12px;color:var(--muted);}
+    .hidden{display:none !important;}
+
+    details{margin-top:14px;border:1px solid var(--border);border-radius:14px;background:var(--panel2);padding:10px 12px;}
+    summary{cursor:pointer;font-weight:600;color:var(--text);}
+
+    .footer{margin-top:12px;color:var(--muted);font-size:12px;}
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      border:1px solid var(--border);
+      background:#ffffff;
+      padding:2px 6px;border-radius:6px;font-size:11px;color:var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>ISO 20022 Face-to-Face Interview Simulation</h1>
+      <div class="footer">Offline HTML simulator generated on 2026-02-28 00:47. Use <span class="kbd">Next</span> to reveal each line, or enable <b>Practice Mode</b> to type your own answers first.</div>
+    </header>
+
+    <div class="controls">
+      <div class="group">
+        <button id="btnPrev">◀ Prev</button>
+        <button id="btnNext">Next ▶</button>
+        <button id="btnAuto">Auto ▶▶</button>
+        <button id="btnStop" disabled>Stop ■</button>
+        <button id="btnReset">Reset ↺</button>
+      </div>
+
+      <div class="group">
+        <span class="pill" id="progressPill">Turn 0 / 0</span>
+        <span class="pill" id="modePill">Mode: Guided</span>
+      </div>
+
+      <div class="group">
+        <label><input type="checkbox" id="chkPractice"> Practice Mode (hide "You" answers)</label>
+        <label style="margin-left:8px;"><input type="checkbox" id="chkScroll" checked> Auto-scroll</label>
+      </div>
+    </div>
+
+    <div class="chat">
+      <div class="chat-header">
+        <div><b>Simulation</b></div>
+        <div class="hint">Keyboard: <span class="kbd">→</span> next, <span class="kbd">←</span> prev, <span class="kbd">R</span> reset</div>
+      </div>
+      <div class="chat-body" id="chatBody"></div>
+    </div>
+
+    
+  </div>
+
+  <script>
+    const TURNS = [{"speaker": "Interviewer", "text": "Good morning, Anil. Please have a seat. How are you today?"}, {"speaker": "You", "text": "Good morning. I’m doing well, thank you. I appreciate the opportunity to interview today."}, {"speaker": "Interviewer", "text": "Great. Let’s begin with a quick introduction. Tell me about yourself."}, {"speaker": "You", "text": "Sure. I have a little over three years of experience as an EDI Developer / Analyst at Kairosmagus. For the past two years, I have been working on a banking payments transformation project for our client LVTLABS, where our main goal was to migrate their legacy payment systems to ISO 20022 standards. My work focused heavily on ISO 20022 message mapping, implementing validations, integrating with downstream systems, handling PACS and CAMT flows, and supporting SIT, UAT, and production issues. I’ve worked particularly with pain.001, pacs.008, pacs.002, camt.054, and camt.053 messages."}, {"speaker": "Interviewer", "text": "Very good. Can you explain this project in detail — both the business requirement and your technical responsibilities?"}, {"speaker": "You", "text": "Sure. LVTLABS wanted to modernize their payment processing platform as part of their ISO 20022 migration. Their legacy formats didn’t support structured data, caused compliance issues, and also increased rejection rates from downstream clearing systems. The key business requirements were: implement ISO 20022 structured messaging; enable straight-through processing by reducing manual checks; improve end-to-end traceability using unique ISO identifiers; support coexistence with legacy CSV/flat-file formats during migration; ensure regulatory compliance for AML, sanctions, and reporting; and enhance customer transparency through acknowledgements (pacs.002) and reconciliation (camt messages). Functionally, we processed pain.001, transformed to pacs.008/009, handled pacs.002 ACK/NACK, validated XML schema and business rules, and processed CAMT for statements and reconciliation. Technically, I built mappings, handled legacy-to-ISO conversions, designed SI BPs, implemented validations, parsed pacs.002, supported CAMT, and did SIT/UAT/production troubleshooting with core banking, AML, and reporting teams."}, {"speaker": "Interviewer", "text": "Walk me through the end-to-end payment lifecycle in your project."}, {"speaker": "You", "text": "The lifecycle starts when a corporate customer uploads a pain.001 file via SFTP or API. Sterling Integrator picks it up and performs XML schema validation using ISO XSDs. Then we run business validations—mandatory fields, control sums, currency checks, account format, duplicate IDs. If valid, we transform pain.001 into pacs.008 (customer credit transfer) or pacs.009 (FI-to-FI). PACS is sent to downstream systems: core banking for debits, AML/sanctions, and clearing/settlement. We receive pacs.002 acknowledgements with accepted/rejected/pending status and update internal status. After settlement, camt.054 notifications and camt.053 end-of-day statements are used for reconciliation and confirmation."}, {"speaker": "Interviewer", "text": "Explain the difference between schema validation and business validation."}, {"speaker": "You", "text": "Schema validation checks the XML against the XSD: structure, tag order, types, namespaces, and required elements. It answers “Is the XML structurally valid?”. Business validation checks payment logic: control sums, account and currency rules, execution dates, duplicate EndToEndId, country/clearing constraints, amount thresholds. It answers “Is the payment logically correct and compliant?”."}, {"speaker": "Interviewer", "text": "How do you transform pain.001 to pacs.008?"}, {"speaker": "You", "text": "In Sterling maps, I map group header fields (MsgId, CreDtTm), payment info blocks to FIToFICstmrCdtTrf, loop over each CdtTrfTxInf, carry EndToEndId and InstrId, map debtor/creditor agents (BIC/FI), and handle remittance info (RmtInf/Ustrd). I also include conditional logic for payment types and ensure ISO namespaces and versions are correct. Traceability is maintained by preserving identifiers across pain → pacs → camt."}, {"speaker": "Interviewer", "text": "Tell me about PACS.002 acknowledgements. What exactly did you do there?"}, {"speaker": "You", "text": "PACS.002 communicates acceptance, rejection, or pending status. I implemented parsing to extract overall and transaction-level status codes (ACCP, RJCT, PDNG), capture reason codes (e.g., AC04 – account closed, BE05 – invalid account), correlate using EndToEndId/InstrId, and update status tables. Rejections route to exception flows; acceptances continue to settlement."}, {"speaker": "Interviewer", "text": "Did you work with CAMT messages as well?"}, {"speaker": "You", "text": "Yes. camt.053 (end-of-day statement) and camt.054 (debit/credit notifications) were used for reconciliation. I mapped them, extracted settlement details, and matched them back to original transactions using EndToEndId or InstrId so finance and ops could confirm settlement or investigate exceptions."}, {"speaker": "Interviewer", "text": "Explain your system architecture at a high level."}, {"speaker": "You", "text": "Upstream corporates submit pain.001 via SFTP or API → Sterling Integrator → XSD validation → business validations → transformation to pacs.008/009 → downstream systems (core banking, AML, clearing) → pacs.002 ACK/NACK back to SI → settlement → camt.054/053 for reconciliation. Logging/monitoring/audit are enabled in SI; legacy formats are processed in parallel during migration. The setup delivers STP, traceability, and high throughput."}, {"speaker": "Interviewer", "text": "Describe a real troubleshooting scenario you handled."}, {"speaker": "You", "text": "We received a pain.001 batch (~120 payments). Schema passed, but business validation failed due to a control sum mismatch between header and transaction totals. Initially the whole file was rejected, but the business needed partial processing. I modified the mapping and BP to segregate invalid transactions, generate pacs.002 partial rejections for only the failing items, and let valid transactions proceed to pacs.008. This improved STP and reduced customer rework."}, {"speaker": "Interviewer", "text": "Security and transmission are key in banking. How did you handle them?"}, {"speaker": "You", "text": "We used SFTP/MFT and REST APIs with TLS for transport security. Files were PGP-encrypted at rest where required. We managed SSH keys and X.509 certificates for authentication and non-repudiation. Access controls and audit logs were enforced within Sterling. Sensitive fields were masked in logs, and we followed least-privilege principles."}, {"speaker": "Interviewer", "text": "How did you address performance and scalability?"}, {"speaker": "You", "text": "We tuned BP concurrency, used batch chunking for large files, optimized maps to reduce XPath overhead, and profiled hotspots. Sterling was deployed in a cluster for high availability. We load-tested end-of-month payroll spikes and set alerting on queue depth and processing latency."}, {"speaker": "Interviewer", "text": "What about monitoring, logging, and audit?"}, {"speaker": "You", "text": "We logged key identifiers (MsgId, EndToEndId, InstrId), timestamps at each stage, validation outcomes, and downstream responses. SI dashboards and external monitoring captured SLAs, error rates, and volumes. These artifacts supported audits and accelerated production triage."}, {"speaker": "Interviewer", "text": "Finally, why should we hire you for this role?"}, {"speaker": "You", "text": "I bring practical, hands-on experience across ISO 20022 mapping, validations, acknowledgements, reconciliation, and secure integrations. I’ve supported SIT, UAT, and production, so I understand both build and run concerns. I can contribute immediately to stable, compliant, and traceable payment flows and continuously improve STP and operational efficiency."}];
+
+    let idx = -1;            // last revealed turn index
+    let timer = null;
+
+    const chatBody = document.getElementById("chatBody");
+    const progressPill = document.getElementById("progressPill");
+    const modePill = document.getElementById("modePill");
+
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnAuto = document.getElementById("btnAuto");
+    const btnStop = document.getElementById("btnStop");
+    const btnReset = document.getElementById("btnReset");
+
+    const chkPractice = document.getElementById("chkPractice");
+    const chkScroll = document.getElementById("chkScroll");
+
+    function nowTime() {
+      const d = new Date();
+      return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+    function updatePills() {
+      progressPill.textContent = `Turn ${Math.max(0, idx+1)} / ${TURNS.length}`;
+      modePill.textContent = chkPractice.checked ? "Mode: Practice" : "Mode: Guided";
+    }
+
+    function scrollIfNeeded() {
+      if (!chkScroll.checked) return;
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function render() {
+      chatBody.innerHTML = "";
+      const practice = chkPractice.checked;
+
+      for (let i = 0; i <= idx; i++) {
+        const t = TURNS[i];
+        const isYou = t.speaker === "You";
+
+        const row = document.createElement("div");
+        row.className = "row " + (isYou ? "you" : "interviewer");
+
+        const av = document.createElement("div");
+        av.className = "avatar";
+        av.textContent = isYou ? "Y" : "I";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+
+        const speaker = document.createElement("div");
+        speaker.className = "speaker";
+        speaker.innerHTML = `<span class="tag">${escapeHtml(t.speaker)}</span><span class="time">${nowTime()}</span>`;
+
+        const content = document.createElement("div");
+        content.innerHTML = escapeHtml(t.text);
+
+        bubble.appendChild(speaker);
+
+        // Practice mode behavior: hide the scripted "You" answer until revealed
+        if (practice && isYou) {
+          const practiceWrap = document.createElement("div");
+          practiceWrap.className = "practice";
+
+          const note = document.createElement("div");
+          note.className = "small";
+          note.textContent = "Type your answer first, then reveal the sample answer.";
+
+          const ta = document.createElement("textarea");
+          ta.placeholder = "Your answer…";
+
+          const actions = document.createElement("div");
+          actions.className = "practice-actions";
+
+          const btnReveal = document.createElement("button");
+          btnReveal.textContent = "Reveal sample answer";
+          btnReveal.onclick = () => {
+            sample.classList.toggle("hidden");
+            btnReveal.textContent = sample.classList.contains("hidden") ? "Reveal sample answer" : "Hide sample answer";
+            scrollIfNeeded();
+          };
+
+          const btnCopy = document.createElement("button");
+          btnCopy.textContent = "Copy sample answer";
+          btnCopy.onclick = async () => {
+            try {
+              await navigator.clipboard.writeText(t.text);
+              btnCopy.textContent = "Copied ✓";
+              setTimeout(() => btnCopy.textContent = "Copy sample answer", 900);
+            } catch (e) {
+              alert("Copy failed. Your browser may block clipboard access.");
+            }
+          };
+
+          const sample = document.createElement("div");
+          sample.className = "small hidden";
+          sample.style.marginTop = "10px";
+          sample.style.whiteSpace = "pre-wrap";
+          sample.style.border = "1px dashed rgba(255,255,255,0.18)";
+          sample.style.padding = "10px";
+          sample.style.borderRadius = "12px";
+          sample.textContent = t.text;
+
+          actions.appendChild(btnReveal);
+          actions.appendChild(btnCopy);
+
+          practiceWrap.appendChild(note);
+          practiceWrap.appendChild(ta);
+          practiceWrap.appendChild(actions);
+          practiceWrap.appendChild(sample);
+
+          bubble.appendChild(practiceWrap);
+        } else {
+          bubble.appendChild(content);
+        }
+
+        row.appendChild(av);
+        row.appendChild(bubble);
+        chatBody.appendChild(row);
+      }
+
+      btnPrev.disabled = idx <= -1;
+      btnNext.disabled = idx >= TURNS.length - 1;
+
+      updatePills();
+      scrollIfNeeded();
+    }
+
+    function next() {
+      if (idx < TURNS.length - 1) {
+        idx++;
+        render();
+      }
+    }
+
+    function prev() {
+      if (idx >= 0) {
+        idx--;
+        render();
+      }
+    }
+
+    function reset() {
+      stopAuto();
+      idx = -1;
+      render();
+    }
+
+    function startAuto() {
+      if (timer) return;
+      btnAuto.disabled = true;
+      btnStop.disabled = false;
+      timer = setInterval(() => {
+        if (idx >= TURNS.length - 1) {
+          stopAuto();
+          return;
+        }
+        next();
+      }, 1800);
+    }
+
+    function stopAuto() {
+      if (!timer) return;
+      clearInterval(timer);
+      timer = null;
+      btnAuto.disabled = false;
+      btnStop.disabled = true;
+    }
+
+    // Event wiring
+    btnNext.onclick = next;
+    btnPrev.onclick = prev;
+    btnReset.onclick = reset;
+    btnAuto.onclick = startAuto;
+    btnStop.onclick = stopAuto;
+    chkPractice.onchange = render;
+
+    // Keyboard shortcuts
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key.toLowerCase() === "r") reset();
+    });
+
+    // Init
+    updatePills();
+    render();
+  </script>
+</body>
+</html>
