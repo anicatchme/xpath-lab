@@ -419,6 +419,11 @@
       return window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
     }
 
+
+// ✅ Preferred voices
+const PREFERRED_INTERVIEWER = "Microsoft Christopher Online (Natural)";
+const PREFERRED_YOU = "Microsoft Ava Online (Natural)";
+
     function populateVoiceSelects() {
       const voices = getVoices();
       const existingI = selVoiceInterviewer.value;
@@ -451,11 +456,27 @@
         if (choice) sel.value = choice.value;
       };
 
-      if (!existingI) pickDefault(selVoiceInterviewer, ["microsoft", "google", "zira", "david", "mark"]);
-      else selVoiceInterviewer.value = existingI;
+     
+// ✅ Force preferred Interviewer voice (Christopher)
+if (!existingI) {
+  const c = Array.from(selVoiceInterviewer.options)
+    .find(o => o.value.includes(PREFERRED_INTERVIEWER));
+  if (c) selVoiceInterviewer.value = c.value;
+  else pickDefault(selVoiceInterviewer, ["microsoft", "google", "zira", "david", "mark"]);
+} else {
+  selVoiceInterviewer.value = existingI;
+}
 
-      if (!existingY) pickDefault(selVoiceYou, ["microsoft", "google", "zira", "david", "mark"]);
-      else selVoiceYou.value = existingY;
+// ✅ Force preferred Candidate voice (Ana)
+if (!existingY) {
+  const a = Array.from(selVoiceYou.options)
+    .find(o => o.value.includes(PREFERRED_YOU));
+  if (a) selVoiceYou.value = a.value;
+  else pickDefault(selVoiceYou, ["microsoft", "google", "zira", "david", "mark"]);
+} else {
+  selVoiceYou.value = existingY;
+}
+
     }
 
     function stopSpeech() {
