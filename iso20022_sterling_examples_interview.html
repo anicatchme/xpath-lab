@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ISO 20022 Interview Simulation (Sterling, Examples, Audio)</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #121924;
+      --panel2: #0f1520;
+      --text: #e6edf3;
+      --muted: #9fb0c0;
+      --border: rgba(255,255,255,0.08);
+      --shadow: rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 18px 14px 40px;
+    }
+    header {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+      box-shadow: 0 10px 30px var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+    .meta-line {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .footer {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 11px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (max-width: 920px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel2);
+    }
+    .controls .group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    button {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 9px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.04s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    input[type="checkbox"] { transform: translateY(1px); }
+
+    .chat {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.02);
+      box-shadow: 0 10px 30px var(--shadow);
+    }
+    .chat-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+    }
+    .chat-header .hint { font-size: 12px; color: var(--muted); }
+    .chat-body {
+      padding: 14px;
+      min-height: 420px;
+      max-height: 70vh;
+      overflow: auto;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      margin: 12px 0;
+      align-items: flex-start;
+    }
+    .row.you { flex-direction: row-reverse; }
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: var(--muted);
+      flex: 0 0 auto;
+    }
+    .bubble {
+      max-width: 78%;
+      border-radius: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      line-height: 1.45;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+    .row.you .bubble {
+      background: rgba(46,160,67,0.10);
+      border-color: rgba(46,160,67,0.25);
+    }
+    .speaker {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .speaker .tag { font-weight: 600; letter-spacing: 0.2px; }
+
+    .practice {
+      margin-top: 10px;
+      border-top: 1px dashed var(--border);
+      padding-top: 10px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 88px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 10px;
+      font-size: 13px;
+      resize: vertical;
+    }
+    .practice-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      align-items: center;
+    }
+    .small { font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .hidden { display: none !important; }
+
+    .audio-panel {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      padding: 12px;
+      box-shadow: 0 10px 30px var(--shadow);
+    }
+    .audio-panel h2 { font-size: 14px; margin: 0 0 10px 0; letter-spacing: 0.2px; }
+    .audio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 920px) {
+      .audio-grid { grid-template-columns: 1fr; }
+    }
+    .audio-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+    }
+    select, input[type="range"] { width: 100%; border-radius: 10px; }
+    select {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+    .range-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    details {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      padding: 10px 12px;
+    }
+    summary { cursor: pointer; font-weight: 600; color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>ISO 20022 Interview </h1>
+      <div class='meta-line'>ISO 20022 Face-to-Face Interview Simulation (Enhanced with Examples)</div><div class='meta-line'>Role: EDI Developer / Analyst – ISO 20022 Payments (3–5 Years)</div><div class='meta-line'>
+	  </div>
+      <div class="footer">
+                Use <span class="kbd">Next</span> to reveal each turn. Practice Mode hides “You” answers until you reveal them.
+      </div>
+    </header>
+
+    <div class="grid">
+      <div>
+        <div class="controls">
+          <div class="group">
+            <button id="btnPrev">◀ Prev</button>
+            <button id="btnNext">Next ▶</button>
+            <button id="btnAuto">Auto ▶▶ (speech-paced)</button>
+            <button id="btnStop" disabled>Stop ■</button>
+            <button id="btnReset">Reset ↺</button>
+          </div>
+
+          <div class="group">
+            <span class="pill" id="progressPill">Turn 0 / 0</span>
+            <span class="pill" id="modePill">Mode: Guided</span>
+          </div>
+
+          <div class="group">
+            <label><input type="checkbox" id="chkPractice"> Practice Mode</label>
+            <label><input type="checkbox" id="chkScroll" checked> Auto-scroll</label>
+          </div>
+        </div>
+
+        <div class="chat" style="margin-top:12px;">
+          <div class="chat-header">
+            <div><b>Simulation</b></div>
+            <div class="hint">Keyboard: <span class="kbd">→</span> next, <span class="kbd">←</span> prev, <span class="kbd">R</span> reset</div>
+          </div>
+          <div class="chat-body" id="chatBody"></div>
+        </div>
+
+                      
+      </div>
+
+      <div class="audio-panel">
+        <h2>Audio</h2>
+        <div class="small" style="margin-bottom:10px;">
+          Uses your browser’s built-in Text-to-Speech (Speech Synthesis). Best voices: <b>Chrome</b> or <b>Edge</b>.<br/>
+          Audio starts only after a user action (browser safety rule).
+        </div>
+
+        <div class="controls" style="margin:0 0 10px 0;">
+          <div class="group">
+            <label><input type="checkbox" id="chkAudio" checked> Enable Audio</label>
+            <label><input type="checkbox" id="chkSpeakOnNext" checked> Speak on Next/Auto (recommended)</label>
+          </div>
+          <div class="group">
+            <button id="btnSpeak">Speak current</button>
+            <button id="btnStopSpeech">Stop speech</button>
+          </div>
+        </div>
+
+        <div class="audio-grid">
+          <div class="audio-row">
+            <div class="small"><b>Interviewer voice</b></div>
+            <select id="selVoiceInterviewer"></select>
+            <div class="small" style="margin-top:6px;"><b>Your voice</b></div>
+            <select id="selVoiceYou"></select>
+            <div class="small" style="margin-top:6px;">
+              In <b>Practice Mode</b>, we speak only the Interviewer lines by default.
+            </div>
+          </div>
+
+          <div class="audio-row">
+            <div class="range-label"><span>Rate</span><span id="lblRate">1.00</span></div>
+            <input id="rngRate" type="range" min="0.7" max="1.3" step="0.05" value="1.0"/>
+            <div class="range-label"><span>Pitch</span><span id="lblPitch">1.00</span></div>
+            <input id="rngPitch" type="range" min="0.8" max="1.2" step="0.05" value="1.0"/>
+            <div class="range-label"><span>Volume</span><span id="lblVol">1.00</span></div>
+            <input id="rngVol" type="range" min="0.2" max="1.0" step="0.05" value="1.0"/>
+            <div class="small" style="margin-top:6px;">
+              Recommended: Rate ~0.95–1.05, Pitch ~0.95–1.05.
+            </div>
+          </div>
+        </div>
+
+        <details>
+          <summary>Audio troubleshooting</summary>
+          <div class="small" style="margin-top:8px;">
+            If you don’t hear anything:
+            <ul>
+              <li>Ensure <b>Enable Audio</b> is ON.</li>
+              <li>Click <b>Speak current</b> once (browser requires user gesture).</li>
+              <li>Switch voice dropdown (Edge often has Microsoft voices).</li>
+              <li>Check system volume and browser tab mute.</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TURNS = [{"speaker": "Interviewer", "text": "Good morning. Please have a seat. How are you today?"}, {"speaker": "You", "text": "Good morning. I’m doing well, thank you. I appreciate the opportunity to interview today."}, {"speaker": "Interviewer", "text": "Great. Tell me about yourself and your recent project."}, {"speaker": "You", "text": "Sure. I have around 4 years of experience as an EDI / Integration Developer & Analyst. For the last 2 years I worked on an ISO 20022 payments migration program where we processed customer payment initiations (pain.001), transformed them into interbank payment messages (pacs.008 / pacs.009), consumed status responses (pacs.002) and supported reconciliation using camt.053 and camt.054.\n\nTechnically, I used IBM Sterling B2B Integrator extensively—Sterling Maps + Business Process (BP) flows—for file intake via SFTP/API, XSD validation, business validations, transformations, routing to downstream systems (core banking/AML/clearing), and production support with monitoring and audit traceability."}, {"speaker": "Interviewer", "text": "Give me a real business use case. What kind of pain.001 did you process?"}, {"speaker": "You", "text": "A common real use case was corporate payroll and vendor payments. For example, a corporate uploads a single pain.001 file containing 100–500 salary transfers for employees. The bank needs to process it with high STP: validate the file, debit the corporate account, route each credit transfer to the right clearing channel, and provide status back.\n\nWe also had vendor/bill payments—same pain.001 structure, but different remittance references and sometimes different execution date rules."}, {"speaker": "Interviewer", "text": "Explain pain.001 in simple terms, and show me what fields matter in a real file."}, {"speaker": "You", "text": "pain.001 is the customer-to-bank payment initiation message. Think of it as a ‘payment batch’ with a header + one or more payment blocks + multiple transactions.\n\nIn a real payroll file, key fields we care about are:\n- Group Header: MsgId, CreDtTm, NbOfTxs, CtrlSum, Initiating Party\n- Payment Info: PmtInfId, PmtMtd=TRF, ReqdExctnDt, debtor account, debtor agent\n- Transaction: InstrId, EndToEndId, amount/currency, creditor name/account, creditor agent, and remittance info.\n\nExample (short and realistic):\n<GrpHdr>\n  <MsgId>PAYROLL-2026-02-28-001</MsgId>\n  <CreDtTm>2026-02-28T09:15:00</CreDtTm>\n  <NbOfTxs>3</NbOfTxs>\n  <CtrlSum>12500.00</CtrlSum>\n</GrpHdr>\n<PmtInf>\n  <PmtInfId>PMT-00045</PmtInfId>\n  <ReqdExctnDt>2026-03-01</ReqdExctnDt>\n  <DbtrAcct>...Corporate Account...</DbtrAcct>\n</PmtInf>\n<CdtTrfTxInf>\n  <PmtId><InstrId>INS-1001</InstrId><EndToEndId>E2E-EMP-77881</EndToEndId></PmtId>\n  <Amt><InstdAmt Ccy=\"USD\">3500.00</InstdAmt></Amt>\n  <Cdtr>...Employee Name...</Cdtr>\n  <CdtrAcct>...Employee Account...</CdtrAcct>\n  <RmtInf><Ustrd>Salary Feb 2026</Ustrd></RmtInf>\n</CdtTrfTxInf>"}, {"speaker": "Interviewer", "text": "Now explain what you built in IBM Sterling B2B Integrator. Walk me through the Business Process."}, {"speaker": "You", "text": "In Sterling B2B Integrator, we implemented the flow using an event-driven Business Process (BP).\n\nHigh level BP steps (realistic):\n1) Inbound intake: file arrives via SFTP (sometimes API) and lands in a Sterling Mailbox.\n2) Pre-checks: filename pattern, partner profile, duplicate check (MsgId / file hash).\n3) XSD validation: run XML Validation Service against the ISO 20022 pain.001 XSD.\n4) Business validations: a rule step (Java task / XSLT / custom service) to validate CtrlSum vs sum(amount), mandatory IDs, execution date, account formats, currency rules, and duplicates (EndToEndId).\n5) Mapping: Map Service (Sterling Map Editor) transforms pain.001 into pacs.008 or pacs.009 depending on routing/rail.\n6) Routing: send the pacs message to downstream (core banking + AML/sanctions + clearing) using SFTP/MFT or HTTPS client adapters.\n7) Tracking/Audit: write MsgId/InstrId/EndToEndId + timestamps + validation outcomes to a DB via JDBC adapter; also store raw docs in mailbox for audit retention.\n8) Exception handling: on failure, route to an exception mailbox, generate an internal rejection report, and notify operations.\n\nThat BP design is what enabled STP and traceability."}, {"speaker": "Interviewer", "text": "Tell me the top business validations you implemented. Give examples."}, {"speaker": "You", "text": "Top validations we implemented (beyond XSD):\n- CtrlSum validation: header CtrlSum must equal sum(InstdAmt). Example: CtrlSum=12500 but actual sum=12499.99 due to rounding → reject or partial reject based on rules.\n- Mandatory fields: each transaction must have EndToEndId, amount, creditor name, creditor account.\n- Execution date: ReqdExctnDt can’t be in the past; payroll can’t be after a cut-off time.\n- Account/format checks: invalid account length/format (or IBAN structure if applicable) → transaction rejection.\n- Duplicate detection: duplicate EndToEndId within a time window → prevent double payment.\n- Compliance flags: basic checks before sending to AML/sanctions (e.g., required address/party fields if mandated).\n\nIn Sterling, we kept these as rule steps so changes were configuration-driven, not hard-coded in the map."}, {"speaker": "Interviewer", "text": "How exactly do you transform pain.001 to pacs.008 in Sterling Maps? What do you map and what do you preserve?"}, {"speaker": "You", "text": "In Sterling Map Editor, the main approach was:\n- Preserve traceability: InstrId and EndToEndId are carried forward into the pacs payment identification so downstream and reconciliation can tie everything together.\n- Map amounts/currency directly.\n- Map debtor/creditor parties and their accounts.\n- Map remittance: unstructured remittance (Ustrd) goes into the pacs remittance element so beneficiary gets the reference.\n- Set proper namespaces and message version.\n\nConceptually:\nGrpHdr(MsgId/CreDtTm) → pacs GrpHdr\nEach CdtTrfTxInf → pacs CdtTrfTxInf loop\nPmtId(InstrId/EndToEndId) → pacs PmtId\nAmt/InstdAmt → pacs Amt\nRmtInf/Ustrd → pacs RmtInf\n\nWe also used lookups (via DB/JDBC or code tables) to populate routing details like agent BICs or clearing identifiers when required by the downstream rail."}, {"speaker": "Interviewer", "text": "You mentioned pacs.002. What is it, and how did you use it in your project?"}, {"speaker": "You", "text": "pacs.002 is a status report returned by downstream payment processing—accepted, rejected, or pending. In our flow, clearing or downstream systems returned pacs.002 and we parsed it to update payment status.\n\nWhat I implemented:\n- Parse group-level status and transaction-level status.\n- Capture rejection reason codes and descriptions when available.\n- Correlate back using MsgId at message level and InstrId/EndToEndId at transaction level.\n- Update status tables and trigger exception workflows.\n\nReal example: if 1 of 120 payroll transactions had an invalid beneficiary account, the pacs.002 came back with that transaction status RJCT and a reason like ‘invalid account’. We marked only that item rejected and kept the rest progressing."}, {"speaker": "Interviewer", "text": "Give me one real incident you handled and how you fixed it in Sterling BP."}, {"speaker": "You", "text": "We had a production issue where a pain.001 file passed XSD validation but failed business validation due to CtrlSum mismatch. Initially the BP rejected the entire file, but operations needed partial processing.\n\nI updated the BP to:\n- Split the file into transaction-level documents (or logically segregate failing transactions).\n- Apply validations per transaction.\n- Generate a partial-reject outcome: only the failing items go to exception flow, while valid items continue to pacs.008 generation.\n- Store a clear rejection report with transaction identifiers (InstrId/EndToEndId) so ops could communicate with the corporate quickly.\n\nResult: reduced full-file rejections and improved STP during peak payroll days."}, {"speaker": "Interviewer", "text": "How did you handle camt.053 and camt.054? Give a real reconciliation example."}, {"speaker": "You", "text": "camt messages were used for reconciliation.\n- camt.054: intraday debit/credit notifications\n- camt.053: end-of-day statements\n\nReal example: After payroll settlement, finance wanted confirmation that amounts were settled and posted. We parsed camt entries and matched them back to original transfers using stable identifiers like EndToEndId/InstrId (and amount/date as secondary keys). If we found a mismatch—like amount posted but missing reference—we flagged it for investigation and shared the correlation details with ops."}, {"speaker": "Interviewer", "text": "Security and transmission—what did you implement in Sterling?"}, {"speaker": "You", "text": "We used secure transports like SFTP/MFT and HTTPS with TLS. In Sterling, we managed:\n- Partner profiles and access controls (least privilege)\n- SSH keys and X.509 certificates where needed\n- Encryption requirements (for example PGP at rest when mandated)\n- Masking sensitive fields in logs\n- Strong auditing: who sent/received, timestamps, and message IDs\n\nThis was important for compliance and for proving traceability end-to-end."}, {"speaker": "Interviewer", "text": "How did you ensure performance and scalability for large payroll files?"}, {"speaker": "You", "text": "We handled large batches by tuning Sterling BP concurrency and using chunking for big files. We optimized maps to reduce heavy XPath operations and avoided unnecessary re-parsing. Also we deployed Sterling in a clustered setup for HA and tested peak volumes (month-end payroll). We monitored processing latency and queue depth to catch bottlenecks early."}, {"speaker": "Interviewer", "text": "Finally, why should we hire you for this role?"}, {"speaker": "You", "text": "Because I’ve delivered real ISO 20022 integration work end-to-end in IBM Sterling B2B Integrator—mapping, validations, routing, acknowledgements, reconciliation, and production support. I understand the ‘build’ and ‘run’ sides: how to design for STP, traceability, compliance, and how to troubleshoot quickly in production. I can contribute immediately to stable payment processing and continuous improvement."}];
+
+    let idx = -1;
+    let timer = null;
+    let autoSpeech = false; // speech-paced auto mode
+
+    const chatBody = document.getElementById("chatBody");
+    const progressPill = document.getElementById("progressPill");
+    const modePill = document.getElementById("modePill");
+
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnAuto = document.getElementById("btnAuto");
+    const btnStop = document.getElementById("btnStop");
+    const btnReset = document.getElementById("btnReset");
+
+    const chkPractice = document.getElementById("chkPractice");
+    const chkScroll = document.getElementById("chkScroll");
+
+    // Audio controls
+    const chkAudio = document.getElementById("chkAudio");
+    const chkSpeakOnNext = document.getElementById("chkSpeakOnNext");
+    const btnSpeak = document.getElementById("btnSpeak");
+    const btnStopSpeech = document.getElementById("btnStopSpeech");
+
+    const selVoiceInterviewer = document.getElementById("selVoiceInterviewer");
+    const selVoiceYou = document.getElementById("selVoiceYou");
+    const rngRate = document.getElementById("rngRate");
+    const rngPitch = document.getElementById("rngPitch");
+    const rngVol = document.getElementById("rngVol");
+    const lblRate = document.getElementById("lblRate");
+    const lblPitch = document.getElementById("lblPitch");
+    const lblVol = document.getElementById("lblVol");
+
+    function nowTime() {
+      const d = new Date();
+      return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function updatePills() {
+      progressPill.textContent = `Turn ${Math.max(0, idx+1)} / ${TURNS.length}`;
+      modePill.textContent = chkPractice.checked ? "Mode: Practice" : "Mode: Guided";
+    }
+
+    function scrollIfNeeded() {
+      if (!chkScroll.checked) return;
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // Speech Synthesis
+    function getVoices() {
+      return window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    }
+
+
+// ✅ Preferred voices
+const PREFERRED_INTERVIEWER = "Microsoft Christopher Online (Natural)";
+const PREFERRED_YOU = "Microsoft Ava Online (Natural)";
+
+    function populateVoiceSelects() {
+      const voices = getVoices();
+      const existingI = selVoiceInterviewer.value;
+      const existingY = selVoiceYou.value;
+
+      selVoiceInterviewer.innerHTML = "";
+      selVoiceYou.innerHTML = "";
+
+      const addOpt = (sel, v) => {
+        const o = document.createElement("option");
+        o.value = v.name;
+        o.textContent = `${v.name} (${v.lang})`;
+        sel.appendChild(o);
+      };
+
+      voices.forEach(v => {
+        addOpt(selVoiceInterviewer, v);
+        addOpt(selVoiceYou, v);
+      });
+
+      const pickDefault = (sel, preferKeywords) => {
+        const opts = Array.from(sel.options);
+        const findBy = (fn) => opts.find(o => fn(o.textContent.toLowerCase()));
+        let choice =
+          findBy(t => preferKeywords.some(k => t.includes(k))) ||
+          findBy(t => t.includes("en-us")) ||
+          findBy(t => t.includes("en-gb")) ||
+          opts[0];
+
+        if (choice) sel.value = choice.value;
+      };
+
+     
+// ✅ Force preferred Interviewer voice (Christopher)
+if (!existingI) {
+  const c = Array.from(selVoiceInterviewer.options)
+    .find(o => o.value.includes(PREFERRED_INTERVIEWER));
+  if (c) selVoiceInterviewer.value = c.value;
+  else pickDefault(selVoiceInterviewer, ["microsoft", "google", "zira", "david", "mark"]);
+} else {
+  selVoiceInterviewer.value = existingI;
+}
+
+// ✅ Force preferred Candidate voice (Ana)
+if (!existingY) {
+  const a = Array.from(selVoiceYou.options)
+    .find(o => o.value.includes(PREFERRED_YOU));
+  if (a) selVoiceYou.value = a.value;
+  else pickDefault(selVoiceYou, ["microsoft", "google", "zira", "david", "mark"]);
+} else {
+  selVoiceYou.value = existingY;
+}
+
+    }
+
+    function stopSpeech() {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function speakTurn(turn, onEnd) {
+      // If audio is disabled/unavailable, optionally continue via callback.
+      if (!chkAudio.checked || !window.speechSynthesis) {
+        if (typeof onEnd === "function") onEnd();
+        return;
+      }
+
+      const practice = chkPractice.checked;
+
+      // In practice mode, don't auto-speak candidate ("You") answers.
+      // We also intentionally do NOT call onEnd here, so auto mode pauses on your turn.
+      if (practice && turn.speaker === "You") return;
+
+      stopSpeech();
+
+      const utter = new SpeechSynthesisUtterance(turn.text);
+      utter.rate = parseFloat(rngRate.value);
+      utter.pitch = parseFloat(rngPitch.value);
+      utter.volume = parseFloat(rngVol.value);
+
+      const voices = getVoices();
+      const voiceName = (turn.speaker === "Interviewer") ? selVoiceInterviewer.value : selVoiceYou.value;
+      const selected = voices.find(v => v.name === voiceName);
+      if (selected) utter.voice = selected;
+
+      utter.onend = () => {
+        if (typeof onEnd === "function") onEnd();
+      };
+      utter.onerror = () => {
+        if (typeof onEnd === "function") onEnd();
+      };
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    function syncRanges() {
+      lblRate.textContent = Number(rngRate.value).toFixed(2);
+      lblPitch.textContent = Number(rngPitch.value).toFixed(2);
+      lblVol.textContent = Number(rngVol.value).toFixed(2);
+    }
+
+    // Rendering
+    function render() {
+      chatBody.innerHTML = "";
+      const practice = chkPractice.checked;
+
+      for (let i = 0; i <= idx; i++) {
+        const t = TURNS[i];
+        const isYou = t.speaker === "You";
+
+        const row = document.createElement("div");
+        row.className = "row " + (isYou ? "you" : "interviewer");
+
+        const av = document.createElement("div");
+        av.className = "avatar";
+        av.textContent = isYou ? "Y" : "I";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+
+        const speaker = document.createElement("div");
+        speaker.className = "speaker";
+        speaker.innerHTML = `<span class="tag">${escapeHtml(t.speaker)}</span><span class="time">${nowTime()}</span>`;
+
+        const content = document.createElement("div");
+        content.innerHTML = escapeHtml(t.text);
+
+        bubble.appendChild(speaker);
+
+        if (practice && isYou) {
+          const practiceWrap = document.createElement("div");
+          practiceWrap.className = "practice";
+
+          const note = document.createElement("div");
+          note.className = "small";
+          note.textContent = "Practice: say your answer out loud (or type it), then reveal the sample answer.";
+
+          const ta = document.createElement("textarea");
+          ta.placeholder = "Your answer (optional)…";
+
+          const actions = document.createElement("div");
+          actions.className = "practice-actions";
+
+          const btnReveal = document.createElement("button");
+          btnReveal.textContent = "Reveal sample answer";
+          btnReveal.onclick = () => {
+            sample.classList.toggle("hidden");
+            btnReveal.textContent = sample.classList.contains("hidden") ? "Reveal sample answer" : "Hide sample answer";
+            scrollIfNeeded();
+          };
+
+          const btnCopy = document.createElement("button");
+          btnCopy.textContent = "Copy sample answer";
+          btnCopy.onclick = async () => {
+            try {
+              await navigator.clipboard.writeText(t.text);
+              btnCopy.textContent = "Copied ✓";
+              setTimeout(() => btnCopy.textContent = "Copy sample answer", 900);
+            } catch (e) {
+              alert("Copy failed. Your browser may block clipboard access.");
+            }
+          };
+
+          const sample = document.createElement("div");
+          sample.className = "small hidden";
+          sample.style.marginTop = "10px";
+          sample.style.whiteSpace = "pre-wrap";
+          sample.style.border = "1px dashed rgba(255,255,255,0.18)";
+          sample.style.padding = "10px";
+          sample.style.borderRadius = "12px";
+          sample.textContent = t.text;
+
+          actions.appendChild(btnReveal);
+          actions.appendChild(btnCopy);
+
+          practiceWrap.appendChild(note);
+          practiceWrap.appendChild(ta);
+          practiceWrap.appendChild(actions);
+          practiceWrap.appendChild(sample);
+
+          bubble.appendChild(practiceWrap);
+        } else {
+          bubble.appendChild(content);
+        }
+
+        row.appendChild(av);
+        row.appendChild(bubble);
+        chatBody.appendChild(row);
+      }
+
+      btnPrev.disabled = idx <= -1;
+      btnNext.disabled = idx >= TURNS.length - 1;
+
+      updatePills();
+      scrollIfNeeded();
+    }
+
+    function next(opts = {}) {
+      const fromAuto = !!opts.fromAuto;
+
+      if (idx < TURNS.length - 1) {
+        idx++;
+        render();
+
+        // If speech-paced auto is running in practice mode, pause on "You" turns.
+        if (fromAuto && autoSpeech && chkPractice.checked && TURNS[idx].speaker === "You") {
+          autoSpeech = false;
+          btnAuto.disabled = false;
+          btnStop.disabled = true;
+          return;
+        }
+
+        if (chkSpeakOnNext.checked) {
+          if (fromAuto && autoSpeech) {
+            speakTurn(TURNS[idx], () => {
+              if (!autoSpeech) return;
+              // Small pause between turns
+              setTimeout(() => next({fromAuto:true}), 250);
+            });
+          } else {
+            speakTurn(TURNS[idx]);
+          }
+        } else {
+          // If auto is on but speak-on-next is off, do a safe fallback delay.
+          if (fromAuto && autoSpeech) {
+            setTimeout(() => next({fromAuto:true}), 1200);
+          }
+        }
+      } else {
+        // End reached
+        if (fromAuto && autoSpeech) stopAuto();
+      }
+    }
+
+    function prev() {
+      if (idx >= 0) {
+        idx--;
+        render();
+      }
+    }
+
+    function reset() {
+      stopAuto();
+      stopSpeech();
+      idx = -1;
+      render();
+    }
+
+    function startAuto() {
+      if (timer || autoSpeech) return;
+
+      btnAuto.disabled = true;
+      btnStop.disabled = false;
+
+      // Speech-paced auto mode (advances only when speaking finishes)
+      if (chkAudio.checked && chkSpeakOnNext.checked && window.speechSynthesis) {
+        autoSpeech = true;
+        next({fromAuto:true}); // kick off
+        return;
+      }
+
+      // Fallback: timed mode (if audio is disabled)
+      timer = setInterval(() => {
+        if (idx >= TURNS.length - 1) {
+          stopAuto();
+          return;
+        }
+        next();
+      }, 1900);
+    }
+
+    function stopAuto() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      autoSpeech = false;
+      stopSpeech();
+      btnAuto.disabled = false;
+      btnStop.disabled = true;
+    }
+
+    // Wiring
+    btnNext.onclick = next;
+    btnPrev.onclick = prev;
+    btnReset.onclick = reset;
+    btnAuto.onclick = startAuto;
+    btnStop.onclick = stopAuto;
+    chkPractice.onchange = () => { stopSpeech(); render(); };
+
+    btnSpeak.onclick = () => {
+      if (idx < 0 || idx >= TURNS.length) return;
+      speakTurn(TURNS[idx]);
+    };
+    btnStopSpeech.onclick = stopSpeech;
+
+    rngRate.oninput = syncRanges;
+    rngPitch.oninput = syncRanges;
+    rngVol.oninput = syncRanges;
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key.toLowerCase() === "r") reset();
+    });
+
+    if (window.speechSynthesis) {
+      populateVoiceSelects();
+      window.speechSynthesis.onvoiceschanged = populateVoiceSelects;
+    } else {
+      chkAudio.checked = false;
+      chkAudio.disabled = true;
+      chkSpeakOnNext.checked = false;
+      chkSpeakOnNext.disabled = true;
+      btnSpeak.disabled = true;
+      btnStopSpeech.disabled = true;
+    }
+
+    syncRanges();
+    updatePills();
+    render();
+  </script>
+</body>
+</html>
