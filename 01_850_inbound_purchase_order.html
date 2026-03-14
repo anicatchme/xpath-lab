@@ -1,0 +1,691 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>X12 850 Reverse Builder — Inbound Purchase Order</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f1a33; --line:#22335f; --text:#e6ecff; --muted:#a9b7e6;
+    --hl:#fff3a3; --buyer:#3b82f6; --seller:#f97316; --ops:#22c55e; --finance:#a78bfa;
+    --good:#34d399; --warn:#fbbf24; --bad:#f87171;
+    --mono:ui-monospace, Menlo, Consolas, monospace;
+    --sans:system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);color:var(--text);background:linear-gradient(180deg,var(--bg),#070b14);}
+  a{color:#b5d6ff;text-decoration:none}
+  header{padding:16px 18px 12px;border-bottom:1px solid var(--line);}
+  h1{margin:0;font-size:18px;letter-spacing:.2px;}
+  .sub{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.5;max-width:1280px;}
+  .navrow{max-width:1320px;margin:0 auto;padding:12px 12px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .navbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:rgba(255,255,255,.03);font-size:12px}
+  .summary{max-width:1320px;margin:0 auto;padding:12px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;}
+  .kpi{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);padding:10px 12px;min-height:72px;}
+  .kpi .label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.45px;margin-bottom:5px;}
+  .kpi .value{font-size:13px;font-weight:800;line-height:1.35;word-break:break-word;}
+  .lifecycle{max-width:1320px;margin:0 auto;padding:0 12px 12px;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;}
+  .life{border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.03);font-size:11px;line-height:1.35;min-height:80px;display:flex;flex-direction:column;justify-content:space-between}
+  .life .top{font-weight:800}
+  .life .dir{color:var(--muted);margin-top:4px}
+  .life.active{border-color:rgba(110,231,255,.55);background:rgba(110,231,255,.09)}
+  .wrap{max-width:1320px;margin:0 auto;padding:0 12px 12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .panel{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);overflow:hidden;min-width:0;}
+  .head{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .title{font-weight:800;font-size:13px;}
+  .tiny{margin-top:4px;color:var(--muted);font-size:12px;}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;}
+  button{border:0;border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer;font-size:13px;background:linear-gradient(90deg,#6ee7ff,#a78bfa);color:#06101f;}
+  button.secondary{background:transparent;color:var(--text);border:1px solid var(--line);font-weight:700;}
+  button:disabled{opacity:.45;cursor:not-allowed;}
+  .body{padding:12px;}
+  .coach{border:1px dashed rgba(110,231,255,.35);background:rgba(110,231,255,.06);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.5;color:#d7f7ff;white-space:pre-wrap;}
+  .timeline{margin-top:10px;display:flex;flex-direction:column;gap:10px;min-height:540px;max-height:740px;overflow:auto;padding-right:2px;}
+  .stepCard{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);padding:12px;}
+  .stepCard.buyer{border-color:rgba(59,130,246,.45)}
+  .stepCard.seller{border-color:rgba(249,115,22,.45)}
+  .stepCard.ops{border-color:rgba(34,197,94,.45)}
+  .stepCard.finance{border-color:rgba(167,139,250,.45)}
+  .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;color:var(--muted);font-size:11px;}
+  .pill{font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);letter-spacing:.3px;}
+  .stepCard.buyer .pill{background:rgba(59,130,246,.15);color:#cfe3ff}
+  .stepCard.seller .pill{background:rgba(249,115,22,.15);color:#ffe2c6}
+  .stepCard.ops .pill{background:rgba(34,197,94,.14);color:#ddffea}
+  .stepCard.finance .pill{background:rgba(167,139,250,.16);color:#ede5ff}
+  .stepTitle{font-size:14px;font-weight:800;margin-bottom:8px;}
+  .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+  .text{font-size:13px;line-height:1.45;margin-bottom:10px;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .chip{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.04);font-family:var(--mono);}
+  .why{font-size:12px;line-height:1.45;color:#d7f7ff;}
+  .builderStatus{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:800;margin-bottom:10px;}
+  .builderStatus.notstarted{color:var(--muted);background:rgba(255,255,255,.02)}
+  .builderStatus.building{color:var(--warn);background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.35)}
+  .builderStatus.ready{color:#d7f7ff;background:rgba(110,231,255,.07);border-color:rgba(110,231,255,.35)}
+  .builderStatus.validated{color:var(--good);background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.35)}
+  .builderStatus.issue{color:var(--bad);background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35)}
+  .validationGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px;}
+  .check{border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.02);min-height:86px;}
+  .check .name{font-size:12px;font-weight:800;margin-bottom:4px;}
+  .check .detail{font-size:11px;color:var(--muted);line-height:1.35;}
+  .check .flag{margin-top:6px;font-size:11px;font-weight:800;letter-spacing:.45px;}
+  .check.pending .flag{color:var(--muted)}
+  .check.ok .flag{color:var(--good)}
+  .check.fail .flag{color:var(--bad)}
+  .ediPane{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02);padding:10px;min-height:540px;max-height:740px;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.55;}
+  .empty{color:var(--muted);font-size:12px;line-height:1.5;padding:2px 0;}
+  .segLine{display:grid;grid-template-columns:56px 1fr;gap:10px;padding:4px 6px;border-radius:8px;cursor:pointer;}
+  .segLine:hover{background:rgba(255,255,255,.05);}
+  .segLine.new{background:var(--hl);color:#141414;}
+  .segLine.active{outline:1px dashed rgba(255,255,255,.45);background:rgba(255,255,255,.08);}
+  .segLine.new.active{outline:1px dashed rgba(20,20,20,.45);}
+  .ln{color:var(--muted);user-select:none;}
+  .segLine.new .ln{color:#505050}
+  .code{word-break:break-word;}
+  .footnote{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.45;}
+  .legend{max-width:1320px;margin:0 auto;padding:0 12px 12px;color:var(--muted);font-size:11px;line-height:1.5;}
+  @media(max-width:1220px){.summary{grid-template-columns:repeat(3,minmax(0,1fr))} .lifecycle{grid-template-columns:repeat(4,minmax(0,1fr))} .wrap{grid-template-columns:1fr}}
+  @media(max-width:760px){.summary{grid-template-columns:1fr} .lifecycle{grid-template-columns:repeat(2,minmax(0,1fr))} .validationGrid{grid-template-columns:1fr} .head{flex-direction:column} .controls{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<header>
+  <h1>X12 850 Reverse Builder — Inbound Purchase Order</h1>
+  <div class="sub">SupplierCo receives a new purchase order from BuyerCo. The simulation starts from the business scenario, adds each X12 850 segment in sequence, and validates the finished document at the end.</div>
+</header>
+
+<div class="navrow">
+  <a class="navbtn" href="index.html">Suite Home</a>
+  
+  <a class="navbtn" href="02_997_outbound_functional_acknowledgment.html">Next: 997 — Functional Acknowledgment</a>
+</div>
+
+<section class="summary" id="summary"></section>
+<section class="lifecycle" id="lifecycle"></section>
+
+<div class="wrap">
+  <section class="panel">
+    <div class="head">
+      <div>
+        <div class="title">Business Scenario in Plain English</div>
+        <div class="tiny" id="scenarioProgress">Step 0 / 0</div>
+      </div>
+      <div class="controls">
+        <button id="nextBtn">Next</button>
+        <button id="playBtn" class="secondary">Play all</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+        <button id="regenBtn" class="secondary">Regenerate</button>
+      </div>
+    </div>
+    <div class="body">
+      <div class="coach" id="scenarioCoach">Click Next to begin. Each step explains what BuyerCo is asking SupplierCo to do, then adds the matching X12 850 segment lines.</div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="head">
+      <div>
+        <div class="title">EDI Document Being Built Line by Line</div>
+        <div class="tiny" id="buildProgress">0 / 0 segments built</div>
+      </div>
+      <div class="controls">
+        <span class="tiny" id="currentStepTag">Waiting to start</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="builderStatus notstarted" id="builderStatus">Document status: Not started.</div>
+      <div class="validationGrid" id="validationGrid"></div>
+      <div class="coach" id="segmentCoach">When a segment line appears, click it to see what that line means in business and EDI terms.</div>
+      <div class="ediPane" id="ediPane"></div>
+      <div class="footnote">Illustrative training sample for a replenishment order. Runtime dates and control numbers are regenerated on demand.</div>
+    </div>
+  </section>
+</div>
+
+<div class="legend">Perspective: SupplierCo is the focal company. This means the 850 is treated as an inbound order document, even though it originated with BuyerCo.</div>
+
+<script>
+  const suiteMap = [
+  {
+    "file": "01_850_inbound_purchase_order.html",
+    "label": "850 \u2014 Purchase Order"
+  },
+  {
+    "file": "02_997_outbound_functional_acknowledgment.html",
+    "label": "997 \u2014 Functional Acknowledgment"
+  },
+  {
+    "file": "03_855_outbound_po_acknowledgment.html",
+    "label": "855 \u2014 Purchase Order Acknowledgment"
+  },
+  {
+    "file": "04_860_inbound_po_change_request.html",
+    "label": "860 \u2014 Purchase Order Change Request"
+  },
+  {
+    "file": "05_865_outbound_po_change_acknowledgment.html",
+    "label": "865 \u2014 Purchase Order Change Acknowledgment"
+  },
+  {
+    "file": "06_856_outbound_ship_notice_manifest.html",
+    "label": "856 \u2014 Ship Notice / Manifest"
+  },
+  {
+    "file": "07_810_outbound_invoice.html",
+    "label": "810 \u2014 Invoice"
+  },
+  {
+    "file": "08_820_inbound_payment_remittance.html",
+    "label": "820 \u2014 Payment Order / Remittance Advice"
+  }
+];
+  const currentFile = "01_850_inbound_purchase_order.html";
+  const segmentInfo = {
+  "ISA": {
+    "title": "ISA - Interchange Header",
+    "text": "The outermost envelope. It identifies sender and receiver, carries the interchange control number, and timestamps the interchange."
+  },
+  "GS": {
+    "title": "GS - Functional Group Header",
+    "text": "Starts the functional group and identifies the business family of the transaction, such as purchase orders or invoices."
+  },
+  "ST": {
+    "title": "ST - Transaction Set Header",
+    "text": "Starts the transaction set and assigns the transaction control number."
+  },
+  "SE": {
+    "title": "SE - Transaction Set Trailer",
+    "text": "Closes the transaction set. The control number must match ST02 and the segment count must be correct."
+  },
+  "GE": {
+    "title": "GE - Functional Group Trailer",
+    "text": "Closes the functional group. The control number must match GS06."
+  },
+  "IEA": {
+    "title": "IEA - Interchange Trailer",
+    "text": "Closes the interchange. The control number must match ISA13."
+  },
+  "BEG": {
+    "title": "BEG - Beginning Segment for Purchase Order",
+    "text": "Carries the commercial identity of the order, including the PO number and order date."
+  },
+  "CUR": {
+    "title": "CUR - Currency",
+    "text": "States the currency used for the order prices."
+  },
+  "REF": {
+    "title": "REF - Department / Buyer Reference",
+    "text": "Adds an internal buyer reference used for traceability or routing."
+  },
+  "PER_OC": {
+    "title": "PER - Order Contact",
+    "text": "Provides the contact the supplier should call or email for order questions."
+  },
+  "DTM": {
+    "title": "DTM - Requested Ship Date",
+    "text": "Communicates the requested ship date for the order."
+  },
+  "TD5": {
+    "title": "TD5 - Carrier Routing",
+    "text": "Communicates the preferred carrier and service level."
+  },
+  "N1_ST": {
+    "title": "N1 - Ship-To",
+    "text": "Identifies where the goods must physically be delivered."
+  },
+  "N3_ST": {
+    "title": "N3 - Ship-To Address",
+    "text": "Carries the ship-to street address."
+  },
+  "N4_ST": {
+    "title": "N4 - Ship-To City/State/Postal",
+    "text": "Carries the city, state, postal code, and country for the ship-to location."
+  },
+  "N1_BT": {
+    "title": "N1 - Bill-To",
+    "text": "Identifies who is financially responsible for the order."
+  },
+  "N3_BT": {
+    "title": "N3 - Bill-To Address",
+    "text": "Carries the bill-to street address."
+  },
+  "N4_BT": {
+    "title": "N4 - Bill-To City/State/Postal",
+    "text": "Carries the city, state, postal code, and country for the bill-to location."
+  },
+  "PO1_1": {
+    "title": "PO1 - Line Item 1",
+    "text": "Creates the first order line with quantity, price, and item identifiers."
+  },
+  "PO1_2": {
+    "title": "PO1 - Line Item 2",
+    "text": "Creates the second order line."
+  },
+  "CTT": {
+    "title": "CTT - Transaction Totals",
+    "text": "Summarizes the number of line items and the quantity hash total."
+  },
+  "AMT": {
+    "title": "AMT - Total Order Amount",
+    "text": "Carries the total monetary value of the purchase order."
+  }
+};
+  const validationTemplate = [
+  {
+    "label": "ISA13 matches IEA02"
+  },
+  {
+    "label": "GS06 matches GE02"
+  },
+  {
+    "label": "ST02 matches SE02"
+  },
+  {
+    "label": "SE01 segment count is correct"
+  },
+  {
+    "label": "CTT01 equals PO1 count"
+  },
+  {
+    "label": "CTT02 equals total quantity"
+  },
+  {
+    "label": "AMT equals summed line value"
+  },
+  {
+    "label": "Required header, parties, and items exist"
+  }
+];
+
+  const timeline = document.getElementById('timeline');
+  const ediPane = document.getElementById('ediPane');
+  const validationGrid = document.getElementById('validationGrid');
+  const summary = document.getElementById('summary');
+  const lifecycle = document.getElementById('lifecycle');
+  const scenarioCoach = document.getElementById('scenarioCoach');
+  const segmentCoach = document.getElementById('segmentCoach');
+  const scenarioProgress = document.getElementById('scenarioProgress');
+  const buildProgress = document.getElementById('buildProgress');
+  const currentStepTag = document.getElementById('currentStepTag');
+  const builderStatus = document.getElementById('builderStatus');
+  const nextBtn = document.getElementById('nextBtn');
+  const playBtn = document.getElementById('playBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const regenBtn = document.getElementById('regenBtn');
+
+  let model = null;
+  let allSegments = [];
+  let steps = [];
+  let cur = -1;
+  let selectedLineId = null;
+  let playTimer = null;
+
+  function two(n) { return String(n).padStart(2, '0'); }
+  function digits(value, len) { return String(value).replace(/\D/g, '').padStart(len, '0').slice(-len); }
+  function padRight(value, len) { return String(value).slice(0, len).padEnd(len, ' '); }
+  function yymmdd(d) { return two(d.getFullYear() % 100) + two(d.getMonth() + 1) + two(d.getDate()); }
+  function yyyymmdd(d) { return String(d.getFullYear()) + two(d.getMonth() + 1) + two(d.getDate()); }
+  function hhmm(d) { return two(d.getHours()) + two(d.getMinutes()); }
+  function money(n) { return Number(n).toFixed(2); }
+  function prettyDate(d) {
+    return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'2-digit' });
+  }
+  function addBizDays(d, count) {
+    const out = new Date(d.getTime());
+    const step = count >= 0 ? 1 : -1;
+    let left = Math.abs(count);
+    while(left > 0) {
+      out.setDate(out.getDate() + step);
+      if(out.getDay() !== 0 && out.getDay() !== 6) left -= 1;
+    }
+    return out;
+  }
+  function splitSeg(text) { return text.replace(/~$/, '').split('*'); }
+  function sum(arr, fn) { return arr.reduce((acc, item) => acc + fn(item), 0); }
+  function centsFromAmount(n) { return Math.round(Number(n) * 100); }
+  function stopPlay() {
+    if(playTimer) {
+      clearInterval(playTimer);
+      playTimer = null;
+      playBtn.textContent = 'Play all';
+    }
+  }
+
+  function renderLifecycle() {
+    lifecycle.innerHTML = '';
+    suiteMap.forEach(item => {
+      const card = document.createElement('a');
+      card.href = item.file;
+      card.className = 'life' + (item.file === currentFile ? ' active' : '');
+      const parts = item.label.split(' — ');
+      card.innerHTML = `<div><div class="top">${parts[0]}</div><div>${parts[1] || ''}</div></div><div class="dir">${item.file === currentFile ? 'Current simulation' : 'Open simulation'}</div>`;
+      lifecycle.appendChild(card);
+    });
+  }
+
+  function renderSummary(cards) {
+    summary.innerHTML = '';
+    cards.forEach(card => {
+      const box = document.createElement('div');
+      box.className = 'kpi';
+      box.innerHTML = `<span class="label">${card.label}</span><span class="value">${card.value}</span>`;
+      summary.appendChild(box);
+    });
+  }
+
+  
+function buildModel() {
+  const now = new Date();
+  const reqShip = addBizDays(now, 2);
+  const seed = yyyymmdd(now);
+  const stamp = Date.now();
+  const isaControl = digits(stamp, 9);
+  const gsControl = digits(stamp + 17, 5);
+  const stControl = '0001';
+  const poNumber = `PO${seed}01`;
+  const items = [
+    { id:'PO1_1', line:1, qty:24, uom:'EA', price:8.90, vp:'32230538', up:'812345678901', desc:'Blue nitrile gloves' },
+    { id:'PO1_2', line:2, qty:12, uom:'EA', price:15.25, vp:'99887766', up:'812345678919', desc:'Safety goggles' }
+  ];
+  return {
+    now, reqShip, seed, isaControl, gsControl, stControl, poNumber, items,
+    buyerIsaId:'BUYERCO01',
+    supplierIsaId:'SUPPLIERCO01',
+    buyerCode:'BUYERCO01',
+    supplierCode:'SUPPLIERCO01',
+    buyerDept:'41309514',
+    buyerContact:'Priya Rao',
+    buyerPhone:'4255552515',
+    buyerEmail:'buyerpo@buyerco.com',
+    shipToId:'0857673380001',
+    billToId:'0857673380099',
+    totalQty: sum(items, item => item.qty),
+    totalAmount: sum(items, item => item.qty * item.price)
+  };
+}
+
+
+  
+function buildSegments(m) {
+  const list = [];
+  list.push({ id:'ISA', seg:'ISA', text:`ISA*00*          *00*          *ZZ*${padRight(m.buyerIsaId,15)}*ZZ*${padRight(m.supplierIsaId,15)}*${yymmdd(m.now)}*${hhmm(m.now)}*U*00401*${m.isaControl}*0*P*>~` });
+  list.push({ id:'GS', seg:'GS', text:`GS*PO*${m.buyerCode}*${m.supplierCode}*${yyyymmdd(m.now)}*${hhmm(m.now)}*${m.gsControl}*X*004010~` });
+  const stIndex = list.length;
+  list.push({ id:'ST', seg:'ST', text:`ST*850*${m.stControl}~` });
+  list.push({ id:'BEG', seg:'BEG', text:`BEG*00*SA*${m.poNumber}**${yyyymmdd(m.now)}~` });
+  list.push({ id:'CUR', seg:'CUR', text:'CUR*BY*USD~' });
+  list.push({ id:'REF', seg:'REF', text:`REF*DP*${m.buyerDept}~` });
+  list.push({ id:'PER_OC', seg:'PER', text:`PER*OC*${m.buyerContact}*TE*${m.buyerPhone}*EM*${m.buyerEmail}~` });
+  list.push({ id:'DTM', seg:'DTM', text:`DTM*010*${yyyymmdd(m.reqShip)}~` });
+  list.push({ id:'TD5', seg:'TD5', text:'TD5*B*2*UPSN*M*UPS GROUND~' });
+  list.push({ id:'N1_ST', seg:'N1', text:`N1*ST*BuyerCo DC Chicago*92*${m.shipToId}~` });
+  list.push({ id:'N3_ST', seg:'N3', text:'N3*1000 BABELWAY PL~' });
+  list.push({ id:'N4_ST', seg:'N4', text:'N4*CHICAGO*IL*60639-1030*US~' });
+  list.push({ id:'N1_BT', seg:'N1', text:`N1*BT*BuyerCo Accounts Payable*92*${m.billToId}~` });
+  list.push({ id:'N3_BT', seg:'N3', text:'N3*200 FINANCE WAY~' });
+  list.push({ id:'N4_BT', seg:'N4', text:'N4*KIRKLAND*WA*98034*US~' });
+  m.items.forEach(item => {
+    list.push({ id:item.id, seg:'PO1', text:`PO1*${item.line}*${item.qty}*${item.uom}*${money(item.price)}**VP*${item.vp}*UP*${item.up}~` });
+  });
+  list.push({ id:'CTT', seg:'CTT', text:`CTT*${m.items.length}*${m.totalQty}~` });
+  list.push({ id:'AMT', seg:'AMT', text:`AMT*TT*${money(m.totalAmount)}~` });
+  list.push({ id:'SE', seg:'SE', text:`SE*0000*${m.stControl}~` });
+  const seIndex = list.length - 1;
+  list[seIndex].text = `SE*${(seIndex - stIndex) + 1}*${m.stControl}~`;
+  list.push({ id:'GE', seg:'GE', text:`GE*1*${m.gsControl}~` });
+  list.push({ id:'IEA', seg:'IEA', text:`IEA*1*${m.isaControl}~` });
+  return list;
+}
+
+
+  
+function buildSteps(m) {
+  return [
+    { role:'ops', badge:'STEP 1', actor:'EDI Gateway', title:'Open the inbound envelopes', english:`BuyerCo is sending a new purchase order to SupplierCo. The EDI gateway opens the interchange, starts the purchase-order group, and opens transaction 850.`, adds:['ISA','GS','ST'], why:'These technical envelopes make partner routing, versioning, and control tracking possible.' },
+    { role:'buyer', badge:'STEP 2', actor:'Buyer Procurement', title:'State the order identity', english:`This is purchase order ${m.poNumber}, created on ${prettyDate(m.now)}. SupplierCo now has the commercial identity of the order.`, adds:['BEG'], why:'BEG is the order header that makes the file commercially recognizable.' },
+    { role:'finance', badge:'STEP 3', actor:'Buyer Finance', title:'Declare currency and buyer reference', english:`Prices are in USD, and BuyerCo wants the order tied to internal department reference ${m.buyerDept}.`, adds:['CUR','REF'], why:'CUR gives pricing context; REF gives an internal routing key.' },
+    { role:'buyer', badge:'STEP 4', actor:'Buyer Contact', title:'Provide an exception contact', english:`If SupplierCo has any question on the order, the buyer contact is ${m.buyerContact} at ${m.buyerPhone} or ${m.buyerEmail}.`, adds:['PER_OC'], why:'The PER segment gives SupplierCo a live business contact for exceptions.' },
+    { role:'ops', badge:'STEP 5', actor:'Buyer Logistics', title:'Set requested ship timing and routing', english:`BuyerCo wants the order shipped by ${prettyDate(m.reqShip)} using UPS Ground as the preferred routing.`, adds:['DTM','TD5'], why:'DTM and TD5 translate delivery expectations into structured EDI content.' },
+    { role:'buyer', badge:'STEP 6', actor:'Buyer Distribution', title:'Tell the supplier where to ship', english:`The physical delivery location is the Chicago distribution center.`, adds:['N1_ST','N3_ST','N4_ST'], why:'The ship-to loop ensures the warehouse destination is explicit.' },
+    { role:'finance', badge:'STEP 7', actor:'Buyer Accounts Payable', title:'Tell the supplier where to bill', english:`The financial responsibility stays with BuyerCo Accounts Payable in Kirkland, Washington.`, adds:['N1_BT','N3_BT','N4_BT'], why:'The bill-to loop separates financial responsibility from the receiving location.' },
+    { role:'buyer', badge:'STEP 8', actor:'Buyer Planner', title:'Add order line 1', english:`Order ${m.items[0].qty} ${m.items[0].uom} of vendor part ${m.items[0].vp} (${m.items[0].desc}) at ${money(m.items[0].price)} each.`, adds:['PO1_1'], why:'Each PO1 creates one executable line item for SupplierCo.' },
+    { role:'buyer', badge:'STEP 9', actor:'Buyer Planner', title:'Add order line 2', english:`Also order ${m.items[1].qty} ${m.items[1].uom} of vendor part ${m.items[1].vp} (${m.items[1].desc}) at ${money(m.items[1].price)} each.`, adds:['PO1_2'], why:'The item list grows one structured PO1 line at a time.' },
+    { role:'ops', badge:'STEP 10', actor:'EDI Gateway', title:'Summarize and close the order', english:`The finished order contains ${m.items.length} lines, total quantity ${m.totalQty}, and total value ${money(m.totalAmount)}. The platform can now summarize the transaction and close the envelopes.`, adds:['CTT','AMT','SE','GE','IEA'], why:'CTT and AMT summarize the business content, while SE/GE/IEA make the file transport-ready.' },
+    { role:'ops', badge:'STEP 11', actor:'Validator', title:'Validate the inbound 850', english:`SupplierCo validates envelope pairing, segment count, line counts, quantity totals, order total amount, and required commercial content before the PO enters order management.`, adds:[], why:'A syntactically present file is not good enough; the commercial math and structure must reconcile.' }
+  ];
+}
+
+
+  
+function buildSummary(m) {
+  return [
+    { label:'Perspective', value:'SupplierCo (seller / supplier view)' },
+    { label:'Direction', value:'Inbound from BuyerCo' },
+    { label:'Document', value:'850 Purchase Order / 004010' },
+    { label:'PO Number', value:m.poNumber },
+    { label:'Requested Ship Date', value:prettyDate(m.reqShip) },
+    { label:'Scenario', value:'New stock replenishment order' }
+  ];
+}
+
+
+  function visibleIds() {
+    const set = new Set();
+    for(let i = 0; i <= cur; i++) {
+      if(steps[i]) steps[i].adds.forEach(id => set.add(id));
+    }
+    return set;
+  }
+
+  function visibleSegments() {
+    const ids = visibleIds();
+    return allSegments.filter(seg => ids.has(seg.id));
+  }
+
+  function renderTimeline() {
+    timeline.innerHTML = '';
+    if(cur < 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'No scenario steps have been revealed yet.';
+      timeline.appendChild(empty);
+      return;
+    }
+    for(let i = 0; i <= cur; i++) {
+      const step = steps[i];
+      const card = document.createElement('div');
+      card.className = `stepCard ${step.role}`;
+      const chips = step.adds.length ? step.adds.map(id => `<span class="chip">${id}</span>`).join('') : '<span class="chip">VALIDATE</span>';
+      card.innerHTML = `
+        <div class="meta"><span class="pill">${step.badge}</span><span>${step.actor}</span></div>
+        <div class="stepTitle">${step.title}</div>
+        <div class="label">Business English</div>
+        <div class="text">${step.english}</div>
+        <div class="label">Segments added now</div>
+        <div class="chips">${chips}</div>
+        <div class="why">${step.why}</div>
+      `;
+      timeline.appendChild(card);
+    }
+    timeline.scrollTop = timeline.scrollHeight;
+  }
+
+  function segmentDefinition(id) {
+    const seg = allSegments.find(s => s.id === id);
+    return segmentInfo[id] || (seg ? segmentInfo[seg.seg] : null);
+  }
+
+  function renderEdi() {
+    const visible = visibleSegments();
+    ediPane.innerHTML = '';
+    if(!visible.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'No EDI lines yet. The business story has not been translated into X12.';
+      ediPane.appendChild(empty);
+      return;
+    }
+    const currentAdds = cur >= 0 ? steps[cur].adds : [];
+    visible.forEach((seg, index) => {
+      const line = document.createElement('div');
+      const isNew = currentAdds.includes(seg.id);
+      const isActive = selectedLineId === seg.id;
+      line.className = `segLine${isNew ? ' new' : ''}${isActive ? ' active' : ''}`;
+      line.innerHTML = `<span class="ln">${String(index + 1).padStart(3, '0')}</span><span class="code">${seg.text}</span>`;
+      line.addEventListener('click', () => {
+        selectedLineId = seg.id;
+        renderEdi();
+        const info = segmentDefinition(seg.id);
+        if(info) {
+          segmentCoach.innerHTML = `<b>${info.title}</b><br>${info.text}`;
+        }
+      });
+      ediPane.appendChild(line);
+    });
+    ediPane.scrollTop = ediPane.scrollHeight;
+  }
+
+  
+function finalChecks() {
+  const byId = {};
+  allSegments.forEach(seg => byId[seg.id] = splitSeg(seg.text));
+  const po1Parts = allSegments.filter(seg => seg.seg === 'PO1').map(seg => splitSeg(seg.text));
+  const stIndex = allSegments.findIndex(seg => seg.id === 'ST');
+  const seIndex = allSegments.findIndex(seg => seg.id === 'SE');
+  const expectedSeCount = (seIndex - stIndex) + 1;
+  const po1Count = po1Parts.length;
+  const totalQty = po1Parts.reduce((n, row) => n + Number(row[2] || 0), 0);
+  const totalAmount = po1Parts.reduce((n, row) => n + (Number(row[2] || 0) * Number(row[4] || 0)), 0);
+  const amtValue = Number(byId.AMT[2] || 0);
+  const requiredOk = ['BEG','CUR','N1_ST','N1_BT','PO1_1'].every(id => byId[id]);
+  return [
+    { label:'ISA13 matches IEA02', ok: byId.ISA[13] === byId.IEA[2], detail:`${byId.ISA[13]} = ${byId.IEA[2]}` },
+    { label:'GS06 matches GE02', ok: byId.GS[6] === byId.GE[2], detail:`${byId.GS[6]} = ${byId.GE[2]}` },
+    { label:'ST02 matches SE02', ok: byId.ST[2] === byId.SE[2], detail:`${byId.ST[2]} = ${byId.SE[2]}` },
+    { label:'SE01 segment count is correct', ok: Number(byId.SE[1]) === expectedSeCount, detail:`SE01=${byId.SE[1]}, expected ${expectedSeCount}` },
+    { label:'CTT01 equals PO1 count', ok: Number(byId.CTT[1]) === po1Count, detail:`CTT01=${byId.CTT[1]}, PO1 count=${po1Count}` },
+    { label:'CTT02 equals total quantity', ok: Number(byId.CTT[2]) === totalQty, detail:`CTT02=${byId.CTT[2]}, expected ${totalQty}` },
+    { label:'AMT equals summed line value', ok: Math.abs(amtValue - totalAmount) < 0.0001, detail:`AMT=${money(amtValue)}, expected ${money(totalAmount)}` },
+    { label:'Required header, parties, and items exist', ok: requiredOk, detail:'BEG, CUR, ship-to, bill-to, and at least one PO1 are present' }
+  ];
+}
+
+
+  function renderValidation() {
+    validationGrid.innerHTML = '';
+    const ready = cur >= steps.length - 1;
+    const checks = ready ? finalChecks() : validationTemplate.map(v => ({ label:v.label, pending:true, detail:'Runs when the full file is built.' }));
+    checks.forEach(check => {
+      const box = document.createElement('div');
+      const cls = check.pending ? 'pending' : (check.ok ? 'ok' : 'fail');
+      box.className = `check ${cls}`;
+      box.innerHTML = `
+        <div class="name">${check.label}</div>
+        <div class="detail">${check.detail}</div>
+        <div class="flag">${check.pending ? 'PENDING' : (check.ok ? 'PASS' : 'FAIL')}</div>
+      `;
+      validationGrid.appendChild(box);
+    });
+  }
+
+  function updateStatus() {
+    const builtCount = visibleSegments().length;
+    buildProgress.textContent = `${builtCount} / ${allSegments.length} segments built`;
+    scenarioProgress.textContent = `Step ${Math.max(cur + 1, 0)} / ${steps.length}`;
+    currentStepTag.textContent = cur < 0 ? 'Waiting to start' : steps[cur].title;
+
+    if(cur < 0) {
+      builderStatus.className = 'builderStatus notstarted';
+      builderStatus.textContent = 'Document status: Not started.';
+    } else if(cur < steps.length - 2) {
+      builderStatus.className = 'builderStatus building';
+      builderStatus.textContent = `Document status: Building. ${builtCount} of ${allSegments.length} segment lines have been created.`;
+    } else if(cur === steps.length - 2) {
+      builderStatus.className = 'builderStatus ready';
+      builderStatus.textContent = 'Document status: Built. All segment lines are present and ready for validation.';
+    } else {
+      const ok = finalChecks().every(check => check.ok);
+      builderStatus.className = ok ? 'builderStatus validated' : 'builderStatus issue';
+      builderStatus.textContent = ok
+        ? 'Document status: Validated. The document is complete and internally consistent for this training scenario.'
+        : 'Document status: Validation issue detected.';
+    }
+  }
+
+  function updateCoaches() {
+    if(cur < 0) {
+      scenarioCoach.textContent = "Click Next to begin. Each step explains what BuyerCo is asking SupplierCo to do, then adds the matching X12 850 segment lines.";
+      segmentCoach.textContent = "When a segment line appears, click it to see what that line means in business and EDI terms.";
+      return;
+    }
+    const step = steps[cur];
+    const addedText = step.adds.length ? `Adds: ${step.adds.join(', ')}` : 'Adds: no new lines. This step validates the completed file.';
+    scenarioCoach.innerHTML = `<b>${step.title}</b><br>${addedText}`;
+    if(!selectedLineId) {
+      segmentCoach.innerHTML = `<b>${step.title}</b><br>${step.why}`;
+    }
+  }
+
+  function refresh() {
+    renderTimeline();
+    renderEdi();
+    renderValidation();
+    updateStatus();
+    updateCoaches();
+    nextBtn.disabled = cur >= steps.length - 1;
+  }
+
+  function reset() {
+    stopPlay();
+    cur = -1;
+    selectedLineId = null;
+    refresh();
+  }
+
+  function next() {
+    if(cur >= steps.length - 1) {
+      stopPlay();
+      return;
+    }
+    cur += 1;
+    selectedLineId = null;
+    refresh();
+    if(cur >= steps.length - 1) stopPlay();
+  }
+
+  function togglePlay() {
+    if(playTimer) {
+      stopPlay();
+      return;
+    }
+    if(cur >= steps.length - 1) return;
+    playBtn.textContent = 'Stop';
+    playTimer = setInterval(() => {
+      next();
+      if(cur >= steps.length - 1) stopPlay();
+    }, 1050);
+  }
+
+  function regenerate() {
+    stopPlay();
+    model = buildModel();
+    allSegments = buildSegments(model);
+    steps = buildSteps(model);
+    renderSummary(buildSummary(model));
+    cur = -1;
+    selectedLineId = null;
+    refresh();
+  }
+
+  nextBtn.addEventListener('click', next);
+  playBtn.addEventListener('click', togglePlay);
+  resetBtn.addEventListener('click', reset);
+  regenBtn.addEventListener('click', regenerate);
+
+  renderLifecycle();
+  regenerate();
+</script>
+</body>
+</html>
