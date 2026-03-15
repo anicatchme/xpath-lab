@@ -6,6 +6,64 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>X12 850 Reverse Builder — Inbound Purchase Order</title>
 <style>
+/* ===============================
+   EDI TRANSACTION FLOW STRIP
+   =============================== */
+
+.flow-container {
+  max-width: 1320px;
+  margin: 12px auto 20px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+/* Each transaction card */
+.flow-container .edi-card {
+  min-width: 150px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.03);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Highlight current (850) */
+.flow-container .edi-card:first-child {
+  border-color: rgba(110,231,255,.55);
+  background: rgba(110,231,255,.10);
+}
+
+/* Transaction code */
+.flow-container .edi-code {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+/* Transaction description */
+.flow-container .edi-title {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+/* Arrow between cards */
+.flow-container .arrow {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--muted);
+  user-select: none;
+  flex-shrink: 0;
+}
+
   :root{
     --bg:#0b1220; --panel:#0f1a33; --line:#22335f; --text:#e6ecff; --muted:#a9b7e6;
     --hl:#fff3a3; --buyer:#3b82f6; --seller:#f97316; --ops:#22c55e; --finance:#a78bfa;
@@ -87,7 +145,49 @@
   .legend{max-width:1320px;margin:0 auto;padding:0 12px 12px;color:var(--muted);font-size:11px;line-height:1.5;}
   @media(max-width:1220px){.summary{grid-template-columns:repeat(3,minmax(0,1fr))} .lifecycle{grid-template-columns:repeat(4,minmax(0,1fr))} .wrap{grid-template-columns:1fr}}
   @media(max-width:760px){.summary{grid-template-columns:1fr} .lifecycle{grid-template-columns:repeat(2,minmax(0,1fr))} .validationGrid{grid-template-columns:1fr} .head{flex-direction:column} .controls{justify-content:flex-start}}
+  /* ===============================
+   LIFECYCLE + FLOW ON SAME ROW
+   =============================== */
+.lifeFlowRow{
+  max-width:1320px;
+  margin:0 auto;
+  padding:0 12px 12px;
+  display:flex;
+  gap:12px;
+  align-items:stretch;
+}
+
+/* keep lifecycle as a LEFT column */
+.lifeFlowRow .lifecycle{
+  padding:0;                 /* row already has padding */
+  margin:0;
+  max-width:none;
+  flex:0 0 260px;            /* fixed left width for the 850 tile */
+  display:block;             /* stop grid stretching across row */
+}
+
+/* lifecycle grid becomes single column inside left block */
+.lifeFlowRow .lifecycle{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+
+/* flow strip takes remaining width */
+.lifeFlowRow .flow-container{
+  margin:0;                  /* remove auto-centering because row controls layout */
+  flex:1 1 auto;
+}
+
+/* On smaller screens, stack them vertically */
+@media(max-width:980px){
+  .lifeFlowRow{flex-direction:column;}
+  .lifeFlowRow .lifecycle{flex:1 1 auto;}
+}
+
 </style>
+
+
 </head>
 <body>
 <header>
@@ -97,12 +197,57 @@
 
 <div class="navrow">
   <a class="navbtn" href="index.html">Suite Home</a>
-  
-  <a class="navbtn" href="02_997_outbound_functional_acknowledgment.html">Next: 997 — Functional Acknowledgment</a>
+</div>
+<section class="summary" id="summary"></section>
+
+<!-- ✅ lifecycle + flow in SAME ROW -->
+<div class="lifeFlowRow">
+  <section class="lifecycle" id="lifecycle"></section>
+
+  <div class="flow-container">
+    <div class="edi-card">
+      <div class="edi-code">850</div>
+      <div class="edi-title">Purchase Order</div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="edi-card ack">
+      <div class="edi-code">997 / 999</div>
+      <div class="edi-title">Functional Acknowledgment</div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="edi-card">
+      <div class="edi-code">855</div>
+      <div class="edi-title">PO Acknowledgment</div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="edi-card">
+      <div class="edi-code">856</div>
+      <div class="edi-title">Advance Ship Notice</div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="edi-card">
+      <div class="edi-code">810</div>
+      <div class="edi-title">Invoice</div>
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="edi-card">
+      <div class="edi-code">820</div>
+      <div class="edi-title">Payment / Remittance</div>
+    </div>
+  </div>
 </div>
 
-<section class="summary" id="summary"></section>
-<section class="lifecycle" id="lifecycle"></section>
+
 
 <div class="wrap">
   <section class="panel">
@@ -146,41 +291,16 @@
 
 <div class="legend">Perspective: SupplierCo is the focal company. This means the 850 is treated as an inbound order document, even though it originated with BuyerCo.</div>
 
+
+
+
 <script>
   const suiteMap = [
   {
     "file": "01_850_inbound_purchase_order.html",
     "label": "850 \u2014 Purchase Order"
   },
-  {
-    "file": "02_997_outbound_functional_acknowledgment.html",
-    "label": "997 \u2014 Functional Acknowledgment"
-  },
-  {
-    "file": "03_855_outbound_po_acknowledgment.html",
-    "label": "855 \u2014 Purchase Order Acknowledgment"
-  },
-  {
-    "file": "04_860_inbound_po_change_request.html",
-    "label": "860 \u2014 Purchase Order Change Request"
-  },
-  {
-    "file": "05_865_outbound_po_change_acknowledgment.html",
-    "label": "865 \u2014 Purchase Order Change Acknowledgment"
-  },
-  {
-    "file": "06_856_outbound_ship_notice_manifest.html",
-    "label": "856 \u2014 Ship Notice / Manifest"
-  },
-  {
-    "file": "07_810_outbound_invoice.html",
-    "label": "810 \u2014 Invoice"
-  },
-  {
-    "file": "08_820_inbound_payment_remittance.html",
-    "label": "820 \u2014 Payment Order / Remittance Advice"
-  }
-];
+ ];
   const currentFile = "01_850_inbound_purchase_order.html";
   const segmentInfo = {
   "ISA": {
