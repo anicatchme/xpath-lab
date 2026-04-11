@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>EDI 820 ACH Remittance – Interactive QA Simulation</title>
+<style>
+:root{
+  --bg:#0b1220; --panel:#0f1a33; --line:#22335f; --text:#e6ecff; --muted:#a9b7e6;
+  --accent:#6ee7ff; --hl:#fff3a3; --pass:#22c55e; --fail:#f97316;
+  --mono: ui-monospace, Menlo, Consolas, monospace;
+}
+body{margin:0;font-family:system-ui,Segoe UI,Arial;background:linear-gradient(180deg,var(--bg),#050914);color:var(--text)}
+header{padding:16px 20px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:18px}
+header p{margin-top:6px;color:var(--muted);font-size:13px}
+.wrap{max-width:1400px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);overflow:hidden}
+.head{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px}
+button{border:0;border-radius:10px;padding:8px 12px;font-weight:800;font-size:12px;cursor:pointer;background:linear-gradient(90deg,var(--accent),#a78bfa);color:#06101f}
+button.secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
+.body{padding:14px}
+pre{font-family:var(--mono);font-size:12px;line-height:1.6;background:#020617;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto}
+.seg{display:block;padding:2px 4px;border-radius:6px}
+.seg.hl{background:var(--hl);color:#1a1a1a}
+.chat{display:flex;flex-direction:column;gap:10px;min-height:380px}
+.bubble{max-width:88%;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:13px}
+.tester{align-self:flex-start}
+.mrd{align-self:flex-end}
+.note{margin-top:10px;border-left:4px solid var(--accent);background:#020617;padding:10px;border-radius:6px;font-size:13px}
+@media(max-width:980px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>EDI 820 ACH Remittance – Senior QA Interactive Walkthrough</h1>
+  <p>End-to-end testing simulation for an ACH-based 820 with multiple invoices, discounts, and a credit memo.</p>
+</header>
+<div class="wrap">
+
+<!-- LEFT: FILE UNDER TEST -->
+<section class="panel">
+  <div class="head">EDI 820 File Under Test</div>
+  <div class="body">
+<pre id="edi">
+<span class="seg" data-key="ISA">ISA*01*0000000000*01*0000000000*ZZ*ABCDEFGHIJKLMNO*ZZ*123456789012345*101127*1719*U*00400*000003438*0*P*></span>
+<span class="seg" data-key="GS">GS*RA*4405197800*999999999*20111219*1726*299*X*004060</span>
+<span class="seg" data-key="ST">ST*820*0289</span>
+<span class="seg" data-key="BPR">BPR*I*4858.77*C*ACH*PBC</span>
+<span class="seg" data-key="TRN">TRN*1*8888856834</span>
+<span class="seg" data-key="CUR">CUR*BY*USD</span>
+<span class="seg" data-key="REFZZ">REF*ZZ*8888856834</span>
+<span class="seg" data-key="DTM020">DTM*020*20111213</span>
+<span class="seg" data-key="N1PE">N1*PE*1 EDI SOURCE</span>
+<span class="seg" data-key="N1PR">N1*PR*ABC CORP</span>
+<span class="seg" data-key="RMR">RMR*IV*999742**631.55*644.44*12.89*PT*0</span>
+<span class="seg" data-key="RMR2">RMR*IV*999734**489.81*499.81*10*PT*0</span>
+<span class="seg" data-key="RMR3">RMR*IV*999740**882.51*900.52*18.01*PT*0</span>
+<span class="seg" data-key="RMR4">RMR*IV*999735**1559.45*1591.28*31.83*PT*0</span>
+<span class="seg" data-key="RMR5">RMR*IV*999736**7.78*7.94*0.16*PT*0</span>
+<span class="seg" data-key="RMR6">RMR*IV*999744**342.17*349.15*6.98*PT*0</span>
+<span class="seg" data-key="RMR7">RMR*IV*999741**946.68*966*19.32*PT*0</span>
+<span class="seg" data-key="RMROS">RMR*OS*64024003**-1.18*-1.18*0*CM*0</span>
+<span class="seg" data-key="SE">SE*35*0289</span>
+<span class="seg" data-key="GE">GE*1*299</span>
+<span class="seg" data-key="IEA">IEA*1*000000299</span>
+</pre>
+<p style="color:var(--muted);font-size:12px">File remains static. Tester validates one business rule per step.</p>
+  </div>
+</section>
+
+<!-- RIGHT: QA WALKTHROUGH -->
+<section class="panel">
+  <div class="head">
+    <span>QA Test Walkthrough (Next →)</span>
+    <span><button id="next">Next</button> <button id="reset" class="secondary">Reset</button></span>
+  </div>
+  <div class="body">
+    <div class="chat" id="chat"></div>
+    <div class="note" id="note">Click Next to begin QA review.</div>
+  </div>
+</section>
+
+</div>
+<script>
+const steps = [
+  {who:'tester', text:'First, do control numbers match at the interchange level?', hi:['ISA','IEA'], note:'TC-E01: ISA/IEA control numbers must match.'},
+  {who:'mrd', text:'No. ISA13 and IEA02 do not match. This is a hard EDI compliance failure.', hi:['ISA','IEA'], note:'Expected Result: FAIL – file rejected before mapping.'},
+
+  {who:'tester', text:'Ignoring that for moment, what payment method is used?', hi:['BPR'], note:'TC-P01: Identify payment method.'},
+  {who:'mrd', text:'BPR indicates ACH. This is an electronic payment, not a check.', hi:['BPR'], note:'Expected Result: PASS – no REF*CK required.'},
+
+  {who:'tester', text:'Do we have proper traceability for this ACH payment?', hi:['TRN','REFZZ'], note:'TC-R01: TRN and reference consistency.'},
+  {who:'mrd', text:'Yes. TRN and REF both reference the same payment ID.', hi:['TRN','REFZZ'], note:'Expected Result: PASS.'},
+
+  {who:'tester', text:'Does the remittance contain multiple invoices and discounts?', hi:['RMR','RMR2','RMR7'], note:'TC-RM01/02: Multiple RMRs with PT discounts.'},
+  {who:'mrd', text:'Yes. Each RMR produces a remittance line, discounts applied correctly.', hi:['RMR','RMR2','RMR7'], note:'Expected Result: PASS.'},
+
+  {who:'tester', text:'Is there a negative amount or credit memo I must test?', hi:['RMROS'], note:'TC-RM03: Credit memo handling.'},
+  {who:'mrd', text:'Yes. RMR*OS with negative amount represents a credit memo.', hi:['RMROS'], note:'Expected Result: PASS if CM logic supported.'},
+
+  {who:'tester', text:'Finally, does the total remittance equal the BPR amount?', hi:['BPR','RMR','RMROS'], note:'TC-T01: Total reconciliation.'},
+  {who:'mrd', text:'This must be explicitly validated. Any mismatch requires rejection.', hi:['BPR','RMR','RMROS'], note:'Expected Result: PASS only if totals match 4858.77.'}
+];
+
+let idx = -1;
+const chat = document.getElementById('chat');
+const note = document.getElementById('note');
+const segs = [...document.querySelectorAll('.seg')];
+function clearHL(){segs.forEach(s=>s.classList.remove('hl'));}
+function hl(keys){clearHL();segs.forEach(s=>{if(keys.includes(s.dataset.key)) s.classList.add('hl');});}
+function addBubble(step){ const d=document.createElement('div'); d.className='bubble '+step.who; d.textContent=step.text; chat.appendChild(d);} 
+document.getElementById('next').onclick=()=>{ idx++; if(idx>=steps.length) return; const s=steps[idx]; addBubble(s); hl(s.hi); note.textContent=s.note; chat.scrollTop=chat.scrollHeight; };
+document.getElementById('reset').onclick=()=>{ idx=-1; chat.innerHTML=''; clearHL(); note.textContent='Click Next to begin QA review.'; };
+</script>
+</body>
+</html>
