@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Conversational EDI Testing Simulator</title>
+
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background: #003a8f;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+section {
+    background: white;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+h2 {
+    color: #003a8f;
+}
+.chat {
+    margin-top: 15px;
+}
+.msg {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    max-width: 80%;
+}
+.tester {
+    background: #e3f2fd;
+    border-left: 5px solid #1976d2;
+}
+.system {
+    background: #e8f5e9;
+    border-left: 5px solid #2e7d32;
+}
+.bank {
+    background: #fff3e0;
+    border-left: 5px solid #ef6c00;
+}
+pre {
+    background: #1e1e1e;
+    color: #dcdcdc;
+    padding: 15px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 13px;
+}
+.check {
+    background: #fffde7;
+    padding: 10px;
+    border-left: 5px solid #fbc02d;
+    margin-top: 10px;
+}
+footer {
+    text-align: center;
+    font-size: 12px;
+    color: #555;
+    padding: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Conversational EDI Testing Simulator</h1>
+<p>End‑to‑End Banking Payment Flow (EDI 820 → 997 → 824 → 821)</p>
+</header>
+
+<!-- STEP 1 -->
+<section>
+<h2>Step 1: EDI 820 – Payment Instruction</h2>
+
+<div class="chat">
+<div class="msg system">
+<b>System:</b> “A corporate has sent a payment request to the bank.”
+</div>
+
+<div class="msg tester">
+<b>Tester:</b> “Let me verify what payment is being requested and whether it makes sense.”
+</div>
+
+<div class="msg tester">
+<b>Tester:</b> “First, I check the amount, trace number, payer, payee, and invoice.”
+</div>
+</div>
+
+<pre>
+ST*820*0001~
+BPR*C*12500.00*C*ACH*CTX~
+TRN*1*PAYREF20260412~
+N1*PR*CORP CLIENT INC~
+N1*PE*ABC SUPPLIER LLC~
+RMR*IV*INV20260315*12500.00~
+</pre>
+
+<div class="check">
+<b>Tester Validations:</b>
+<ul>
+<li>Does BPR amount = invoice amount?</li>
+<li>Is TRN unique?</li>
+<li>Does vendor exist and have a valid bank account?</li>
+</ul>
+</div>
+</section>
+
+<!-- STEP 2 -->
+<section>
+<h2>Step 2: EDI 997 – Functional Acknowledgment</h2>
+
+<div class="chat">
+<div class="msg bank">
+<b>Bank:</b> “I received your file and it is structurally correct.”
+</div>
+
+<div class="msg tester">
+<b>Tester:</b> “Good. But this does NOT mean payment is successful yet.”
+</div>
+</div>
+
+<pre>
+ST*997*0001~
+AK1*RA*101~
+AK2*820*0001~
+AK5*A~
+AK9*A*1*1*1~
+</pre>
+
+<div class="check">
+<b>Tester Checks:</b>
+<ul>
+<li>Control numbers match EDI 820?</li>
+<li>Accepted vs rejected?</li>
+<li>Partial acceptance?</li>
+</ul>
+</div>
+</section>
+
+<!-- STEP 3 -->
+<section>
+<h2>Step 3: Bank Processing (No EDI File)</h2>
+
+<div class="chat">
+<div class="msg system">
+<b>System:</b> “Bank is performing internal checks.”
+</div>
+
+<div class="msg tester">
+<b>Tester:</b> “I check logs, cut‑off timing, ACH vs Wire routing.”
+</div>
+</div>
+
+<div class="check">
+<b>Tester Focus:</b>
+<ul>
+<li>Was file before cut‑off?</li>
+<li>Is this ACH or Wire?</li>
+<li>Any compliance or fraud holds?</li>
+</ul>
+</div>
+</section>
+
+<!-- STEP 4 -->
+<section>
+<h2>Step 4: EDI 824 – Application Advice (Business Decision)</h2>
+
+<div class="chat">
+<div class="msg bank">
+<b>Bank:</b> “I have completed business validation.”
+</div>
+
+<div class="msg tester">
+<b>Tester:</b> “Now I know if payment was accepted or rejected.”
+</div>
+</div>
+
+<pre>
+ST*824*0001~
+OTI*TA*820*0001~
+TED*005*PAYMENT ACCEPTED~
+REF*TRN*PAYREF20260412~
+</pre>
+
+<div class="check">
+<b>Tester Checks:</b>
+<ul>
+<li>Status accepted or rejected?</li>
+<li>Error reason makes sense?</li>
+<li>TRN matches EDI 820?</li>
+</ul>
+</div>
+</section>
+
+<!-- STEP 5 -->
+<section>
+<h2>Step 5: EDI 821 – Bank Statement & Reconciliation</h2>
+
+<div class="chat">
+<div class="msg system">
+<b>System:</b> “Payment has been settled and reported.”
+</div>
+
+<div class="msg tester">
+<b>Tester:</b> “This proves money actually moved.”
+</div>
+</div>
+
+<pre>
+ST*821*0001~
+AMT*TT*12500.00~
+REF*TRN*PAYREF20260412~
+</pre>
+
+<div class="check">
+<b>Tester Reconciliation:</b>
+<ul>
+<li>Amount matches EDI 820</li>
+<li>Trace number consistent</li>
+<li>No missing or duplicate payments</li>
+</ul>
+</div>
+</section>
+
+<section>
+<h2>End‑to‑End Tester Mindset</h2>
+<p>
+EDI 820 asks for money movement.<br>
+EDI 997 confirms file receipt.<br>
+EDI 824 confirms business decision.<br>
+EDI 821 confirms settlement.<br><br>
+<b>A tester validates the journey of money — not just files.</b>
+</p>
+</section>
+
+<footer>
+© Banking EDI Conversational Training Simulation
+</footer>
+
+</body>
+</html>
