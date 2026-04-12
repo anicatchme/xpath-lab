@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EDI Defect Triage Simulation</title>
+
+<style>
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f4f6fb;
+  margin: 0;
+}
+header {
+  background: #8e0000;
+  color: white;
+  padding: 18px;
+  text-align: center;
+}
+section {
+  background: white;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+h2 { color: #8e0000; }
+.defect {
+  background: #fff3f3;
+  padding: 12px;
+  border-left: 6px solid #c62828;
+  margin-bottom: 15px;
+}
+.msg {
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+}
+.tester { background: #e3f2fd; border-left: 4px solid #1565c0; }
+.bank { background: #fff3e0; border-left: 4px solid #ef6c00; }
+.ba { background: #e8f5e9; border-left: 4px solid #2e7d32; }
+.triage {
+  background: #f9fbe7;
+  padding: 12px;
+  border-left: 5px solid #afb42b;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+th {
+  background: #f1f1f1;
+}
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: #555;
+  padding: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Defect Triage Simulation</h1>
+<p>End‑to‑End Banking EDI Payments (Tester View)</p>
+</header>
+
+<section>
+<h2>Defect Scenario 1: Payment Accepted but Missing in EDI 821</h2>
+
+<div class="defect">
+<strong>Observed Issue:</strong><br>
+EDI 820 sent → EDI 997 accepted → EDI 824 accepted → ❌ No EDI 821 received
+</div>
+
+<div class="msg tester">
+As a tester, I expected a settlement record. This indicates money may not have settled.
+</div>
+
+<div class="triage">
+<strong>Triage Discussion:</strong>
+<ul>
+<li>Was payment processed after cutoff?</li>
+<li>Was it a weekend or holiday?</li>
+<li>Is this expected delay or actual failure?</li>
+</ul>
+</div>
+
+<table>
+<tr><th>Triage Item</th><th>Decision</th></tr>
+<tr><td>Defect Type</td><td>Functional / Reconciliation</td></tr>
+<tr><td>Severity</td><td>High (Financial Impact)</td></tr>
+<tr><td>Priority</td><td>P1</td></tr>
+<tr><td>Owner</td><td>Bank Operations</td></tr>
+<tr><td>Status</td><td>Open</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Defect Scenario 2: EDI 997 Accepted but EDI 824 Rejected</h2>
+
+<div class="defect">
+<strong>Observed Issue:</strong><br>
+997 shows Accepted but 824 shows Insufficient Funds
+</div>
+
+<div class="msg tester">
+This is expected behavior. Technical validation passed, business validation failed.
+</div>
+
+<div class="triage">
+<strong>Triage Conclusion:</strong>
+<ul>
+<li>No defect with EDI</li>
+<li>Business data issue</li>
+<li>Close as Expected Behavior</li>
+</ul>
+</div>
+
+<table>
+<tr><th>Triage Item</th><th>Decision</th></tr>
+<tr><td>Defect Type</td><td>Expected Behavior</td></tr>
+<tr><td>Severity</td><td>N/A</td></tr>
+<tr><td>Owner</td><td>N/A</td></tr>
+<tr><td>Status</td><td>Closed – Not a Bug</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Defect Scenario 3: Amount Mismatch in EDI 821</h2>
+
+<div class="defect">
+<strong>Observed Issue:</strong><br>
+EDI 820 amount = 12,500 <br>
+EDI 821 amount = 12,000
+</div>
+
+<div class="msg tester">
+This indicates incorrect settlement amount. High financial risk.
+</div>
+
+<div class="triage">
+<strong>Root Cause Analysis:</strong>
+<ul>
+<li>Check for bank fees</li>
+<li>Check currency conversion</li>
+<li>Check net vs gross settlement rules</li>
+</ul>
+</div>
+
+<table>
+<tr><th>Triage Item</th><th>Decision</th></tr>
+<tr><td>Defect Type</td><td>Settlement Defect</td></tr>
+<tr><td>Severity</td><td>Critical</td></tr>
+<tr><td>Priority</td><td>P0</td></tr>
+<tr><td>Owner</td><td>Bank Clearing Team</td></tr>
+<tr><td>Status</td><td>Escalated</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Defect Scenario 4: Duplicate Payment Created</h2>
+
+<div class="defect">
+<strong>Observed Issue:</strong><br>
+Same TRN appears in two EDI 821 settlement records
+</div>
+
+<div class="msg tester">
+This is a critical defect – duplicate payment risk.
+</div>
+
+<table>
+<tr><th>Triage Item</th><th>Decision</th></tr>
+<tr><td>Defect Type</td><td>Duplicate Processing</td></tr>
+<tr><td>Severity</td><td>Critical</td></tr>
+<tr><td>Priority</td><td>P0</td></tr>
+<tr><td>Owner</td><td>Bank + Corporate</td></tr>
+<tr><td>Status</td><td>Emergency Fix Required</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Tester Triage Checklist (Teach This to Freshers)</h2>
+<ul>
+<li>Is this expected or unexpected?</li>
+<li>Which EDI document proves failure?</li>
+<li>Is money impacted?</li>
+<li>Who owns the fix?</li>
+<li>Is workaround available?</li>
+</ul>
+</section>
+
+<footer>
+© Banking EDI Defect Triage Training Simulation
+</footer>
+
+</body>
+</html>
