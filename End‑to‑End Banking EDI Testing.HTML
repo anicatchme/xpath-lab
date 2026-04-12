@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EDI End-to-End Testing – Scenario Simulator</title>
+
+<style>
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f2f5fb;
+  margin: 0;
+}
+header {
+  background: #002f6c;
+  color: #fff;
+  padding: 18px;
+  text-align: center;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  background: #dde6f2;
+  padding: 10px;
+}
+.tabs button {
+  background: #fff;
+  border: none;
+  margin: 5px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.tabs button.active {
+  background: #002f6c;
+  color: white;
+}
+.content {
+  display: none;
+  background: white;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.content.active {
+  display: block;
+}
+.msg {
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+}
+.system { background: #e8f5e9; border-left: 4px solid #2e7d32;}
+.bank { background: #fff3e0; border-left: 4px solid #ef6c00;}
+.tester { background: #e3f2fd; border-left: 4px solid #1976d2;}
+.check {
+  background: #fffde7;
+  padding: 10px;
+  margin-top: 10px;
+  border-left: 5px solid #fbc02d;
+}
+pre {
+  background: #1e1e1e;
+  color: #dcdcdc;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+footer {
+  text-align: center;
+  font-size: 13px;
+  padding: 10px;
+  color: #555;
+}
+</style>
+
+<script>
+function openScenario(id) {
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById("btn-"+id).classList.add('active');
+}
+</script>
+</head>
+
+<body>
+
+<header>
+<h1>End‑to‑End Banking EDI Testing Simulator</h1>
+<p>Scenario‑Based Learning for Freshers (820 → 997 → 824 → 821)</p>
+</header>
+
+<div class="tabs">
+<button id="btn-s1" onclick="openScenario('s1')" class="active">✅ Happy Path</button>
+<button id="btn-s2" onclick="openScenario('s2')">❌ Amount Mismatch</button>
+<button id="btn-s3" onclick="openScenario('s3')">❌ Duplicate TRN</button>
+<button id="btn-s4" onclick="openScenario('s4')">⚠ After Cutoff</button>
+<button id="btn-s5" onclick="openScenario('s5')">❌ Insufficient Funds</button>
+<button id="btn-s6" onclick="openScenario('s6')">❌ Invalid Vendor Bank</button>
+<button id="btn-s7" onclick="openScenario('s7')">⚠ Partial Acceptance</button>
+<button id="btn-s8" onclick="openScenario('s8')">🔁 Resubmission</button>
+<button id="btn-s9" onclick="openScenario('s9')">❌ Missing Settlement</button>
+<button id="btn-s10" onclick="openScenario('s10')">❌ Reconciliation Mismatch</button>
+</div>
+
+<!-- SCENARIO TEMPLATE -->
+
+<div id="s1" class="content active">
+<h2>Scenario 1: Happy Path – Successful ACH Payment</h2>
+
+<div class="msg system">Corporate sends a valid EDI 820.</div>
+<div class="msg tester">I verify amount, invoice, vendor, and TRN.</div>
+<div class="msg bank">EDI 997 – Accepted.</div>
+<div class="msg bank">EDI 824 – Payment Accepted.</div>
+<div class="msg system">EDI 821 shows settlement for PAYREF20260412.</div>
+
+<div class="check">
+✅ Expected Result:
+<ul>
+<li>All acknowledgments successful</li>
+<li>Settlement present</li>
+<li>Trace number matches end to end</li>
+</ul>
+</div>
+</div>
+
+<div id="s2" class="content">
+<h2>Scenario 2: Amount Mismatch</h2>
+
+<div class="msg tester">Invoice total does not match BPR amount.</div>
+<div class="msg bank">EDI 997 – Accepted.</div>
+<div class="msg bank">EDI 824 – Rejected (Amount mismatch).</div>
+
+<div class="check">
+❌ Expected Result:
+<ul>
+<li>Technical pass</li>
+<li>Business rejection</li>
+<li>No EDI 821</li>
+</ul>
+</div>
+</div>
+
+<div id="s3" class="content">
+<h2>Scenario 3: Duplicate Payment Trace Number</h2>
+
+<div class="msg system">Same TRN is reused.</div>
+<div class="msg tester">Duplicate payment risk.</div>
+<div class="msg bank">EDI 824 – Rejected (Duplicate).</div>
+
+<div class="check">
+❌ Expected Result:
+<ul>
+<li>Payment stopped</li>
+<li>No settlement</li>
+</ul>
+</div>
+</div>
+
+<div id="s4" class="content">
+<h2>Scenario 4: After ACH Cutoff Time</h2>
+
+<div class="msg system">File received after cutoff.</div>
+<div class="msg tester">Settlement should be delayed.</div>
+<div class="msg bank">EDI 824 – Accepted (Pending).</div>
+
+<div class="check">
+⚠ Expected Result:
+<ul>
+<li>Settlement next business day</li>
+<li>No same‑day EDI 821</li>
+</ul>
+</div>
+</div>
+
+<div id="s5" class="content">
+<h2>Scenario 5: Insufficient Funds</h2>
+
+<div class="msg tester">Corporate account has insufficient funds.</div>
+<div class="msg bank">EDI 824 – Rejected.</div>
+
+<div class="check">
+❌ Expected Result:
+<ul>
+<li>Clear business rejection</li>
+<li>No settlement</li>
+</ul>
+</div>
+</div>
+
+<div id="s6" class="content">
+<h2>Scenario 6: Invalid Vendor Bank Details</h2>
+
+<div class="msg tester">Vendor routing number is invalid.</div>
+<div class="msg bank">EDI 824 – Rejected.</div>
+
+<div class="check">
+❌ Expected Result:
+<ul>
+<li>Vendor validation failure</li>
+</ul>
+</div>
+</div>
+
+<div id="s7" class="content">
+<h2>Scenario 7: Partial File Acceptance</h2>
+
+<div class="msg tester">One payment valid, one invalid.</div>
+<div class="msg bank">EDI 997 – Partial Acceptance.</div>
+<div class="msg bank">EDI 824 – Mixed outcomes.</div>
+
+<div class="check">
+⚠ Expected Result:
+<ul>
+<li>Only valid payments settled</li>
+</ul>
+</div>
+</div>
+
+<div id="s8" class="content">
+<h2>Scenario 8: Resubmission After Fix</h2>
+
+<div class="msg tester">Corrected and resent payment.</div>
+<div class="msg bank">EDI 824 – Accepted.</div>
+
+<div class="check">
+✅ Expected Result:
+<ul>
+<li>Successful processing after fix</li>
+</ul>
+</div>
+</div>
+
+<div id="s9" class="content">
+<h2>Scenario 9: Missing EDI 821</h2>
+
+<div class="msg tester">Payment accepted but no settlement reported.</div>
+
+<div class="check">
+❌ Expected Result:
+<ul>
+<li>Reconciliation defect raised</li>
+</ul>
+</div>
+</div>
+
+<div id="s10" class="content">
+<h2>Scenario 10: Reconciliation Amount Mismatch</h2>
+
+<div class="msg tester">EDI 821 shows incorrect amount.</div>
+
+<div class="check">
+❌ Expected Result:
+<ul>
+<li>Critical financial defect</li>
+</ul>
+</div>
+</div>
+
+<footer>
+© End‑to‑End Banking EDI Scenario Simulator
+</footer>
+
+</body>
+</html>
