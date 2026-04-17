@@ -1,0 +1,452 @@
+<section class="aws-faq" aria-labelledby="awsFaqTitle">
+  <div class="aws-faq__header">
+    <h2 id="awsFaqTitle">AWS & Cloud Computing — Interactive Q&A (Basics)</h2>
+    <p class="aws-faq__sub">
+      Quick answers for beginners: cloud concepts, AWS building blocks, security, networking, and scalability.
+    </p>
+
+    <div class="aws-faq__controls" role="group" aria-label="FAQ controls">
+      <label class="aws-faq__search">
+        <span class="sr-only">Search questions</span>
+        <input id="faqSearch" type="search" placeholder="Search (e.g., VPC, EC2, IAM, S3, AZ, load balancer)..." />
+      </label>
+
+      <button type="button" class="btn" id="expandAll">Expand all</button>
+      <button type="button" class="btn" id="collapseAll">Collapse all</button>
+    </div>
+  </div>
+
+  <div class="aws-faq__list" id="faqList">
+    <!-- 1 -->
+    <details class="faq-item" data-tags="cloud basics definition">
+      <summary>
+        <span class="q">What is Cloud Computing?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          Cloud computing means renting IT resources (compute, storage, databases, networking, analytics, etc.)
+          over the internet instead of buying and maintaining physical servers yourself.
+          You can scale up/down quickly and pay only for what you use.
+        </p>
+      </div>
+    </details>
+
+    <!-- 2 -->
+    <details class="faq-item" data-tags="aws basics definition">
+      <summary>
+        <span class="q">What is AWS?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          AWS (Amazon Web Services) is a cloud platform that provides on-demand services like virtual servers,
+          storage, databases, networking, security, and more—so teams can build and run apps without managing
+          physical infrastructure.
+        </p>
+      </div>
+    </details>
+
+    <!-- 3 -->
+    <details class="faq-item" data-tags="shared responsibility security model">
+      <summary>
+        <span class="q">What is the AWS Shared Responsibility Model?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          Security is shared: AWS handles <strong>security of the cloud</strong> (data centers, hardware, core infrastructure),
+          while customers handle <strong>security in the cloud</strong> (their data, identity/permissions, configurations, and applications).
+          For EC2, customers manage the guest OS patches and security group rules; for services like S3, customers still manage data access and permissions.
+        </p>
+        <p class="note">
+          Tip: Most real cloud incidents come from customer misconfiguration—review IAM policies, encryption, and network exposure regularly.
+        </p>
+      </div>
+    </details>
+
+    <!-- 4 -->
+    <details class="faq-item" data-tags="region availability zone az global infrastructure">
+      <summary>
+        <span class="q">What are AWS Regions and Availability Zones (AZs)?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          A <strong>Region</strong> is a geographic area (e.g., US East). Each Region contains multiple
+          <strong>Availability Zones</strong>—isolated locations (one or more data centers) with independent power/networking.
+          Best practice is to run workloads across multiple AZs so your app stays available even if one AZ has issues.
+        </p>
+      </div>
+    </details>
+
+    <!-- 5 -->
+    <details class="faq-item" data-tags="vpc networking private network">
+      <summary>
+        <span class="q">What is a VPC (Virtual Private Cloud)?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          A <strong>VPC</strong> is your own isolated virtual network inside AWS where you launch resources (like EC2).
+          You control IP ranges, subnets, routing, and network access—similar to a private data center network.
+        </p>
+      </div>
+    </details>
+
+    <!-- 6 -->
+    <details class="faq-item" data-tags="subnet public private networking">
+      <summary>
+        <span class="q">What is a Subnet? Why do we use it?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          A <strong>subnet</strong> is a slice of your VPC’s IP range placed in a specific Availability Zone.
+          You use subnets to separate resources by purpose and risk:
+          <strong>public subnets</strong> (internet-facing) and <strong>private subnets</strong> (internal services).
+        </p>
+      </div>
+    </details>
+
+    <!-- 7 -->
+    <details class="faq-item" data-tags="route table routing">
+      <summary>
+        <span class="q">What is a Route Table?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          A <strong>route table</strong> decides where network traffic goes from a subnet.
+          Example: a route that sends <code>0.0.0.0/0</code> to an Internet Gateway enables outbound internet access for that subnet.
+        </p>
+      </div>
+    </details>
+
+    <!-- 8 -->
+    <details class="faq-item" data-tags="internet gateway igw public subnet">
+      <summary>
+        <span class="q">What is an Internet Gateway (IGW)?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          An <strong>Internet Gateway</strong> connects your VPC to the public internet.
+          Typically, public subnets route internet-bound traffic to the IGW so resources can be reachable (when security rules allow it).
+        </p>
+      </div>
+    </details>
+
+    <!-- 9 -->
+    <details class="faq-item" data-tags="nat gateway private subnet outbound">
+      <summary>
+        <span class="q">What is a NAT Gateway? When do I need it?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          A <strong>NAT Gateway</strong> lets resources in a <strong>private subnet</strong> access the internet for outbound needs
+          (updates, package downloads) <em>without allowing inbound internet connections</em> to those private resources.
+        </p>
+      </div>
+    </details>
+
+    <!-- 10 -->
+    <details class="faq-item" data-tags="ec2 compute virtual server instance">
+      <summary>
+        <span class="q">What is Amazon EC2?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          <strong>EC2</strong> is a service that provides virtual servers (“instances”) in the cloud.
+          You choose CPU/RAM capacity, an OS image (AMI), storage, and networking—then run your application like on a normal server.
+        </p>
+      </div>
+    </details>
+
+    <!-- 11 -->
+    <details class="faq-item" data-tags="s3 storage object bucket">
+      <summary>
+        <span class="q">What is Amazon S3?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          <strong>S3</strong> is object storage for files such as images, videos, backups, logs, and datasets.
+          Data is stored in <strong>buckets</strong> and accessed via policies/permissions.
+        </p>
+      </div>
+    </details>
+
+    <!-- 12 -->
+    <details class="faq-item" data-tags="iam security users roles policies mfa">
+      <summary>
+        <span class="q">What is IAM, and why is it important?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          <strong>IAM (Identity and Access Management)</strong> controls who can access AWS and what they can do.
+          Core pieces are <strong>users</strong>, <strong>groups</strong>, <strong>roles</strong>, and <strong>policies</strong>.
+          Best practice is “least privilege” and using MFA for sensitive accounts.
+        </p>
+      </div>
+    </details>
+
+    <!-- 13 -->
+    <details class="faq-item" data-tags="load balancer alb nlb traffic high availability">
+      <summary>
+        <span class="q">What is a Load Balancer in AWS?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          A <strong>Load Balancer</strong> distributes incoming traffic across multiple EC2 instances so apps remain fast and available.
+          If one instance fails, traffic is redirected to healthy instances—improving uptime and scalability.
+        </p>
+        <p>
+          Common types include <strong>Application Load Balancer (ALB)</strong> for HTTP/HTTPS and advanced routing,
+          and <strong>Network Load Balancer (NLB)</strong> for high-performance TCP/UDP.
+        </p>
+      </div>
+    </details>
+
+    <!-- 14 -->
+    <details class="faq-item" data-tags="auto scaling asg elasticity">
+      <summary>
+        <span class="q">What is Auto Scaling (ASG) and why do we use it?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          <strong>Auto Scaling</strong> automatically adjusts the number of EC2 instances based on demand (scale out/in).
+          It helps maintain performance during peak traffic and reduces cost during low usage. It can also replace unhealthy instances automatically.
+        </p>
+      </div>
+    </details>
+
+    <!-- 15 -->
+    <details class="faq-item" data-tags="well architected pillars best practices">
+      <summary>
+        <span class="q">What is the AWS Well-Architected Framework?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <p>
+          The AWS Well-Architected Framework is guidance for designing and running cloud systems using six pillars:
+          <strong>Operational Excellence</strong>, <strong>Security</strong>, <strong>Reliability</strong>,
+          <strong>Performance Efficiency</strong>, <strong>Cost Optimization</strong>, and <strong>Sustainability</strong>.
+        </p>
+      </div>
+    </details>
+
+    <!-- 16 -->
+    <details class="faq-item" data-tags="beginner path learning">
+      <summary>
+        <span class="q">What’s a simple beginner path to learn AWS?</span>
+        <span class="icon" aria-hidden="true"></span>
+      </summary>
+      <div class="a">
+        <ol>
+          <li>Start with IAM (users/roles/policies) and billing basics.</li>
+          <li>Learn networking: VPC → subnets → route tables → IGW/NAT.</li>
+          <li>Compute: EC2 + storage options.</li>
+          <li>Storage: S3 basics + access policies.</li>
+          <li>High availability: Load Balancer + Auto Scaling across AZs.</li>
+          <li>Security & best practices: Shared Responsibility + Well-Architected pillars.</li>
+        </ol>
+      </div>
+    </details>
+  </div>
+</section>
+
+<style>
+  :root{
+    --bg:#0b1220;
+    --card:#111a2e;
+    --text:#eaf0ff;
+    --muted:#a9b6d6;
+    --accent:#7aa2ff;
+    --border:rgba(255,255,255,.14);
+    --shadow: 0 8px 24px rgba(0,0,0,.28);
+    --radius:14px;
+  }
+  .aws-faq{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color:var(--text);
+    background:linear-gradient(180deg, var(--bg), #080d18);
+    padding:24px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .aws-faq__header h2{
+    margin:0 0 6px 0;
+    letter-spacing:.2px;
+  }
+  .aws-faq__sub{
+    margin:0 0 16px 0;
+    color:var(--muted);
+    line-height:1.4;
+  }
+  .aws-faq__controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin: 12px 0 18px;
+  }
+  .aws-faq__search{
+    flex: 1 1 320px;
+  }
+  #faqSearch{
+    width:100%;
+    padding:10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,.04);
+    color: var(--text);
+    outline: none;
+  }
+  #faqSearch::placeholder{ color: rgba(234,240,255,.55); }
+
+  .btn{
+    padding:10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(122,162,255,.12);
+    color: var(--text);
+    cursor:pointer;
+    transition: transform .05s ease, background .2s ease;
+    white-space: nowrap;
+  }
+  .btn:hover{ background: rgba(122,162,255,.20); }
+  .btn:active{ transform: translateY(1px); }
+
+  .aws-faq__list{
+    display:grid;
+    gap:12px;
+  }
+
+  details.faq-item{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow:hidden;
+  }
+  summary{
+    list-style:none;
+    cursor:pointer;
+    padding:14px 14px;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+  }
+  summary::-webkit-details-marker{ display:none; }
+  .q{
+    font-weight: 650;
+    line-height:1.25;
+  }
+  .icon{
+    width: 10px; height: 10px;
+    border-right: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: rotate(45deg);
+    transition: transform .18s ease;
+    margin-right: 4px;
+    flex: 0 0 auto;
+  }
+  details[open] .icon{ transform: rotate(225deg); }
+
+  .a{
+    padding: 0 14px 14px 14px;
+    color: var(--text);
+  }
+  .a p, .a li{ color: rgba(234,240,255,.92); }
+  .a code{
+    background: rgba(255,255,255,.08);
+    padding: 1px 6px;
+    border-radius: 8px;
+  }
+  .note{
+    border-left: 3px solid var(--accent);
+    padding-left: 10px;
+    color: var(--muted);
+  }
+
+  .sr-only{
+    position:absolute;
+    width:1px;height:1px;
+    padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);
+    white-space:nowrap;border:0;
+  }
+
+  /* “No results” state */
+  .aws-faq__empty{
+    display:none;
+    padding: 14px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    text-align:center;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .icon, .btn{ transition:none; }
+  }
+</style>
+
+<script>
+  (function(){
+    const list = document.getElementById('faqList');
+    const items = Array.from(list.querySelectorAll('details.faq-item'));
+
+    // Add an empty state element
+    const empty = document.createElement('div');
+    empty.className = 'aws-faq__empty';
+    empty.id = 'faqEmpty';
+    empty.textContent = 'No matching questions. Try different keywords.';
+    list.appendChild(empty);
+
+    const search = document.getElementById('faqSearch');
+    const expandAll = document.getElementById('expandAll');
+    const collapseAll = document.getElementById('collapseAll');
+
+    function setAll(open){
+      items.forEach(d => d.open = open);
+    }
+
+    function filterFaq(term){
+      const q = term.trim().toLowerCase();
+      let shown = 0;
+
+      items.forEach(d => {
+        const text = d.innerText.toLowerCase();
+        const tags = (d.getAttribute('data-tags') || '').toLowerCase();
+        const match = !q || text.includes(q) || tags.includes(q);
+        d.style.display = match ? '' : 'none';
+        if(match) shown++;
+      });
+
+      empty.style.display = shown === 0 ? '' : 'none';
+    }
+
+    // Events
+    expandAll.addEventListener('click', () => setAll(true));
+    collapseAll.addEventListener('click', () => setAll(false));
+    search.addEventListener('input', (e) => filterFaq(e.target.value));
+
+    // Keyboard: Ctrl/Cmd+K to focus search
+    document.addEventListener('keydown', (e) => {
+      const isK = (e.key || '').toLowerCase() === 'k';
+      if ((e.ctrlKey || e.metaKey) && isK) {
+        e.preventDefault();
+        search.focus();
+      }
+    });
+  })();
+</script>
