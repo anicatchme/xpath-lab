@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Use Case A — NACHA Payroll Salary Run | EDI Banking Training</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#0b1220; --panel:#111a2e; --panel-2:#16223b; --ink:#e7eefc;
+    --muted:#9fb0d0; --accent:#4cc9f0; --accent-2:#7ee787; --warn:#f7b731;
+    --bad:#ff6b6b; --ok:#52d273; --line:#22324f; --code:#0d1424;
+    --p0:#ff5470; --p1:#ff9f43; --p2:#ffd166; --p3:#9bb3ff;
+    --tag-smk:#22c55e; --tag-san:#10b981; --tag-fun:#3b82f6; --tag-int:#8b5cf6;
+    --tag-e2e:#ec4899; --tag-reg:#f59e0b; --tag-rec:#06b6d4; --tag-prf:#ef4444;
+    --tag-sec:#ef4444; --tag-uat:#22d3ee; --tag-rfl:#a78bfa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.55;font-size:15px}
+  header{padding:28px 40px 12px;background:linear-gradient(160deg,#0b1220 0%,#162853 100%);
+         border-bottom:1px solid var(--line)}
+  header .crumb{color:var(--muted);font-size:13px;letter-spacing:.5px;text-transform:uppercase}
+  header h1{margin:6px 0 8px;font-size:30px;letter-spacing:-.3px}
+  header .sub{color:var(--muted);max-width:980px}
+  header .badges{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+  .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;
+         font-size:12px;background:#1c2a4a;border:1px solid var(--line);color:var(--ink)}
+  .badge.dot::before{content:"";display:inline-block;width:8px;height:8px;border-radius:999px;
+                     background:var(--accent);margin-right:6px}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:4px;padding:0 40px;background:var(--panel);
+           border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  nav.tabs button{background:transparent;border:none;color:var(--muted);
+                  padding:14px 16px;font-size:14px;cursor:pointer;border-bottom:2px solid transparent}
+  nav.tabs button.active{color:var(--ink);border-bottom-color:var(--accent)}
+  nav.tabs button:hover{color:var(--ink)}
+  main{padding:30px 40px 80px;max-width:1280px;margin:0 auto}
+  section.tab{display:none}
+  section.tab.active{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  h2{font-size:24px;margin:0 0 8px;letter-spacing:-.2px}
+  h3{font-size:18px;margin:24px 0 8px;color:var(--accent)}
+  h4{font-size:15px;margin:18px 0 6px;color:var(--accent-2);text-transform:uppercase;letter-spacing:.6px}
+  p{margin:8px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:12px 0}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel-2);color:var(--accent);font-weight:600;letter-spacing:.3px}
+  tr:hover td{background:rgba(76,201,240,.04)}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:14px;
+      overflow-x:auto;font-size:12.5px;line-height:1.5}
+  code{font-family:Menlo,Monaco,Consolas,monospace;color:#cfe1ff}
+  .pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;
+        font-weight:600;letter-spacing:.4px;text-transform:uppercase;margin-right:4px}
+  .p0{background:rgba(255,84,112,.15);color:var(--p0);border:1px solid var(--p0)}
+  .p1{background:rgba(255,159,67,.15);color:var(--p1);border:1px solid var(--p1)}
+  .p2{background:rgba(255,209,102,.12);color:var(--p2);border:1px solid var(--p2)}
+  .p3{background:rgba(155,179,255,.15);color:var(--p3);border:1px solid var(--p3)}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;
+        font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-right:4px;
+        color:#0b1220}
+  .tag-smk{background:var(--tag-smk)}.tag-san{background:var(--tag-san)}
+  .tag-fun{background:var(--tag-fun);color:#fff}.tag-int{background:var(--tag-int);color:#fff}
+  .tag-e2e{background:var(--tag-e2e);color:#fff}.tag-reg{background:var(--tag-reg)}
+  .tag-rec{background:var(--tag-rec)}.tag-prf{background:var(--tag-prf);color:#fff}
+  .tag-sec{background:var(--tag-sec);color:#fff}.tag-uat{background:var(--tag-uat)}
+  .tag-rfl{background:var(--tag-rfl);color:#fff}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+          padding:10px 14px;margin:8px 0}
+  details summary{cursor:pointer;font-weight:600;color:var(--ink);outline:none}
+  details[open]{background:var(--panel-2)}
+  details .body{margin-top:10px;color:var(--muted)}
+  details .body table{margin-top:8px}
+  ul.tight{margin:6px 0 6px 20px;padding:0}
+  ul.tight li{margin:3px 0}
+  .annot{display:grid;grid-template-columns:60px 1fr;gap:14px;margin-top:8px;font-size:13px}
+  .annot .pos{color:var(--accent);font-family:Menlo,monospace;font-weight:600}
+  .callout{border-left:3px solid var(--accent);padding:10px 14px;background:rgba(76,201,240,.05);
+           border-radius:0 8px 8px 0;margin:14px 0}
+  .callout.warn{border-left-color:var(--warn);background:rgba(247,183,49,.07)}
+  .callout.bad{border-left-color:var(--bad);background:rgba(255,107,107,.07)}
+  .callout.ok{border-left-color:var(--ok);background:rgba(82,210,115,.07)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0;color:var(--muted);font-size:13px}
+  .legend span::before{content:"■";margin-right:6px}
+  footer{padding:30px 40px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);
+         text-align:center;margin-top:40px}
+  .kbd{font-family:Menlo,monospace;background:#1c2a4a;border:1px solid var(--line);
+       padding:1px 6px;border-radius:4px;font-size:12px;color:var(--accent-2)}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+  .stat{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .stat .n{font-size:22px;color:var(--accent);font-weight:700}
+  .stat .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+  @media(max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crumb">LVTMAGUS EDI Banking Training </div>
+  <h1>NACHA Payroll Salary Run — Bulk ACH Credits</h1>
+  <p class="sub">A US retailer's payroll vendor delivers a NACHA file with 12,000 PPD credit entries to the company's bank by 4:00 PM ET on Wednesday for Friday value date. This page is the end-to-end training pack: business concept, NACHA file structure, IBM Sterling B2B Integrator implementation, and the full QA test catalog from a US-bank (Fed/OFAC/NACHA Operating Rules) perspective.</p>
+  <div class="badges">
+    <span class="badge dot">Rail: ACH (FedACH / TCH EPN)</span>
+    <span class="badge">Standard: NACHA File Format</span>
+    <span class="badge">SEC Code: PPD</span>
+    <span class="badge">Settlement: DNS (Net)</span>
+    <span class="badge">Direction: Inbound to ODFI</span>
+    <span class="badge">Regulatory: NACHA + Reg E + OFAC + BSA</span>
+    <span class="badge">Sterling B2Bi: 6.x</span>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="overview" class="active">1. Overview</button>
+  <button data-tab="business">2. Business Context</button>
+  <button data-tab="structure">3. NACHA File Structure</button>
+  <button data-tab="flow">4. End-to-End Flow</button>
+  <button data-tab="sample">5. Annotated Sample File</button>
+  <button data-tab="sterling">6. Sterling B2Bi Build</button>
+  <button data-tab="testing">7. QA Test Catalog</button>
+  <button data-tab="scenarios">8. Real-World Scenarios</button>
+  <button data-tab="cheatsheet">9. Cheat Sheet</button>
+</nav>
+
+<main>
+
+<!-- ============= TAB 1: OVERVIEW ============= -->
+<section class="tab active" id="overview">
+  <h2>1. Overview &mdash; What this flow really is</h2>
+
+  <div class="card">
+    <p>An <b>ACH payroll credit run</b> is the most common business payment in the United States. When you receive your salary on a Friday morning by direct deposit, you are receiving the <b>credit leg</b> of a NACHA-format ACH batch that was transmitted by your employer's payroll provider 48&ndash;72 hours earlier.</p>
+    <p>From the bank's perspective, this is a <b>file-based, batch, deferred-net-settlement (DNS)</b> EDI flow. The bank is the <b>ODFI</b> (Originating Depository Financial Institution) for the originating company, and the funds will land at thousands of <b>RDFIs</b> (Receiving DFIs) across the United States via either of the two ACH operators: <b>FedACH</b> (Federal Reserve) or <b>EPN</b> (The Clearing House Electronic Payments Network).</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h4>Who's involved</h4>
+      <ul class="tight">
+        <li><b>Originator</b> — the retail company (employer)</li>
+        <li><b>Third-Party Sender (TPS)</b> — the payroll vendor (e.g., ADP, Gusto)</li>
+        <li><b>ODFI</b> — the originator's bank</li>
+        <li><b>ACH Operator</b> — FedACH or TCH EPN</li>
+        <li><b>RDFI</b> — each employee's bank</li>
+        <li><b>Receiver</b> — each employee</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>What moves</h4>
+      <ul class="tight">
+        <li>One <b>NACHA file</b>, fixed-width, 94 characters per record</li>
+        <li>One file → one or many <b>Batches</b></li>
+        <li>Each batch → many <b>Entry Detail (06) records</b></li>
+        <li>Optional <b>Addenda (07) records</b> per entry</li>
+        <li>Plus <b>Batch Control (08)</b> and <b>File Control (09)</b> totals</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>When it happens</h4>
+      <ul class="tight">
+        <li><b>Day -2</b>, 16:00 ET — payroll vendor → ODFI inbox</li>
+        <li><b>Day -1</b>, AM — ODFI processes, delivers to operator</li>
+        <li><b>Day 0</b> (Friday) — operator distributes to RDFIs</li>
+        <li><b>Day 0</b>, 09:00 ET — RDFIs post to employee accounts</li>
+        <li><b>Day +1 → Day +60</b> — return / NOC window depending on R-code</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Key concepts you must understand on Day 1</h3>
+
+  <table>
+    <tr><th>Concept</th><th>Plain-English Meaning</th><th>Why It Matters in Testing</th></tr>
+    <tr><td><b>SEC Code</b></td><td>Standard Entry Class — tells the RDFI how the entry was authorized. <code>PPD</code> = consumer pre-authorized (most payroll). Other common: <code>CCD</code>, <code>WEB</code>, <code>TEL</code>, <code>CTX</code>, <code>IAT</code>.</td><td>Different SEC codes have different return windows and Reg E protections. PPD allows R10/R11 returns up to 60 days.</td></tr>
+    <tr><td><b>Service Class Code</b></td><td>Tells the operator the batch type. <code>200</code> = mixed credits & debits, <code>220</code> = credits only, <code>225</code> = debits only.</td><td>A payroll batch must be <code>220</code>. Any <code>225</code> in a payroll file is a defect.</td></tr>
+    <tr><td><b>Transaction Code</b></td><td>2-digit code per entry. <code>22</code> = checking credit, <code>32</code> = savings credit, <code>23</code>/<code>33</code> = pre-notification (zero-dollar).</td><td>Mismatch with Service Class causes the entire batch to reject.</td></tr>
+    <tr><td><b>Effective Entry Date</b></td><td>The date funds should post at the RDFI. Field on the Batch Header.</td><td>Must be a banking day, must be within the operator's allowed window (1-2 banking days forward; same-day for SDA).</td></tr>
+    <tr><td><b>Trace Number</b></td><td>15-digit unique key per entry: ODFI 8-digit routing prefix + 7-digit sequence.</td><td>This is your <b>correlation key</b>. Returns reference it. Sterling persists it as the join column.</td></tr>
+    <tr><td><b>Hash &amp; Totals</b></td><td>Routing-number hash, debit total, credit total, entry/addenda count — repeated on Batch Control and File Control.</td><td>If totals don't match, the entire file is rejected. Top-five real-world defect.</td></tr>
+    <tr><td><b>Same-Day ACH (SDA)</b></td><td>Three additional same-day windows (10:30, 14:45, 16:45 ET cut-offs as of 2026), per-transaction $1M cap.</td><td>Late-running payroll often gets sent SDA. Test cut-off boundaries hard.</td></tr>
+    <tr><td><b>Pre-Notification (Pre-Note)</b></td><td>Zero-dollar entry sent 3 banking days before the first live entry to verify account.</td><td>If the RDFI rejects the pre-note, the live entry must be held.</td></tr>
+  </table>
+
+  <div class="callout">
+    <b>One-line summary:</b> a NACHA payroll run is a <i>fixed-width batch file</i> that travels SFTP→ODFI→Operator→RDFI on a multi-day deferred-net cycle, governed by NACHA Operating Rules and policed by the Federal Reserve, with a return window of up to 60 days for consumer entries.
+  </div>
+</section>
+
+<!-- ============= TAB 2: BUSINESS CONTEXT ============= -->
+<section class="tab" id="business">
+  <h2>2. Business Context &mdash; The real-world story</h2>
+
+  <div class="card">
+    <h3>The Originator's view (the retailer)</h3>
+    <p>"Acme Mart" is a US retail chain with 12,000 employees across 31 states. Bi-weekly pay date is every other Friday. Acme uses a payroll vendor (the Third-Party Sender) that:</p>
+    <ul class="tight">
+      <li>Computes gross-to-net for every employee on Tuesday (Day -3).</li>
+      <li>Locks the file at 14:00 ET Wednesday (Day -2) after Acme's HR sign-off.</li>
+      <li>Encrypts (PGP) and SFTP-uploads the NACHA file to Acme's bank by 16:00 ET Wednesday.</li>
+    </ul>
+    <p>The bank in this scenario is a Tier-2 US regional bank (<b>"FirstNorth Bank"</b>) acting as the <b>ODFI</b>. The bank uses <b>IBM Sterling B2B Integrator 6.x</b> as its file-ingestion and routing platform, and <b>Open Payments Framework / FIS / Finastra</b> (or in-house) as its core ACH engine for Fed delivery.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>Why a bank uses Sterling B2Bi for this</h4>
+      <ul class="tight">
+        <li>Multi-protocol secure ingestion (SFTP, FTPS, AS2, HTTPS) with PGP &amp; per-partner mailboxes.</li>
+        <li>Per-partner schedules, throttles, and SLA monitors.</li>
+        <li>Pre-validation maps that reject malformed files at the perimeter <i>before</i> they touch the core ACH engine.</li>
+        <li>End-to-end correlation (file → batch → entry → return) with audit trail.</li>
+        <li>Operator dashboards for the Payments Ops team.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>What can go wrong (and routinely does)</h4>
+      <ul class="tight">
+        <li>File totals mismatch — entire file rejected.</li>
+        <li>OFAC SDN hit on a beneficiary name → batch held, must be reviewed within 24 hours.</li>
+        <li>Effective entry date is a Federal holiday → batch warehoused or rejected.</li>
+        <li>One employee changed banks last month — old account closed → R02 / R03 return.</li>
+        <li>Duplicate file submission after operator outage — risk of double-pay.</li>
+        <li>Insufficient pre-funding on Acme's account — ODFI risk decision.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>The regulatory backdrop (US bank lens)</h3>
+  <table>
+    <tr><th>Regulation / Rule</th><th>Owner</th><th>Impact on This Flow</th></tr>
+    <tr><td>NACHA Operating Rules</td><td>NACHA</td><td>File format, SEC codes, return rights, time windows. Updated annually.</td></tr>
+    <tr><td>Reg E (12 CFR §1005)</td><td>CFPB</td><td>Consumer (PPD) protections; 60-day unauthorized-debit return right (R10/R11).</td></tr>
+    <tr><td>Reg CC (12 CFR §229)</td><td>Federal Reserve</td><td>Funds availability at the RDFI; "next-day availability" for ACH credits.</td></tr>
+    <tr><td>OFAC SDN / Sectoral Sanctions</td><td>US Treasury</td><td>Every Receiver name + ID + city + bank routing must be screened. Hits = freeze.</td></tr>
+    <tr><td>BSA / AML (31 CFR §1020)</td><td>FinCEN</td><td>Suspicious-activity monitoring on ACH velocity and amount patterns.</td></tr>
+    <tr><td>UCC Article 4A</td><td>State law</td><td>Governs commercial wire/ACH credits — finality and warranty rules.</td></tr>
+    <tr><td>FFIEC Guidance</td><td>FFIEC</td><td>Authentication of corporate ACH originators; risk management.</td></tr>
+  </table>
+
+  <div class="stat-row">
+    <div class="stat"><div class="n">~30B</div><div class="l">ACH transactions / year (US)</div></div>
+    <div class="stat"><div class="n">$80T+</div><div class="l">ACH dollar volume / year</div></div>
+    <div class="stat"><div class="n">~0.03%</div><div class="l">ACH return rate (industry avg)</div></div>
+    <div class="stat"><div class="n">$1M</div><div class="l">Same-Day ACH per-tx cap</div></div>
+  </div>
+
+  <div class="callout warn">
+    <b>BA / PM tip:</b> the <i>business owner</i> of this flow inside a bank is usually <b>Treasury Management Services</b> (commercial side) or <b>Cash Management Operations</b>. The technical owner is the <b>Payments Hub team</b> running Sterling. The compliance owner is <b>Financial Crimes / BSA Officer</b>. Three sign-offs, three review meetings.
+  </div>
+</section>
+
+<!-- ============= TAB 3: NACHA FILE STRUCTURE ============= -->
+<section class="tab" id="structure">
+  <h2>3. NACHA File Structure &mdash; The format, byte by byte</h2>
+
+  <p>A NACHA file is a plain-text, fixed-width, ASCII file. Every record is exactly <b>94 characters</b>, terminated by CRLF. Lines are blocked in groups of 10 (the "blocking factor"); if the last block is short, it is padded with <code>9</code>'s — a record full of nines.</p>
+
+  <h3>The hierarchy</h3>
+  <pre><code>FILE HEADER (1)
+  └── BATCH HEADER (5)
+       └── ENTRY DETAIL (6)
+             └── ADDENDA (7)   [optional, depends on SEC code]
+       └── ENTRY DETAIL (6)
+       └── ...
+       └── BATCH CONTROL (8)
+  └── BATCH HEADER (5)
+       └── ...
+  └── FILE CONTROL (9)
+  └── (optional padding "999...")</code></pre>
+
+  <h3>Record types &mdash; what each line means</h3>
+  <table>
+    <tr><th>Type</th><th>Name</th><th>Purpose</th><th>Required?</th></tr>
+    <tr><td><code>1</code></td><td>File Header</td><td>Identifies sender (immediate origin) and receiver (immediate destination), creation date/time, file ID modifier.</td><td>Exactly 1</td></tr>
+    <tr><td><code>5</code></td><td>Batch Header</td><td>Service class, company name &amp; ID, SEC code, effective entry date, ODFI ID.</td><td>1+ per file</td></tr>
+    <tr><td><code>6</code></td><td>Entry Detail</td><td>One actual payment: receiver routing, account #, amount, name, trace number, transaction code.</td><td>1+ per batch</td></tr>
+    <tr><td><code>7</code></td><td>Addenda</td><td>Free-form payment information (mandatory for CTX/IAT, optional for PPD).</td><td>0+ per entry</td></tr>
+    <tr><td><code>8</code></td><td>Batch Control</td><td>Counts and totals for this batch. Must match the entries above.</td><td>1 per batch</td></tr>
+    <tr><td><code>9</code></td><td>File Control</td><td>Counts and totals for the whole file. Must match all batches above.</td><td>Exactly 1</td></tr>
+  </table>
+
+  <h3>File Header (Record Type 1) &mdash; field by field</h3>
+  <table>
+    <tr><th>Pos</th><th>Len</th><th>Field</th><th>Notes</th></tr>
+    <tr><td>01</td><td>1</td><td>Record Type</td><td>Always <code>1</code></td></tr>
+    <tr><td>02-03</td><td>2</td><td>Priority Code</td><td>Always <code>01</code></td></tr>
+    <tr><td>04-13</td><td>10</td><td>Immediate Destination</td><td>Receiving ODFI/Operator routing # with leading space. Example: <code> 091000019</code></td></tr>
+    <tr><td>14-23</td><td>10</td><td>Immediate Origin</td><td>Sending entity routing # or 10-digit company ID. Example: <code> 1234567890</code></td></tr>
+    <tr><td>24-29</td><td>6</td><td>File Creation Date</td><td>YYMMDD</td></tr>
+    <tr><td>30-33</td><td>4</td><td>File Creation Time</td><td>HHMM (24h)</td></tr>
+    <tr><td>34</td><td>1</td><td>File ID Modifier</td><td>A&ndash;Z, 0&ndash;9. Increments per file submitted on same date.</td></tr>
+    <tr><td>35-37</td><td>3</td><td>Record Size</td><td>Always <code>094</code></td></tr>
+    <tr><td>38-39</td><td>2</td><td>Blocking Factor</td><td>Always <code>10</code></td></tr>
+    <tr><td>40</td><td>1</td><td>Format Code</td><td>Always <code>1</code></td></tr>
+    <tr><td>41-63</td><td>23</td><td>Immediate Destination Name</td><td>e.g., <code>FEDERAL RESERVE BANK    </code></td></tr>
+    <tr><td>64-86</td><td>23</td><td>Immediate Origin Name</td><td>e.g., <code>ACME PAYROLL VENDOR    </code></td></tr>
+    <tr><td>87-94</td><td>8</td><td>Reference Code</td><td>Originator's free-form reference</td></tr>
+  </table>
+
+  <h3>Batch Header (Record Type 5)</h3>
+  <table>
+    <tr><th>Pos</th><th>Len</th><th>Field</th><th>Notes</th></tr>
+    <tr><td>01</td><td>1</td><td>Record Type</td><td>Always <code>5</code></td></tr>
+    <tr><td>02-04</td><td>3</td><td>Service Class Code</td><td><code>200</code> mixed / <code>220</code> credits-only / <code>225</code> debits-only</td></tr>
+    <tr><td>05-20</td><td>16</td><td>Company Name</td><td>e.g., <code>ACME MART INC   </code></td></tr>
+    <tr><td>21-40</td><td>20</td><td>Company Discretionary Data</td><td>Free-form, often payroll period</td></tr>
+    <tr><td>41-50</td><td>10</td><td>Company Identification</td><td>Usually <code>1</code> + 9-digit Tax ID</td></tr>
+    <tr><td>51-53</td><td>3</td><td>SEC Code</td><td><code>PPD</code> for payroll consumer credit</td></tr>
+    <tr><td>54-63</td><td>10</td><td>Company Entry Description</td><td>e.g., <code>PAYROLL   </code> — appears on receiver's statement</td></tr>
+    <tr><td>64-69</td><td>6</td><td>Company Descriptive Date</td><td>Display only, e.g., <code>250307</code></td></tr>
+    <tr><td>70-75</td><td>6</td><td>Effective Entry Date</td><td>YYMMDD — <b>actual settlement target</b></td></tr>
+    <tr><td>76-78</td><td>3</td><td>Settlement Date</td><td>Julian. Inserted by ACH Operator (originator leaves blank/spaces)</td></tr>
+    <tr><td>79</td><td>1</td><td>Originator Status Code</td><td>Always <code>1</code> for ODFI-originated</td></tr>
+    <tr><td>80-87</td><td>8</td><td>Originating DFI ID</td><td>First 8 digits of ODFI's routing #</td></tr>
+    <tr><td>88-94</td><td>7</td><td>Batch Number</td><td>Sequential within file, starts at 0000001</td></tr>
+  </table>
+
+  <h3>Entry Detail (Record Type 6)</h3>
+  <table>
+    <tr><th>Pos</th><th>Len</th><th>Field</th><th>Notes</th></tr>
+    <tr><td>01</td><td>1</td><td>Record Type</td><td>Always <code>6</code></td></tr>
+    <tr><td>02-03</td><td>2</td><td>Transaction Code</td><td><code>22</code>=ckg credit, <code>32</code>=svg credit, <code>23</code>/<code>33</code>=pre-note</td></tr>
+    <tr><td>04-11</td><td>8</td><td>RDFI Routing # (first 8)</td><td>Receiver's bank ABA</td></tr>
+    <tr><td>12</td><td>1</td><td>Routing Check Digit</td><td>Mod-10 check on the 8 above</td></tr>
+    <tr><td>13-29</td><td>17</td><td>RDFI Account Number</td><td>Left-justified, blank-padded</td></tr>
+    <tr><td>30-39</td><td>10</td><td>Amount</td><td>In cents, no decimal. <code>0000125000</code> = $1,250.00</td></tr>
+    <tr><td>40-54</td><td>15</td><td>Individual ID Number</td><td>Often Employee ID</td></tr>
+    <tr><td>55-76</td><td>22</td><td>Individual Name</td><td><code>SMITH JOHN Q       </code></td></tr>
+    <tr><td>77-78</td><td>2</td><td>Discretionary Data</td><td>Bank-defined</td></tr>
+    <tr><td>79</td><td>1</td><td>Addenda Indicator</td><td><code>0</code> if no addenda follows, <code>1</code> if yes</td></tr>
+    <tr><td>80-94</td><td>15</td><td>Trace Number</td><td>ODFI 8-digit + 7-digit sequence — your correlation key</td></tr>
+  </table>
+
+  <h3>Batch Control (Record Type 8)</h3>
+  <table>
+    <tr><th>Pos</th><th>Len</th><th>Field</th><th>Notes</th></tr>
+    <tr><td>01</td><td>1</td><td>Record Type</td><td>Always <code>8</code></td></tr>
+    <tr><td>02-04</td><td>3</td><td>Service Class Code</td><td>Must equal Batch Header value</td></tr>
+    <tr><td>05-10</td><td>6</td><td>Entry/Addenda Count</td><td>Total 6+7 records in this batch</td></tr>
+    <tr><td>11-20</td><td>10</td><td>Entry Hash</td><td>Sum of first-8 routing-#'s of all entries; rightmost 10 digits</td></tr>
+    <tr><td>21-32</td><td>12</td><td>Total Debit Dollar Amount</td><td>Sum of debits in cents</td></tr>
+    <tr><td>33-44</td><td>12</td><td>Total Credit Dollar Amount</td><td>Sum of credits in cents</td></tr>
+    <tr><td>45-54</td><td>10</td><td>Company Identification</td><td>Echo of Batch Header field</td></tr>
+    <tr><td>55-73</td><td>19</td><td>Message Authentication Code</td><td>Optional MAC, usually blank</td></tr>
+    <tr><td>74-79</td><td>6</td><td>Reserved</td><td>Spaces</td></tr>
+    <tr><td>80-87</td><td>8</td><td>Originating DFI ID</td><td>Echo</td></tr>
+    <tr><td>88-94</td><td>7</td><td>Batch Number</td><td>Echo</td></tr>
+  </table>
+
+  <h3>File Control (Record Type 9)</h3>
+  <table>
+    <tr><th>Pos</th><th>Len</th><th>Field</th><th>Notes</th></tr>
+    <tr><td>01</td><td>1</td><td>Record Type</td><td>Always <code>9</code></td></tr>
+    <tr><td>02-07</td><td>6</td><td>Batch Count</td><td>Number of "5" records in file</td></tr>
+    <tr><td>08-13</td><td>6</td><td>Block Count</td><td>Total physical blocks of 10 records</td></tr>
+    <tr><td>14-21</td><td>8</td><td>Entry/Addenda Count</td><td>Sum across all batches</td></tr>
+    <tr><td>22-31</td><td>10</td><td>Entry Hash</td><td>Sum of all batch hashes; rightmost 10 digits</td></tr>
+    <tr><td>32-43</td><td>12</td><td>Total Debit $$ in File</td><td>Cents</td></tr>
+    <tr><td>44-55</td><td>12</td><td>Total Credit $$ in File</td><td>Cents</td></tr>
+    <tr><td>56-94</td><td>39</td><td>Reserved</td><td>Spaces</td></tr>
+  </table>
+
+  <div class="callout">
+    <b>Memorize this rule:</b> File Control totals = Σ Batch Control totals = Σ Entry Detail amounts. If any of those three relationships is off by even one cent, the operator rejects the entire file. This is the single most common reason a payroll run fails on Wednesday night.
+  </div>
+</section>
+
+<!-- ============= TAB 4: FLOW ============= -->
+<section class="tab" id="flow">
+  <h2>4. End-to-End Process Flow</h2>
+
+  <p>The diagram below traces one payroll file from the moment the payroll vendor locks it on Wednesday afternoon until the last R10 unauthorized-debit return arrives 60 days later. Each lane is a system; each arrow is a message or file transfer.</p>
+
+  <div class="legend">
+    <span style="color:var(--accent)">SFTP / file transfer</span>
+    <span style="color:var(--accent-2)">internal API / DB write</span>
+    <span style="color:var(--warn)">ACH operator delivery</span>
+    <span style="color:var(--bad)">return / exception flow</span>
+  </div>
+
+  <div class="card" style="overflow-x:auto">
+    <svg viewBox="0 0 1200 760" width="100%" height="760" xmlns="http://www.w3.org/2000/svg" style="background:#0d1424;border-radius:8px">
+      <!-- Lanes -->
+      <g font-family="-apple-system, sans-serif" font-size="13" fill="#9fb0d0">
+        <text x="80" y="34">Payroll Vendor</text>
+        <text x="280" y="34">Sterling B2Bi (ODFI)</text>
+        <text x="500" y="34">Core ACH Engine</text>
+        <text x="700" y="34">ACH Operator (FedACH/EPN)</text>
+        <text x="930" y="34">RDFI</text>
+        <text x="1100" y="34">Receiver</text>
+      </g>
+
+      <!-- Lane separators -->
+      <g stroke="#22324f" stroke-dasharray="4 4">
+        <line x1="240" y1="50" x2="240" y2="740"/>
+        <line x1="450" y1="50" x2="450" y2="740"/>
+        <line x1="670" y1="50" x2="670" y2="740"/>
+        <line x1="900" y1="50" x2="900" y2="740"/>
+        <line x1="1080" y1="50" x2="1080" y2="740"/>
+      </g>
+
+      <!-- Time labels -->
+      <g font-family="Menlo, monospace" font-size="11" fill="#7ee787">
+        <text x="10" y="80">Wed 16:00</text>
+        <text x="10" y="140">Wed 16:05</text>
+        <text x="10" y="200">Wed 16:30</text>
+        <text x="10" y="260">Wed 17:00</text>
+        <text x="10" y="320">Thu 09:00</text>
+        <text x="10" y="380">Thu 12:00</text>
+        <text x="10" y="440">Thu 14:00</text>
+        <text x="10" y="500">Fri 06:00</text>
+        <text x="10" y="560">Fri 09:00</text>
+        <text x="10" y="620">Fri PM</text>
+        <text x="10" y="680">Mon-Fri</text>
+        <text x="10" y="730">Up to 60d</text>
+      </g>
+
+      <!-- Arrows -->
+      <defs>
+        <marker id="ar" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <polygon points="0 0, 10 3, 0 6" fill="#4cc9f0"/>
+        </marker>
+        <marker id="ar2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <polygon points="0 0, 10 3, 0 6" fill="#7ee787"/>
+        </marker>
+        <marker id="ar3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <polygon points="0 0, 10 3, 0 6" fill="#f7b731"/>
+        </marker>
+        <marker id="ar4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <polygon points="0 0, 10 3, 0 6" fill="#ff6b6b"/>
+        </marker>
+      </defs>
+
+      <!-- 1. Vendor → Sterling -->
+      <line x1="120" y1="80" x2="280" y2="80" stroke="#4cc9f0" stroke-width="2" marker-end="url(#ar)"/>
+      <text x="135" y="74" font-size="11" fill="#cfe1ff">PGP-encrypted NACHA file via SFTP</text>
+
+      <!-- 2. Sterling internal: decrypt + parse -->
+      <line x1="290" y1="140" x2="290" y2="170" stroke="#7ee787" stroke-width="2"/>
+      <text x="245" y="135" font-size="11" fill="#cfe1ff">Decrypt → Parse map → Validate</text>
+      <rect x="270" y="170" width="120" height="36" rx="4" fill="#16223b" stroke="#7ee787"/>
+      <text x="280" y="192" font-size="11" fill="#7ee787">Inbound BP run</text>
+
+      <!-- 3. Sterling → Core ACH -->
+      <line x1="395" y1="200" x2="500" y2="200" stroke="#7ee787" stroke-width="2" marker-end="url(#ar2)"/>
+      <text x="395" y="194" font-size="11" fill="#cfe1ff">Hand-off via MQ</text>
+
+      <!-- 4. Core: OFAC + funding check -->
+      <rect x="490" y="232" width="160" height="50" rx="4" fill="#16223b" stroke="#7ee787"/>
+      <text x="505" y="252" font-size="11" fill="#7ee787">OFAC SDN screening</text>
+      <text x="505" y="270" font-size="11" fill="#7ee787">Funding pre-check</text>
+
+      <!-- 5. Core → Operator file -->
+      <line x1="655" y1="320" x2="700" y2="320" stroke="#f7b731" stroke-width="2" marker-end="url(#ar3)"/>
+      <text x="500" y="314" font-size="11" fill="#cfe1ff">FedACH transmission window</text>
+
+      <!-- 6. Operator → RDFI -->
+      <line x1="780" y1="380" x2="930" y2="380" stroke="#f7b731" stroke-width="2" marker-end="url(#ar3)"/>
+      <text x="780" y="374" font-size="11" fill="#cfe1ff">Distribution file to RDFI</text>
+
+      <!-- 7. RDFI posts -->
+      <rect x="910" y="412" width="170" height="56" rx="4" fill="#16223b" stroke="#7ee787"/>
+      <text x="925" y="432" font-size="11" fill="#7ee787">RDFI receives, validates,</text>
+      <text x="925" y="450" font-size="11" fill="#7ee787">sandbox-posts (memo) Thu</text>
+
+      <!-- 8. Settlement Friday AM -->
+      <line x1="700" y1="500" x2="900" y2="500" stroke="#f7b731" stroke-width="2" marker-end="url(#ar3)"/>
+      <text x="700" y="494" font-size="11" fill="#cfe1ff">Net settlement at Federal Reserve</text>
+
+      <!-- 9. Receiver gets credit -->
+      <line x1="1010" y1="560" x2="1100" y2="560" stroke="#7ee787" stroke-width="2" marker-end="url(#ar2)"/>
+      <text x="1015" y="554" font-size="11" fill="#cfe1ff">Statement &amp; alert</text>
+
+      <!-- 10. Returns -->
+      <line x1="1100" y1="680" x2="930" y2="680" stroke="#ff6b6b" stroke-width="2" marker-end="url(#ar4)"/>
+      <text x="940" y="674" font-size="11" fill="#cfe1ff">R-code if unauthorized / closed acct</text>
+      <line x1="900" y1="680" x2="700" y2="680" stroke="#ff6b6b" stroke-width="2" marker-end="url(#ar4)"/>
+      <text x="700" y="674" font-size="11" fill="#cfe1ff">Operator forwards return</text>
+      <line x1="700" y1="680" x2="500" y2="680" stroke="#ff6b6b" stroke-width="2" marker-end="url(#ar4)"/>
+      <line x1="500" y1="680" x2="290" y2="680" stroke="#ff6b6b" stroke-width="2" marker-end="url(#ar4)"/>
+      <text x="290" y="674" font-size="11" fill="#cfe1ff">Sterling matches by Trace #</text>
+      <line x1="280" y1="730" x2="120" y2="730" stroke="#ff6b6b" stroke-width="2" marker-end="url(#ar4)"/>
+      <text x="125" y="724" font-size="11" fill="#cfe1ff">Return notice + funds reversal to vendor</text>
+    </svg>
+  </div>
+
+  <h3>What happens at each step (in plain English)</h3>
+  <table>
+    <tr><th>#</th><th>Time (ET)</th><th>System</th><th>Action</th><th>Failure mode</th></tr>
+    <tr><td>1</td><td>Wed 16:00</td><td>Vendor</td><td>PGP-encrypts NACHA file, SFTP push to bank's perimeter</td><td>SFTP creds wrong, PGP key expired, late submission past cut-off</td></tr>
+    <tr><td>2</td><td>Wed 16:05</td><td>Sterling perimeter</td><td>Mailbox adapter detects file, decrypts, moves to staging</td><td>Disk full, decryption fails, duplicate filename</td></tr>
+    <tr><td>3</td><td>Wed 16:30</td><td>Sterling BP</td><td>Parse with NACHA map; validate totals, hashes, dates</td><td>Bad totals, invalid SEC code, wrong record size</td></tr>
+    <tr><td>4</td><td>Wed 17:00</td><td>Sterling → Core</td><td>Hand off via MQ to core ACH engine</td><td>MQ down, message-too-large, schema mismatch</td></tr>
+    <tr><td>5</td><td>Thu 09:00</td><td>Core</td><td>OFAC screen, funding pre-check, build operator file</td><td>OFAC SDN hit, prefund insufficient, originator on watch list</td></tr>
+    <tr><td>6</td><td>Thu 12:00</td><td>Core → FedACH</td><td>Transmit to FedACH or EPN</td><td>Operator window closed, file rejected at edge validation</td></tr>
+    <tr><td>7</td><td>Thu 14:00</td><td>Operator</td><td>Sort, distribute to RDFI files</td><td>Routing # invalid, RDFI offline</td></tr>
+    <tr><td>8</td><td>Fri 06:00</td><td>Operator settlement</td><td>Net debits/credits at Fed master accounts</td><td>ODFI's Fed account underfunded → throttle</td></tr>
+    <tr><td>9</td><td>Fri 09:00</td><td>RDFI</td><td>Posts to receiver's account, sends alert/statement</td><td>Account closed (R02), wrong number (R03), frozen (R16)</td></tr>
+    <tr><td>10</td><td>Mon-Fri (≤2d)</td><td>RDFI</td><td>Sends return file (R-code) for any rejects</td><td>—</td></tr>
+    <tr><td>11</td><td>Up to 60d</td><td>RDFI</td><td>R10/R11 unauthorized return possible (consumer Reg E)</td><td>Originator must indemnify; chargeback to corporate</td></tr>
+  </table>
+</section>
+
+<!-- ============= TAB 5: ANNOTATED SAMPLE FILE ============= -->
+<section class="tab" id="sample">
+  <h2>5. Annotated Sample NACHA File</h2>
+
+  <p>Below is a complete (small but valid) NACHA payroll file with three Entry Details. Every record is exactly 94 characters. Spaces are visible as <code>·</code> for clarity in some annotations. Real files use plain spaces.</p>
+
+  <h3>The full file</h3>
+<pre><code>101 091000019 1234567890250305160AA094101FEDERAL RESERVE BANK    ACME PAYROLL VENDOR    REF12345
+5220ACME MART INC                     1234567890PPDPAYROLL   250307250307   1091000010000001
+62211100002510000123456789      0000125000EMP000123      SMITH JOHN Q          0091000010000001
+62221100002519999888777         0000089750EMP000124      DOE JANE              0091000010000002
+62321100002519876543210         0000142000EMP000125      LEE PRIYA P           0091000010000003
+82200000030033300000750000000000000000035675000123456789                         091000010000001
+9000001000001000000030033300000750000000000000000035675000
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999</code></pre>
+
+  <h3>Line-by-line breakdown</h3>
+
+  <details open>
+    <summary><b>Line 1 &mdash; File Header (Type 1)</b></summary>
+    <div class="body">
+      <div class="annot"><div class="pos">01</div><div><code>1</code> = File Header</div></div>
+      <div class="annot"><div class="pos">02-03</div><div><code>01</code> = Priority Code (always 01)</div></div>
+      <div class="annot"><div class="pos">04-13</div><div><code> 091000019</code> = Immediate Destination = Federal Reserve Bank routing number with leading space</div></div>
+      <div class="annot"><div class="pos">14-23</div><div><code>1234567890</code> = Immediate Origin = Acme Payroll Vendor 10-digit company ID</div></div>
+      <div class="annot"><div class="pos">24-29</div><div><code>250305</code> = File Created 2025-03-05</div></div>
+      <div class="annot"><div class="pos">30-33</div><div><code>1600</code> = Created at 16:00</div></div>
+      <div class="annot"><div class="pos">34</div><div><code>A</code> = File ID modifier (first file of the day)</div></div>
+      <div class="annot"><div class="pos">35-37</div><div><code>094</code> = Record size (always)</div></div>
+      <div class="annot"><div class="pos">38-39</div><div><code>10</code> = Blocking factor (always)</div></div>
+      <div class="annot"><div class="pos">40</div><div><code>1</code> = Format code (always)</div></div>
+      <div class="annot"><div class="pos">41-63</div><div><code>FEDERAL RESERVE BANK    </code> = Destination name</div></div>
+      <div class="annot"><div class="pos">64-86</div><div><code>ACME PAYROLL VENDOR    </code> = Origin name</div></div>
+      <div class="annot"><div class="pos">87-94</div><div><code>REF12345</code> = Reference code</div></div>
+    </div>
+  </details>
+
+  <details>
+    <summary><b>Line 2 &mdash; Batch Header (Type 5)</b></summary>
+    <div class="body">
+      <div class="annot"><div class="pos">01</div><div><code>5</code> = Batch Header</div></div>
+      <div class="annot"><div class="pos">02-04</div><div><code>220</code> = Service Class = credits-only (correct for payroll)</div></div>
+      <div class="annot"><div class="pos">05-20</div><div><code>ACME MART INC   </code> = Company name on receiver's statement</div></div>
+      <div class="annot"><div class="pos">21-40</div><div>Discretionary data (blank or pay-period code)</div></div>
+      <div class="annot"><div class="pos">41-50</div><div><code>1234567890</code> = Company ID (Tax ID prefixed by '1')</div></div>
+      <div class="annot"><div class="pos">51-53</div><div><code>PPD</code> = SEC Code (Prearranged Payment & Deposit, consumer)</div></div>
+      <div class="annot"><div class="pos">54-63</div><div><code>PAYROLL   </code> = Entry description (max 10 chars on statement)</div></div>
+      <div class="annot"><div class="pos">64-69</div><div><code>250307</code> = Display date</div></div>
+      <div class="annot"><div class="pos">70-75</div><div><code>250307</code> = <b>Effective Entry Date</b> = Friday 2025-03-07</div></div>
+      <div class="annot"><div class="pos">76-78</div><div>Settlement Date = blank (operator fills)</div></div>
+      <div class="annot"><div class="pos">79</div><div><code>1</code> = Originator Status</div></div>
+      <div class="annot"><div class="pos">80-87</div><div><code>09100001</code> = ODFI 8-digit prefix</div></div>
+      <div class="annot"><div class="pos">88-94</div><div><code>0000001</code> = Batch number 1</div></div>
+    </div>
+  </details>
+
+  <details>
+    <summary><b>Lines 3-5 &mdash; Entry Details (Type 6)</b></summary>
+    <div class="body">
+      <p>Three employees credited:</p>
+      <table>
+        <tr><th>TxnCode</th><th>RDFI Routing</th><th>Account</th><th>Amount</th><th>Employee</th><th>Trace #</th></tr>
+        <tr><td><code>22</code> Checking credit</td><td><code>11100002</code> + check digit <code>5</code></td><td><code>10000123456789</code></td><td>$1,250.00</td><td>SMITH JOHN Q</td><td><code>091000010000001</code></td></tr>
+        <tr><td><code>22</code> Checking credit</td><td><code>11100002</code> + <code>5</code></td><td><code>19999888777</code></td><td>$897.50</td><td>DOE JANE</td><td><code>091000010000002</code></td></tr>
+        <tr><td><code>32</code> Savings credit</td><td><code>11100002</code> + <code>5</code></td><td><code>19876543210</code></td><td>$1,420.00</td><td>LEE PRIYA P</td><td><code>091000010000003</code></td></tr>
+      </table>
+      <div class="callout warn"><b>Validation:</b> the routing check digit (position 12) must satisfy Mod-10. The trace number prefix matches the ODFI.</div>
+    </div>
+  </details>
+
+  <details>
+    <summary><b>Line 6 &mdash; Batch Control (Type 8)</b></summary>
+    <div class="body">
+      <div class="annot"><div class="pos">02-04</div><div><code>220</code> = Service Class (matches header)</div></div>
+      <div class="annot"><div class="pos">05-10</div><div><code>000003</code> = Entry+addenda count = 3</div></div>
+      <div class="annot"><div class="pos">11-20</div><div><code>0033300000</code> = Hash = 11100002 × 3 = 33300006 → rightmost 10 digits = <code>0033300000</code> (in our small example, recompute strictly)</div></div>
+      <div class="annot"><div class="pos">21-32</div><div><code>000000000000</code> = Total debit (zero, this is credit-only)</div></div>
+      <div class="annot"><div class="pos">33-44</div><div><code>000000356750</code> = Total credit = $3,567.50 in cents</div></div>
+      <div class="annot"><div class="pos">45-54</div><div><code>0123456789</code> = Company ID echo</div></div>
+      <div class="annot"><div class="pos">80-87</div><div><code>09100001</code> = ODFI ID echo</div></div>
+      <div class="annot"><div class="pos">88-94</div><div><code>0000001</code> = Batch number echo</div></div>
+    </div>
+  </details>
+
+  <details>
+    <summary><b>Line 7 &mdash; File Control (Type 9)</b></summary>
+    <div class="body">
+      <div class="annot"><div class="pos">02-07</div><div><code>000001</code> = 1 batch in the file</div></div>
+      <div class="annot"><div class="pos">08-13</div><div><code>000001</code> = 1 block of 10 records (with type-9 padding)</div></div>
+      <div class="annot"><div class="pos">14-21</div><div><code>00000003</code> = 3 entries+addenda</div></div>
+      <div class="annot"><div class="pos">22-31</div><div><code>0033300000</code> = Hash sum (rightmost 10 digits across batches)</div></div>
+      <div class="annot"><div class="pos">32-43</div><div><code>000000000000</code> = Total debit</div></div>
+      <div class="annot"><div class="pos">44-55</div><div><code>000000356750</code> = Total credit</div></div>
+    </div>
+  </details>
+
+  <details>
+    <summary><b>Line 8 &mdash; Padding (Type 9, all nines)</b></summary>
+    <div class="body">A NACHA file must be a multiple of 10 records. Our example has 7 real records, so we pad with <code>9</code>'s to reach a multiple-of-10 block. (Full file = 7 + 3 padding = 10 lines.)</div>
+  </details>
+
+  <div class="callout">
+    <b>Tester takeaway:</b> use a NACHA-aware viewer (some teams use IBM File Layout Editor inside Sterling, others use NACHACheck, ACHbox, or the open-source <code>nacha</code> CLI). Eyeballing 94-character lines is a <i>defect generator</i>.
+  </div>
+</section>
+
+<!-- ============= TAB 6: STERLING B2BI BUILD ============= -->
+<section class="tab" id="sterling">
+  <h2>6. IBM Sterling B2B Integrator &mdash; The build</h2>
+
+  <p>Below is the standard pattern that a payments-hub team would build in Sterling B2Bi 6.x to ingest this NACHA payroll file. We do not write code yet (Module 11 covers that), but you should know the shape so QA can write meaningful test cases.</p>
+
+  <h3>Components used</h3>
+  <table>
+    <tr><th>Component</th><th>Role</th><th>Notes</th></tr>
+    <tr><td>Trading Partner Profile</td><td>"ACME-PAYROLL-VENDOR"</td><td>Defines SFTP creds, PGP keys, mailbox routing</td></tr>
+    <tr><td>SSH/SFTP Server Adapter</td><td>Listens for inbound SFTP push</td><td>Per-partner Mailbox path</td></tr>
+    <tr><td>Mailbox</td><td>/Inbound/ACMEPAY/incoming</td><td>Triggers BP on new file</td></tr>
+    <tr><td>PGP Package Service</td><td>Decrypts file</td><td>Public/private keypair pre-shared</td></tr>
+    <tr><td>NACHA Inbound Map</td><td>Parse fixed-width to XML</td><td>Built in Map Editor with NACHA type tree</td></tr>
+    <tr><td>Translation Service</td><td>Runs the map</td><td>Output: canonical payments XML</td></tr>
+    <tr><td>JDBC Adapter</td><td>Persists header + entries to staging DB</td><td>For correlation, audit, dashboard</td></tr>
+    <tr><td>MQ Adapter (or JMS)</td><td>Publishes to core ACH engine</td><td>Per-batch or per-entry, depending on architecture</td></tr>
+    <tr><td>Email / SMTP Service</td><td>Notify Ops on failures</td><td>Tied to BP error handler</td></tr>
+    <tr><td>Schedule</td><td>Daily 16:30 cut-off check</td><td>Alarms if expected file did not arrive</td></tr>
+  </table>
+
+  <h3>Business Process (BP) shape — pseudocode</h3>
+<pre><code>&lt;process name="Inbound_NACHA_PayrollVendor"&gt;
+  &lt;sequence&gt;
+    &lt;!-- 1. File arrived in mailbox; BP invoked by mailbox event --&gt;
+    &lt;operation name="GetFromMailbox"&gt;
+      &lt;participant name="MailboxExtractAbstractService"/&gt;
+    &lt;/operation&gt;
+
+    &lt;!-- 2. Decrypt PGP --&gt;
+    &lt;operation name="PGPDecrypt"&gt;
+      &lt;participant name="PGPPackageService"/&gt;
+      &lt;output message="DecryptIn"&gt;
+        &lt;assign to="profile_id"&gt;ACMEPAY_PGP&lt;/assign&gt;
+      &lt;/output&gt;
+    &lt;/operation&gt;
+
+    &lt;!-- 3. Pre-validate filename + duplicate check --&gt;
+    &lt;operation name="DuplicateCheck"&gt;
+      &lt;participant name="JDBCAdapter"/&gt;
+      &lt;output message="DupCheck"&gt;
+        &lt;assign to="query"&gt;SELECT 1 FROM nacha_file_log WHERE file_hash=? AND received_dt&gt;sysdate-7&lt;/assign&gt;
+      &lt;/output&gt;
+    &lt;/operation&gt;
+    &lt;choice&gt;
+      &lt;onMessage condition="duplicate_found"&gt;
+        &lt;operation name="RaiseError"&gt;...send alert, stop...&lt;/operation&gt;
+      &lt;/onMessage&gt;
+    &lt;/choice&gt;
+
+    &lt;!-- 4. Translate NACHA → canonical XML --&gt;
+    &lt;operation name="TranslateNACHA"&gt;
+      &lt;participant name="TranslationService"/&gt;
+      &lt;output message="TransIn"&gt;
+        &lt;assign to="map_name"&gt;NACHA_INBOUND_PPD_v3&lt;/assign&gt;
+      &lt;/output&gt;
+    &lt;/operation&gt;
+
+    &lt;!-- 5. Validate totals, dates, SEC, OFAC pre-flag --&gt;
+    &lt;operation name="ValidateBatchTotals"&gt;
+      &lt;participant name="XSLTService"/&gt;
+    &lt;/operation&gt;
+
+    &lt;!-- 6. Persist file/batch/entry rows --&gt;
+    &lt;operation name="PersistEntries"&gt;
+      &lt;participant name="LightweightJDBCAdapter"/&gt;
+    &lt;/operation&gt;
+
+    &lt;!-- 7. Hand off to core ACH engine --&gt;
+    &lt;operation name="PublishToCore"&gt;
+      &lt;participant name="MQAdapter"/&gt;
+      &lt;output message="MqOut"&gt;
+        &lt;assign to="queue"&gt;ACH.OUTBOUND.CORE&lt;/assign&gt;
+      &lt;/output&gt;
+    &lt;/operation&gt;
+
+    &lt;!-- 8. Acknowledge to vendor mailbox: ACK file --&gt;
+    &lt;operation name="WriteACK"&gt;
+      &lt;participant name="MailboxAddService"/&gt;
+    &lt;/operation&gt;
+
+  &lt;/sequence&gt;
+  &lt;onFault&gt;
+    &lt;sequence&gt;
+      &lt;operation name="LogError"&gt;...&lt;/operation&gt;
+      &lt;operation name="EmailOps"&gt;...&lt;/operation&gt;
+      &lt;operation name="WriteNAK"&gt;...&lt;/operation&gt;
+    &lt;/sequence&gt;
+  &lt;/onFault&gt;
+&lt;/process&gt;</code></pre>
+
+  <h3>Persistence model (database tables Sterling team owns)</h3>
+  <table>
+    <tr><th>Table</th><th>Grain</th><th>Key Columns</th></tr>
+    <tr><td><code>nacha_file_log</code></td><td>One row per file</td><td>file_id, sender_partner, file_hash, received_dt, status, total_credit, total_debit, batch_count, entry_count</td></tr>
+    <tr><td><code>nacha_batch</code></td><td>One row per batch (Type 5/8)</td><td>file_id, batch_no, sec_code, eff_date, company_id, total_credit, total_debit, status</td></tr>
+    <tr><td><code>nacha_entry</code></td><td>One row per Entry Detail</td><td>trace_no (PK), file_id, batch_no, txn_code, rdfi_routing, account_no, amount, individual_id, individual_name, status</td></tr>
+    <tr><td><code>nacha_return</code></td><td>One row per return received</td><td>orig_trace_no (FK), return_code (R01..R99), return_dt, addenda_info</td></tr>
+  </table>
+
+  <div class="callout">
+    <b>Senior dev tip:</b> never let the NACHA inbound map be the single source of truth for validation. Put schematic validation in the map (lengths, field types, mandatory presence), but put <i>business</i> validation (totals, dates, SEC compatibility, duplicate detection) in a separate XSLT or stored procedure. This gives QA a clean place to inject test cases and keeps the map maintainable.
+  </div>
+</section>
+
+<!-- ============= TAB 7: QA TEST CATALOG ============= -->
+<section class="tab" id="testing">
+  <h2>7. QA Test Catalog &mdash; the tester's playbook</h2>
+
+  <p>This section is structured around the <b>levels of testing</b> a QA assigned to this flow must run. Each test type is followed by representative test cases. Severity tags use P0 (must-pass blocker) through P3 (cosmetic).</p>
+
+  <div class="legend">
+    <span class="tag tag-smk">Smoke</span>
+    <span class="tag tag-san">Sanity</span>
+    <span class="tag tag-fun">Functional</span>
+    <span class="tag tag-int">Integration</span>
+    <span class="tag tag-e2e">E2E</span>
+    <span class="tag tag-reg">Regression</span>
+    <span class="tag tag-rec">Reconciliation</span>
+    <span class="tag tag-prf">Performance</span>
+    <span class="tag tag-sec">Security</span>
+    <span class="tag tag-uat">UAT</span>
+    <span class="tag tag-rfl">R-flow</span>
+  </div>
+
+  <h3>Test environment prerequisites</h3>
+  <ul class="tight">
+    <li>Sterling B2Bi sandbox with NACHA inbound map deployed.</li>
+    <li>Trading Partner profile <code>ACMEPAY-TEST</code>, PGP test keys exchanged.</li>
+    <li>Mock ACH operator (FedACH simulator or in-house stub).</li>
+    <li>Mock RDFI for return generation.</li>
+    <li>Test data factory: ability to generate NACHA files parameterized by entry count, SEC code, dates, amounts.</li>
+    <li>OFAC SDN test list (with synthetic "blocked" names — never real ones).</li>
+    <li>Database read-only access on staging.</li>
+  </ul>
+
+  <h3>7.1 &nbsp; Smoke tests <span class="tag tag-smk">SMK</span></h3>
+  <p>Run on every deployment. Pass = "the build is alive". Should complete in &lt; 10 min.</p>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-smk">SMK</span> A single 1-entry valid PPD file ingests to "Persisted" status</summary>
+    <div class="body">
+      <b>Steps:</b> Drop a valid 1-entry NACHA file into the SFTP mailbox.<br>
+      <b>Expected:</b> BP <code>Inbound_NACHA_PayrollVendor</code> completes successfully; row in <code>nacha_file_log</code> with status <code>PERSISTED</code>; ACK file written back to vendor mailbox.<br>
+      <b>Oracles:</b> BP status, DB row, ACK file presence.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-smk">SMK</span> Sterling can decrypt vendor's PGP-encrypted file</summary>
+    <div class="body">
+      <b>Setup:</b> Encrypt valid file with vendor's public key in test environment.<br>
+      <b>Expected:</b> File decrypts cleanly; cleartext NACHA reaches translation service.
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-smk">SMK</span> Health check: MQ queue to core engine is reachable</summary>
+    <div class="body">
+      <b>Steps:</b> Send a heartbeat message; verify return.<br>
+      <b>Expected:</b> Round-trip &lt; 2s; no MQ errors in logs.
+    </div>
+  </details>
+
+  <h3>7.2 &nbsp; Sanity tests <span class="tag tag-san">SAN</span></h3>
+  <p>Quick regression on the current sprint's changes. ~30 min.</p>
+
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-san">SAN</span> Sanity on map output schema</summary>
+    <div class="body">Sample file with 5 entries; assert canonical XML has File→Batch→Entry hierarchy and all 5 entries present, all amounts in cents.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-san">SAN</span> Sanity on ACK content</summary>
+    <div class="body">ACK file contains correct file ID, batch count, entry count, total credit, total debit. Filename pattern matches contract.</div>
+  </details>
+
+  <h3>7.3 &nbsp; Functional tests <span class="tag tag-fun">FUN</span></h3>
+  <p>Field-, record-, and rule-level tests. Largest section.</p>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-fun">FUN</span> File Header — invalid record size</summary>
+    <div class="body">Submit file with record size <code>095</code>. <b>Expected:</b> reject with error <code>VAL-001 Record Size must be 094</code>; NAK file written.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-fun">FUN</span> Service Class Code mismatch (220 header vs 22 entry credit + 27 entry debit mix)</summary>
+    <div class="body">Mix a debit (TxnCode 27) into a 220 batch. <b>Expected:</b> reject; entire batch flagged <code>SVC_CLASS_MISMATCH</code>.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-fun">FUN</span> Routing Check Digit invalid</summary>
+    <div class="body">Set RDFI routing <code>11100002</code> with check digit <code>9</code> (correct is <code>5</code>). <b>Expected:</b> entry rejected; rest of batch processed; entry recorded with status <code>RJCT-RTG</code>.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-fun">FUN</span> Effective Entry Date is a Federal holiday (e.g., Jul 4)</summary>
+    <div class="body"><b>Expected:</b> warehouse to next banking day OR reject per ODFI policy; alert raised; UI shows revised effective date.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-fun">FUN</span> Effective Entry Date in the past</summary>
+    <div class="body"><b>Expected:</b> reject with <code>STALE_DATE</code> if &gt; 2 banking days old; otherwise auto-shift per policy.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-fun">FUN</span> Batch Control entry count mismatch</summary>
+    <div class="body">Batch has 3 entries but Batch Control says 4. <b>Expected:</b> entire file rejected; <code>BATCH_COUNT_MISMATCH</code>.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-fun">FUN</span> File Control hash mismatch</summary>
+    <div class="body">Manually corrupt the entry hash on Type 9. <b>Expected:</b> file reject; alert.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-fun">FUN</span> Amount = 0 on Entry Detail (non-prenote)</summary>
+    <div class="body">Transaction code 22 with $0.00. <b>Expected:</b> reject (zero amount only allowed for prenote codes 23/33).</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-fun">FUN</span> Pre-notification (TxnCode 23/33) zero-dollar entry — allowed</summary>
+    <div class="body"><b>Expected:</b> accepted; flagged as prenote; not sent to core for funding; sent to operator on schedule.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-fun">FUN</span> Account number left-padded with zeros</summary>
+    <div class="body">Verify Sterling preserves leading zeros (banks lose money when account <code>0001234567</code> becomes <code>1234567</code>).</div>
+  </details>
+  <details>
+    <summary><span class="pill p2">P2</span> <span class="tag tag-fun">FUN</span> Individual name with apostrophe and accented char</summary>
+    <div class="body"><code>O'CONNOR JOSÉ</code>. NACHA character set is uppercase ASCII; expected behaviour: ASCII-fold or reject per policy.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-fun">FUN</span> Trace number gap or duplicate inside file</summary>
+    <div class="body">Two entries with same trace number. <b>Expected:</b> reject (operator would reject too).</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-fun">FUN</span> Cut-off boundary: file arrives 1 second before 16:00 ET</summary>
+    <div class="body"><b>Expected:</b> processed for next-day delivery to operator.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-fun">FUN</span> Cut-off boundary: file arrives 1 second after 16:00 ET</summary>
+    <div class="body"><b>Expected:</b> warehoused with revised effective date OR rejected (per SLA contract). Alert raised.</div>
+  </details>
+
+  <h3>7.4 &nbsp; Integration tests <span class="tag tag-int">INT</span></h3>
+  <p>Verify Sterling correctly hands off to other systems and consumes from them.</p>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-int">INT</span> Sterling → Core ACH engine MQ message contract</summary>
+    <div class="body">Verify each message published to <code>ACH.OUTBOUND.CORE</code> matches the agreed XML schema with all required fields populated.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-int">INT</span> Core engine returns "accepted" → Sterling updates status</summary>
+    <div class="body">Mock core sends async ack on <code>ACH.STATUS.IN</code>. <b>Expected:</b> Sterling consumer BP updates <code>nacha_entry.status</code> to <code>SENT_OPERATOR</code>.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-int">INT</span> Operator rejects file at edge → status flows back</summary>
+    <div class="body">Mock operator returns reject file. <b>Expected:</b> all entries marked <code>REJ_OPERATOR</code> with reason; vendor notified.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-int">INT</span> JDBC outage during persistence</summary>
+    <div class="body">Take DB offline mid-run. <b>Expected:</b> BP fails over to error path; file not lost; replay possible.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-int">INT</span> MQ outage during hand-off</summary>
+    <div class="body"><b>Expected:</b> retries per policy, then dead-letter; ops notified; file replayable.</div>
+  </details>
+
+  <h3>7.5 &nbsp; End-to-End tests <span class="tag tag-e2e">E2E</span></h3>
+  <p>Full chain with mocked external counterparties.</p>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-e2e">E2E</span> 12,000-entry payroll file → all credit confirmations next day</summary>
+    <div class="body">Vendor → Sterling → Core → mock Operator → mock RDFI. Verify all 12,000 entries marked <code>SETTLED</code> by end of Friday in test calendar.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-e2e">E2E</span> Mixed scenario: 11,990 success + 10 returns</summary>
+    <div class="body">Mock RDFI returns 5×R01, 3×R02, 2×R03. Verify all 10 returns matched to original trace numbers, vendor notified, employer's ledger reversed for those 10.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-e2e">E2E</span> Same-day ACH window</summary>
+    <div class="body">Submit file flagged for SDA at 14:30 ET. <b>Expected:</b> credited to receivers same day by 17:00 ET; per-tx amounts respect $1M cap.</div>
+  </details>
+
+  <h3>7.6 &nbsp; Regression tests <span class="tag tag-reg">REG</span></h3>
+  <p>Run after every map, BP, code-list, or service change. Ideally automated nightly.</p>
+
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-reg">REG</span> Golden file regression suite</summary>
+    <div class="body">A library of 50+ historical NACHA files (anonymized) with known-good canonical XML output. After any change, re-translate and diff.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-reg">REG</span> All 8 SEC code variants</summary>
+    <div class="body">PPD, CCD, WEB, TEL, CTX, IAT, ARC, BOC — verify each routes correctly and either translates (supported) or rejects with the right code (unsupported).</div>
+  </details>
+  <details>
+    <summary><span class="pill p2">P2</span> <span class="tag tag-reg">REG</span> Full R-code matrix (R01–R85)</summary>
+    <div class="body">For each return code defined in NACHA, simulate a return and verify Sterling's return-handling map produces the right downstream XML.</div>
+  </details>
+
+  <h3>7.7 &nbsp; Reconciliation tests <span class="tag tag-rec">RCN</span></h3>
+  <p>End-of-day and end-of-cycle accounting controls.</p>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-rec">RCN</span> File-level recon: vendor totals = Sterling totals = core totals</summary>
+    <div class="body">For every file ingested, verify <code>file.total_credit</code> matches the sum the core engine accepted and the operator confirmed.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-rec">RCN</span> Daily Fed settlement recon</summary>
+    <div class="body">ODFI's Fed master account net debit/credit at end of settlement window matches sum of Sterling's outbound batches for that day.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-rec">RCN</span> Returns recon</summary>
+    <div class="body">Sum of returns received in 60 days = sum of debits to corporate's account for those R-codes. Off-by-one or off-by-cent must alarm.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-rec">RCN</span> Vendor SLA recon</summary>
+    <div class="body">Files received per SLA, files processed per SLA, ACK files sent per SLA — daily report.</div>
+  </details>
+
+  <h3>7.8 &nbsp; Performance &amp; volume tests <span class="tag tag-prf">PRF</span></h3>
+
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-prf">PRF</span> Peak load: 50,000 entries in single file</summary>
+    <div class="body">Verify BP completes within SLA (e.g., 15 min); no memory leaks; DB write throughput acceptable.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-prf">PRF</span> Concurrency: 10 vendors uploading simultaneously</summary>
+    <div class="body">No file mix-up between mailboxes; per-vendor BP isolation; node pool sized correctly.</div>
+  </details>
+  <details>
+    <summary><span class="pill p2">P2</span> <span class="tag tag-prf">PRF</span> Soak test: 4-hour continuous file submission at quarter-end peak</summary>
+    <div class="body">No degradation, no leaks, no DB lock escalation.</div>
+  </details>
+  <details>
+    <summary><span class="pill p2">P2</span> <span class="tag tag-prf">PRF</span> Stress: 1M entries (10× peak)</summary>
+    <div class="body">Acceptable failure mode is graceful slowdown or file split, not data loss.</div>
+  </details>
+
+  <h3>7.9 &nbsp; Security tests <span class="tag tag-sec">SEC</span></h3>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-sec">SEC</span> OFAC SDN screening hit</summary>
+    <div class="body">Submit file with synthetic "OSAMA BIN LADEN" name. <b>Expected:</b> entry held; alert to Financial Crimes; never released without manual review; never auto-debit corporate.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-sec">SEC</span> SFTP authentication failure does not write to mailbox</summary>
+    <div class="body">Wrong key. Connection refused; no partial file in staging.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-sec">SEC</span> PGP signature verification</summary>
+    <div class="body">File encrypted but unsigned (or signed by wrong key) → reject per policy.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-sec">SEC</span> File pollution / path traversal</summary>
+    <div class="body">Filename contains <code>../../</code>. <b>Expected:</b> rejected at perimeter.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-sec">SEC</span> Replay attack: same file resubmitted</summary>
+    <div class="body">Identical SHA-256 hash within 7-day window. <b>Expected:</b> duplicate detection halts processing.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-sec">SEC</span> PII handling in logs</summary>
+    <div class="body">Verify account numbers and SSNs are masked in BP logs and audit trails.</div>
+  </details>
+
+  <h3>7.10 &nbsp; UAT scenarios <span class="tag tag-uat">UAT</span></h3>
+  <p>Run with the business owner (Treasury Mgmt or Cash Mgmt Ops). Each scenario must be acceptable to a non-technical sign-off.</p>
+
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-uat">UAT</span> Operations dashboard usability</summary>
+    <div class="body">Ops user can find a payroll run by company, date, or trace number within 60 seconds.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-uat">UAT</span> Notification clarity</summary>
+    <div class="body">Reject email contains: file name, vendor, reason, suggested next action. Reviewed and approved by business.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-uat">UAT</span> Manual reprocess workflow</summary>
+    <div class="body">Ops can re-trigger a previously rejected file after vendor fix. Audit trail preserved.</div>
+  </details>
+
+  <h3>7.11 &nbsp; R-flow / return tests <span class="tag tag-rfl">RFL</span></h3>
+  <p>Returns are an entire sub-system. They are also where banks commonly lose money via failed match-back.</p>
+
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-rfl">RFL</span> R01 Insufficient Funds — return matched and reversed</summary>
+    <div class="body">RDFI returns R01 within 2 banking days. Sterling matches by trace #, marks original entry <code>RTN-R01</code>, debits corporate's settlement account.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-rfl">RFL</span> R02 Account Closed</summary>
+    <div class="body">Same as R01 but with R02 reason; verify proper code-list translation and statement narrative.</div>
+  </details>
+  <details>
+    <summary><span class="pill p0">P0</span> <span class="tag tag-rfl">RFL</span> R03 No Account / Unable to Locate</summary>
+    <div class="body">Common in payroll when employee changed banks. Verify employee record flagged for HR follow-up.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-rfl">RFL</span> R10 Customer Advises Unauthorized (consumer Reg E)</summary>
+    <div class="body">RDFI returns R10 anywhere from day 1 to day 60. Verify Sterling accepts late returns up to the 60-day Reg E window; alerts compliance; debits corporate; documents indemnification flow.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-rfl">RFL</span> R11 Customer Advises Improperly Authorized</summary>
+    <div class="body">Similar to R10. Test 60-day window boundary precisely.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-rfl">RFL</span> NOC (Notification of Change) C01 Incorrect Account Number</summary>
+    <div class="body">RDFI corrects account #. Sterling must update Acme's record-of-change for next pay run; not a return, no debit; pay this run still posts.</div>
+  </details>
+  <details>
+    <summary><span class="pill p1">P1</span> <span class="tag tag-rfl">RFL</span> Return arrives for an entry Sterling has no record of</summary>
+    <div class="body">Orphan return. <b>Expected:</b> route to investigation queue; do not auto-reverse anything; alert ops.</div>
+  </details>
+  <details>
+    <summary><span class="pill p2">P2</span> <span class="tag tag-rfl">RFL</span> Late return outside 60-day window</summary>
+    <div class="body">Return on day 61. <b>Expected:</b> reject with reason "outside-window"; do not debit corporate.</div>
+  </details>
+
+  <div class="card" style="margin-top:24px">
+    <h4>Test data factory — what to build first</h4>
+    <p>Before writing test cases, build a generator that produces parameterized NACHA files. Suggested parameters:</p>
+    <ul class="tight">
+      <li><code>--entries N</code> — count</li>
+      <li><code>--sec PPD|CCD|WEB|...</code></li>
+      <li><code>--effective-date YYYY-MM-DD</code></li>
+      <li><code>--include-prenote</code></li>
+      <li><code>--corrupt totals|hash|date|service-class</code> — for negative tests</li>
+      <li><code>--ofac-hit</code> — inject a synthetic SDN-list name</li>
+      <li><code>--routing-error N</code> — inject N invalid check digits</li>
+      <li><code>--seed S</code> — deterministic for regression</li>
+    </ul>
+    <p>Investing 2 weeks in this factory pays back forever. Open-source <code>moov-io/ach</code> (Go) is an excellent starting point.</p>
+  </div>
+
+  <div class="callout warn">
+    <b>QA priority advice:</b> on a typical bank delivery, <i>30-40% of all defects raised against this flow are about returns and reconciliation</i>, not about the happy path. Spend your test effort proportionally.
+  </div>
+</section>
+
+<!-- ============= TAB 8: REAL-WORLD SCENARIOS ============= -->
+<section class="tab" id="scenarios">
+  <h2>8. Real-World Scenarios</h2>
+
+  <p>These are not synthetic. Every scenario below has played out in production at multiple US banks. As a tester or BA, knowing them up-front is the difference between "good enough" and "production-ready".</p>
+
+  <h3>Scenario 1 — Friday before a long weekend, file held by OFAC</h3>
+  <div class="card">
+    <p>The vendor delivers the bi-weekly payroll on Wednesday before Memorial Day weekend. One employee's last name happens to fuzzy-match an OFAC SDN. Compliance only reviews on next business day (Tuesday). Without a clear policy, 12,000 employees miss Friday paychecks.</p>
+    <p><b>What good design does:</b> single-name OFAC hits in a 12,000-row PPD file are isolated to that one entry. The other 11,999 release on time. The held entry waits in a "Compliance Hold" queue.</p>
+    <p><b>What QA tests:</b> partial-release behavior; queue UI for compliance officer; SLA timer on hold; auto-release vs auto-reject if no review within X hours.</p>
+  </div>
+
+  <h3>Scenario 2 — Vendor sends the same file twice "by mistake"</h3>
+  <div class="card">
+    <p>An ops person at the payroll vendor re-uploads Wednesday's file at 18:00 because they "weren't sure it went through". Without dedup, 24,000 credits go out and Acme is double-debited $7M.</p>
+    <p><b>What good design does:</b> dedup by content hash (SHA-256 of file bytes) within a sliding window; reject identical resubmits; allow operator-initiated <i>reprocess</i> only via a separate authorized BP.</p>
+    <p><b>What QA tests:</b> exact duplicate; near-duplicate (one byte changed); duplicate after vendor "correction"; clearing of dedup window after 7 days.</p>
+  </div>
+
+  <h3>Scenario 3 — Wrong fiscal year in Effective Entry Date</h3>
+  <div class="card">
+    <p>Vendor's Date library defaults YY=00 in January. File submitted Jan 3, 2026 has Effective Entry Date <code>950109</code> (1995!). Some lax operators silently warehouse this for the next valid window; modern systems reject.</p>
+    <p><b>What good design does:</b> reject any effective entry date &gt; 2 banking days in past or &gt; 7 days in future; alert.</p>
+    <p><b>What QA tests:</b> boundary years 99→00, 24→25, leap-day Feb 29, December → January cross.</p>
+  </div>
+
+  <h3>Scenario 4 — RDFI returns R10 on day 59</h3>
+  <div class="card">
+    <p>An employee disputes the deposit (claiming it was unauthorized — typically a fraud or domestic-abuse situation). RDFI files R10 on day 59. Some legacy ODFIs reject anything past 5 days; this violates Reg E.</p>
+    <p><b>What good design does:</b> accept R10/R11 up to day 60, debit corporate, document, send to Financial Crimes for indemnification claim.</p>
+    <p><b>What QA tests:</b> day 1, day 30, day 60, day 61 boundary; corporate ledger debit; alert to compliance; audit trail.</p>
+  </div>
+
+  <h3>Scenario 5 — Same-Day ACH cap exceeded</h3>
+  <div class="card">
+    <p>A bonus run includes a $1.2M payment to an executive. Sent in the SDA window with an entry that exceeds the $1M per-tx cap. Operator rejects the entry, not the file.</p>
+    <p><b>What good design does:</b> pre-flight check at Sterling layer that blocks any SDA-flagged entry above cap; suggest non-SDA window if amount allows.</p>
+    <p><b>What QA tests:</b> $999,999.99, $1,000,000.00, $1,000,000.01 boundaries; SDA flag handling; mixed file with some SDA-eligible, some not.</p>
+  </div>
+
+  <h3>Scenario 6 — Federal holiday calendar drift</h3>
+  <div class="card">
+    <p>Juneteenth (June 19) became a federal holiday in 2021. Banks that didn't update their holiday table either reject valid files or auto-warehouse files that should have processed.</p>
+    <p><b>What good design does:</b> holiday calendar is a code list, sourced from Federal Reserve published calendar; refreshed annually; covered by a regression test.</p>
+    <p><b>What QA tests:</b> all federal holidays for current and next year; Friday-into-Monday holidays; regional bank holidays (e.g., Patriot's Day in MA/ME).</p>
+  </div>
+
+  <h3>Scenario 7 — Network outage at FedACH for 90 minutes</h3>
+  <div class="card">
+    <p>Real outage example: FedACH unavailable during the morning processing window. Files stack up in the operator queue. Some banks panic and switch to TCH EPN; others wait.</p>
+    <p><b>What good design does:</b> Sterling tracks per-file state independently; on operator recovery, replays in correct order; never duplicates.</p>
+    <p><b>What QA tests:</b> simulated operator outage of 30/60/120 minutes; queue depth alerting; replay correctness; manual operator instructions for ops team.</p>
+  </div>
+
+  <h3>Scenario 8 — Pre-note success, but live entry rejected</h3>
+  <div class="card">
+    <p>Pre-note went through fine 10 days ago. The employee then closed and re-opened a different account. Live entry on the original account fails R02.</p>
+    <p><b>What good design does:</b> pre-note success does not eliminate live-entry validation; treat them independently; flag pattern of "pre-note ok then live R02" as an emerging fraud signal.</p>
+    <p><b>What QA tests:</b> separate prenote-pass + live-fail flow; alerting on suspicious patterns.</p>
+  </div>
+</section>
+
+<!-- ============= TAB 9: CHEAT SHEET ============= -->
+<section class="tab" id="cheatsheet">
+  <h2>9. Cheat Sheet — print and pin</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>Record types</h4>
+      <p><code>1</code> File Header · <code>5</code> Batch Header · <code>6</code> Entry Detail · <code>7</code> Addenda · <code>8</code> Batch Control · <code>9</code> File Control / padding</p>
+    </div>
+    <div class="card">
+      <h4>Service Class Codes</h4>
+      <p><code>200</code> mixed · <code>220</code> credits-only · <code>225</code> debits-only</p>
+    </div>
+    <div class="card">
+      <h4>Common Transaction Codes</h4>
+      <p><code>22</code> ckg credit · <code>27</code> ckg debit · <code>32</code> svg credit · <code>37</code> svg debit · <code>23</code>/<code>33</code> prenote credit · <code>28</code>/<code>38</code> prenote debit</p>
+    </div>
+    <div class="card">
+      <h4>Common SEC Codes</h4>
+      <p><b>PPD</b> consumer · <b>CCD</b> corporate · <b>WEB</b> internet auth · <b>TEL</b> phone auth · <b>CTX</b> corporate w/ EDI addenda · <b>IAT</b> intl · <b>ARC</b>/<b>BOC</b> check conversion</p>
+    </div>
+    <div class="card">
+      <h4>Top R-codes you'll see</h4>
+      <p><code>R01</code> NSF · <code>R02</code> closed · <code>R03</code> no acct · <code>R04</code> bad acct # · <code>R05</code> unauth corp · <code>R07</code> auth revoked · <code>R10</code> unauth consumer · <code>R11</code> improper auth · <code>R16</code> frozen acct · <code>R20</code> non-tx acct · <code>R29</code> corporate not auth</p>
+    </div>
+    <div class="card">
+      <h4>Return windows</h4>
+      <p>R01–R09: 2 banking days · R10/R11: 60 days (consumer) · R29: 2 banking days · NOC C01–C09: not a return, info only</p>
+    </div>
+    <div class="card">
+      <h4>Same-Day ACH</h4>
+      <p>3 windows daily; $1M per-tx cap; settlement same day; not all SEC codes eligible; IAT excluded.</p>
+    </div>
+    <div class="card">
+      <h4>Cut-off rules of thumb (ET)</h4>
+      <p>FedACH SDA windows ~10:30, 14:45, 16:45 · Standard ACH overnight cycle · Friday non-holiday cut-offs are tightest.</p>
+    </div>
+  </div>
+
+  <h3>Test type cheat sheet</h3>
+  <table>
+    <tr><th>Tag</th><th>Type</th><th>Run when</th><th>Owner</th></tr>
+    <tr><td><span class="tag tag-smk">SMK</span></td><td>Smoke</td><td>Every deploy</td><td>QA / DevOps</td></tr>
+    <tr><td><span class="tag tag-san">SAN</span></td><td>Sanity</td><td>Per sprint</td><td>QA</td></tr>
+    <tr><td><span class="tag tag-fun">FUN</span></td><td>Functional</td><td>Per change</td><td>QA</td></tr>
+    <tr><td><span class="tag tag-int">INT</span></td><td>Integration</td><td>Per release</td><td>QA + Dev</td></tr>
+    <tr><td><span class="tag tag-e2e">E2E</span></td><td>End-to-End</td><td>Per release</td><td>QA</td></tr>
+    <tr><td><span class="tag tag-reg">REG</span></td><td>Regression</td><td>Nightly</td><td>QA Automation</td></tr>
+    <tr><td><span class="tag tag-rec">RCN</span></td><td>Reconciliation</td><td>Daily / cycle</td><td>QA + Operations</td></tr>
+    <tr><td><span class="tag tag-prf">PRF</span></td><td>Performance</td><td>Per quarter</td><td>QA + Performance team</td></tr>
+    <tr><td><span class="tag tag-sec">SEC</span></td><td>Security</td><td>Per release + ad-hoc</td><td>QA + InfoSec</td></tr>
+    <tr><td><span class="tag tag-uat">UAT</span></td><td>UAT</td><td>Pre go-live</td><td>Business + QA</td></tr>
+    <tr><td><span class="tag tag-rfl">RFL</span></td><td>R-flow</td><td>Per release</td><td>QA</td></tr>
+  </table>
+
+  <div class="callout ok">
+    <b>You are now ready</b> to walk into a US bank's payments-hub team and (a) read any NACHA file, (b) explain the data flow on a whiteboard, (c) author 40+ test cases across all test levels, and (d) ask the right questions of dev and ops. Repeat this template for the other 5 use cases.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  LVTMagus &nbsp;|&nbsp; NACHA Payroll Salary Run &nbsp;|&nbsp; EDI Banking Training (Long-term Mastery Track) &nbsp;|&nbsp; US bank lens
+</footer>
+
+<script>
+  const tabs = document.querySelectorAll('nav.tabs button');
+  const sections = document.querySelectorAll('section.tab');
+  tabs.forEach(b => b.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    sections.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }));
+  // open all details on print
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('details').forEach(d => d.open = true);
+    document.querySelectorAll('section.tab').forEach(s => s.classList.add('active'));
+  });
+</script>
+
+</body>
+</html>
